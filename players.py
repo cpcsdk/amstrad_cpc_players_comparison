@@ -199,19 +199,19 @@ def crunch_ym_with_fap(ym_fname: str):
             res["play_time"] = int(line)
     return res
 
-def compile_aks_with_akg(aks_fname):
-    akg_fname = aks_fname.replace(".aks", ".akg")
-    cmd_line = f"bndbuild --direct -- SongToAkg -bin -adr 0x500 \\\"{aks_fname}\\\" \\\"{akg_fname}\\\" "
-    return __crunch_or_compile_music__(aks_fname, akg_fname, cmd_line)
+def compile_aks_with_akg(at_fname):
+    akg_fname = os.path.splitext(at_fname)[0] + ".akg"
+    cmd_line = f"bndbuild --direct -- SongToAkg -bin -adr 0x500 \\\"{at_fname}\\\" \\\"{akg_fname}\\\" "
+    return __crunch_or_compile_music__(at_fname, akg_fname, cmd_line)
 
-def compile_aks_with_aky(aks_fname):
-    aky_fname = aks_fname.replace(".aks", ".aky")
-    cmd_line = f"bndbuild --direct -- SongToAky -bin -adr 0x500 \\\"{aks_fname}\\\" \\\"{aky_fname}\\\" "
-    return __crunch_or_compile_music__(aks_fname, aky_fname, cmd_line)
+def compile_aks_with_aky(at_fname):
+    aky_fname = os.path.splitext(at_fname)[0] + ".aky"
+    cmd_line = f"bndbuild --direct -- SongToAky -bin -adr 0x500 \\\"{at_fname}\\\" \\\"{aky_fname}\\\" "
+    return __crunch_or_compile_music__(at_fname, aky_fname, cmd_line)
 
 
-def compile_aks_with_akm(aks_fname):
-    akm_fname = aks_fname.replace(".aks", ".akm")
-    cmd_line = f"bndbuild --direct -- SongToAkm -bin -adr 0x500 \\\"{aks_fname}\\\" \\\"{akm_fname}\\\" "
-    return __crunch_or_compile_music__(aks_fname, akm_fname, cmd_line)
+def compile_aks_with_akm(at_fname):
+    akm_fname = os.path.splitext(at_fname)[0] + ".akm"
+    cmd_line = f"bndbuild --direct -- SongToAkm -bin -adr 0x500 \\\"{at_fname}\\\" \\\"{akm_fname}\\\" "
+    return __crunch_or_compile_music__(at_fname, akm_fname, cmd_line)
 

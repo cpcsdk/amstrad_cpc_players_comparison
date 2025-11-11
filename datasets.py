@@ -14,7 +14,8 @@ import enum
 import shutil
 import os
 import subprocess
-
+import logging
+import glob
 
 class MusicFormat(enum.Enum):
     AKS = "aks"
@@ -55,13 +56,33 @@ def convert_music_file(input_file: str, output_file: str):
 
 
 def convert_at_to_ym(input, output):
-    cmd = f"bndbuild --direct -- SongToYm \\\"{input}\\\" \\\"{output}\\\""
+  #  cmd = f"tools\\SongToYm.exe \\\"{input}\\\" \\\"{output}\\\""
+    cmd = f"bndbuild --direct -- SongToYm  \\\"{input}\\\" \\\"{output}\\\" "
+    logging.debug(f"AT2YM: {cmd}")
     subprocess.run(cmd, check=True)
 
 
 
 class Dataset:
-    pass
+    def __init__(self):
+        self.clean_patterns = [
+            "**/*.BIN",
+            "**/*.sna",
+            "**/*.ym", #XXX this ine can be dangerous for new datasets
+            "**/*.ayt",
+            "**/*.akg",
+            "**/*.akm",
+            "**/*.aky",
+            "**/*.fap",
+            "**/*.json",
+        ]
+
+    def clean(self):
+        for pat in self.clean_patterns:
+            for f in glob.glob(pat, root_dir=self.root(), recursive=True):
+                f = os.path.join(self.root(), f)
+                logging.info(f"Delete {f}")
+                os.remove(f)
 
 class At3DatasetSongKind(enum.Enum):
     ST = "128"
@@ -71,15 +92,30 @@ class At3DatasetSongKind(enum.Enum):
     VT2 = "VT2"
     WYZ = "Wyz"
 
+    def extension(self):
+        return {
+            At3DatasetSongKind.ST: MusicFormat.ST,
+            At3DatasetSongKind.AT2: MusicFormat.AKS,
+            At3DatasetSongKind.AT3: MusicFormat.AKS,
+            At3DatasetSongKind.SKS: MusicFormat.SKS,
+            At3DatasetSongKind.VT2: MusicFormat.VT2,
+            At3DatasetSongKind.WYZ: MusicFormat.WYZ,
+        }[self].name
+    
 class At3Dataset(Dataset):
     def __init__(self, file_kinds= None):
+        super().__init__()
         if file_kinds is None:
-            file_kinds = [At3DatasetSongKind.SKS, At3DatasetSongKind.AT3, At3DatasetSongKind.AT2]
+            file_kinds = [At3DatasetSongKind.SKS, At3DatasetSongKind.AT3, At3DatasetSongKind.AT2, At3DatasetSongKind.ST]
+            file_kinds = [At3DatasetSongKind.AT3, At3DatasetSongKind.AT2, At3DatasetSongKind.ST]
 
 
      #   file_kinds = [At3DatasetSongKind.VT2]
         self.path = os.path.join("datasets", "ArkosTracker3")
         self.file_kinds = file_kinds
+
+    def root(self):
+        return self.path
 
     def __iter__(self):
         for kind in self.file_kinds:
@@ -89,9 +125,13 @@ class At3Dataset(Dataset):
     def iter_kind(self, kind: At3DatasetSongKind):
         kind_path = os.path.join(self.path, kind.value)
         for fname in os.listdir(kind_path):
-            #does not seem to work with SKS, ST
-            if fname.lower().endswith((MusicFormat.AKS.value)):
-                if "FenyxKell - BD10n" in fname:
-                    continue
+            ext = os.path.splitext(fname)[1][1:].upper()
+            if any([ext == kind.extension() for kind in self.file_kinds]) and not (
+                "BD10" in fname or "Bobline" in fname
+            ):
+                logging.info(f"{fname} will be handled thanks to type {ext}")
                 yield os.path.join(kind_path, fname)
+            else:
+                logging.info(f"{fname} has been filtered out ({ext})")
+
 

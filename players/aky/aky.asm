@@ -1,11 +1,11 @@
+    org 0x500
+AKY_File
+		incbin MUSIC_DATA_FNAME
 
-MyProgram	equ #500
-
-		org MyProgram		; Test program
 		run $
         BREAPOINT
 StartExample
-		ld sp,MyProgram
+		ld sp, 0x500
 		ld hl,#c9fb		; Cpc interrupt reduced to ei/ret
 		ld (#38),hl		;
 
@@ -48,10 +48,6 @@ WaitVsync
 		jr MainLoop
 
  include "PlayerAkyStabilized_CPC.asm"
-
-    align 256; ???
-AKY_File
-		incbin MUSIC_DATA_FNAME
 
 
     save MUSIC_EXEC_FNAME

@@ -12,11 +12,31 @@
 
 import logging
 import benchmark
-
+import argparse
+import sys
 
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+                    prog=sys.argv[0],
+                    description='Benchmark launcher for Amstrad CPC players')
+    
+    parser.add_argument("--benchmark", action="append", default="AT3", choices=['AT3'])
+    parser.add_argument("--clean", action='store_true')
+
+
     logging.basicConfig(level=logging.DEBUG)
-    bench = benchmark.ArkosTracker3Benchmark()
-    bench.execute()
+
+    args = parser.parse_args()
+
+    print(args)
+    benchs = []
+    if "AT3" in args.benchmark:
+        benchs.append(benchmark.ArkosTracker3Benchmark())
+
+    for bench in benchs:
+        if args.clean:
+            bench.clean()
+        else:
+            bench.execute()

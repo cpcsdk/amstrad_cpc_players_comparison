@@ -30,6 +30,9 @@ class Benchmark:
         self.players = players
 
 
+    def clean(self):
+        self.dataset.clean()
+        
     def execute(self):
         self.build_files() #deactivated temporarily
         self.analyse_files()
@@ -99,12 +102,14 @@ class Benchmark:
             convert_music_file(input, converted_fname)
             
             resc = crunch_music_file(converted_fname, out_player)
-            resp = build_replay_program(resc, out_player)
-
-            res = resc | resp
             json_fname = "_".join(os.path.splitext(resc["compressed_fname"])) + ".json"
-            with open(json_fname, "w") as f:
-                json.dump(res, f)
+
+            if os.path.exists(json_fname):
+                resp = build_replay_program(resc, out_player)
+
+                res = resc | resp
+                with open(json_fname, "w") as f:
+                    json.dump(res, f)
 
         return [handle_input(input) for input in self.dataset]
 

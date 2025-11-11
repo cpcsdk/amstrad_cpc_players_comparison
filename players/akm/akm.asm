@@ -1,8 +1,9 @@
 
-MyProgram	equ #500
+    org 0x500
 PLY_AKM_REMOVE_HOOKS
+AKM_File
+		incbin MUSIC_DATA_FNAME
 
-		org MyProgram		; Test program
 		run $
         BREAPOINT
 StartExample
@@ -50,9 +51,6 @@ WaitVsync
 
  include "PlayerAkm.asm"
 
-    align 256; ???
-AKM_File
-		incbin MUSIC_DATA_FNAME
 
 
     save MUSIC_EXEC_FNAME

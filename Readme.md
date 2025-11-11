@@ -27,12 +27,13 @@ The duration will be collected in future versions. Only FAP allows to retrieve i
 
  - This is currently a one man project, the project will be unbiased and finished if other persons join to finish it
  - There is no cache handling => all files are converted/built at each run. It is mandatory to check their existence and not regenerate them !
- - This version has been tested on Windows only. Maybe it fails on Linux because of dedicated path handling...
+ - This version has been tested on Windows only. It fails on Linux ATM
  - Player duration has not been taken into account yet. This is mandatory to collect this metric. The choice of the player has to be done on the paret front of a 2d scatter plot on size vs time
  - If have not checked the memory impact of players with code generation. This will be mandatory to adjust figures based on that
  - There is only a single dataset. Various with various properties are expected.
  - AYC cruncher is missing. Either it requires a dedicated PC program (but I have not found a modern one), either it requires emulation with CSL scripting (I have not checked the feasability of the thing)
  - AKM player is used even on music not compatible because they use fancy effects. 
+ - FAP does not correct frequency, but AYT does. I do not know if it can be unfair
 
 ## Usage
 
