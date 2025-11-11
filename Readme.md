@@ -32,7 +32,7 @@ The duration will be collected in future versions. Only FAP allows to retrieve i
  - If have not checked the memory impact of players with code generation. This will be mandatory to adjust figures based on that
  - There is only a single dataset. Various with various properties are expected.
  - AYC cruncher is missing. Either it requires a dedicated PC program (but I have not found a modern one), either it requires emulation with CSL scripting (I have not checked the feasability of the thing)
-
+ - AKM player is used even on music not compatible because they use fancy effects. 
 
 ## Usage
 
