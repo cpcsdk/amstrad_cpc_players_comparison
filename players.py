@@ -15,6 +15,7 @@ import os
 import subprocess
 import logging
 import platform
+from utils import execute_process
 
 from datasets import MusicFormat
 import utils
@@ -152,8 +153,7 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
     + f"-o \\\"{sna_fname}\\\" \\\"{z80}\\\" "
 
 
-    logging.ingo(cmd)
-    subprocess.run(cmd, check=True)
+    execute_process(cmd)
     return {
         "program_size": os.path.getsize(amsdos_fname) - 128
     }

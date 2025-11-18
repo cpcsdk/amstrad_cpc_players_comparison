@@ -64,7 +64,11 @@ class Benchmark:
 
         report.write(f"---\ntitle: {self.name}\n---\n\n# Program size comparison\n\n")
 
-        summary = df.pivot(index="sources", columns=["format"])["prog_size"].reset_index()
+
+        print(df)
+        summary = df.pivot(index="sources", columns=["format"])["prog_size"]
+        print(summary.mean())
+        summary = summary.reset_index()
         summary.to_markdown(report)
 
 
@@ -86,7 +90,6 @@ class Benchmark:
 
         plt.clf()
         for row in summary.iterrows():
-
             row = row[1]
             plt.plot(
                 plot_x,
@@ -103,14 +106,14 @@ class Benchmark:
         plt.clf()
         sns.boxplot(df, x="format", y="prog_size")
         boxplot_png = f"reports/boxplot_{self.name}.png"
-        generate_axis()
+       # generate_axis()
         plt.savefig(boxplot_png)
         report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
 
 
         plt.clf()
         sns.swarmplot(df, x="format", y="prog_size")
-        generate_axis()
+      #  generate_axis()
         swarmplot_png = f"reports/swarmlot_{self.name}.png"
         plt.savefig(swarmplot_png)
         report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")

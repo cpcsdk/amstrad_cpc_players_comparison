@@ -16,6 +16,7 @@ import os
 import subprocess
 import logging
 import glob
+from utils import execute_process
 
 class MusicFormat(enum.Enum):
     AKS = "aks"
@@ -62,13 +63,11 @@ def convert_music_file(input_file: str, output_file: str):
 def convert_at_to_ym6(input, output):
   #  cmd = f"tools\\SongToYm.exe \\\"{input}\\\" \\\"{output}\\\""
     cmd = f"bndbuild --direct -- SongToYm  \\\"{input}\\\" \\\"{output}\\\" "
-    logging.debug(f"AT2YM: {cmd}")
-    subprocess.run(cmd, check=True)
+    execute_process(cmd)
 
 def convert_chp_to_ym3(input, output):
     cmd = f"bndbuild --direct -- chipnsfx  \\\"{input}\\\" -y \\\"{output}\\\" "
-    logging.debug(f"chipnsfx: {cmd}")
-    subprocess.run(cmd, check=True)
+    execute_process(cmd)
 
 class Dataset:
     def __init__(self, path):
