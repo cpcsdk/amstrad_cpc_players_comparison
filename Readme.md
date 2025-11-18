@@ -47,7 +47,7 @@ Additional configurations and options will be added later, depending on communit
 
 ## Dependencies
 
-The python script uses the following dependencies: `matplotlib`, `seaborn`, `pandas`, `tabulate`.
+The python script uses the following dependencies: `matplotlib`, `seaborn`, `pandas`, `tabulate`, `joblib`.
 It also requires the `bndbuild` tool which control the various crunchers.
 
 

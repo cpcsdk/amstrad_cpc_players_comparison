@@ -26,11 +26,10 @@ if __name__ == "__main__":
     parser.add_argument("--clean", action='store_true')
 
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.ERROR)
 
     args = parser.parse_args()
 
-    print(args)
     benchs = []
     if not args.benchmark or "AT3" in args.benchmark:
         benchs.append(benchmark.ArkosTracker3Benchmark())

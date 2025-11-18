@@ -151,7 +151,8 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
     + f"--snapshot " \
     + f"-o \\\"{sna_fname}\\\" \\\"{z80}\\\" "
 
-    print(cmd)
+
+    logging.ingo(cmd)
     subprocess.run(cmd, check=True)
     return {
         "program_size": os.path.getsize(amsdos_fname) - 128

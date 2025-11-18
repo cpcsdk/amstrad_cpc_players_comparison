@@ -16,6 +16,7 @@ import json
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt 
+from joblib import delayed, Parallel
 
 from datasets import *
 from players import *
@@ -52,7 +53,6 @@ class Benchmark:
             formats.append(os.path.splitext(res["compressed_fname"])[1].replace("CHPZ80", "chp"))
             sizes.append(res["program_size"])
             sources.append(os.path.splitext(os.path.basename(res["compressed_fname"]))[0])
-            print(f)
         
         df = pd.DataFrame.from_dict({
             "format": formats,
@@ -152,7 +152,7 @@ class Benchmark:
             else:
                 logging.info(f"{json_fname} already exists")
 
-        return [handle_input(input) for input in self.dataset]
+        return Parallel(n_jobs=-1, verbose=3)(delayed(handle_input)(input) for input in self.dataset)
 
 
     def iter_json(self):
