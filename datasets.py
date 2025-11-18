@@ -73,7 +73,7 @@ def convert_chp_to_ym3(input, output):
 class Dataset:
     def __init__(self, path):
         assert path is not None
-        
+
         self.clean_patterns = [
             "**/*.BIN",
             "**/*.sna",
@@ -92,14 +92,15 @@ class Dataset:
     def root(self):
         return self.path
     
+    def iter_json(self):
+        return iter(glob.glob(os.path.join(self.root(), "*.json")))
+    
     def clean(self):
         for pat in self.clean_patterns:
             for f in glob.glob(pat, root_dir=self.root(), recursive=True):
                 f = os.path.join(self.root(), f)
                 logging.info(f"Delete {f}")
                 os.remove(f)
-
-
 
 class At3DatasetSongKind(enum.Enum):
     ST = "128"
@@ -127,7 +128,6 @@ class ChpDataset(Dataset):
     def __iter__(self):
         for f in glob.glob(os.path.join(self.root(), "*.CHP")):
             yield f
-            break
 
 class At3Dataset(Dataset):
     def __init__(self, file_kinds= None):
@@ -146,7 +146,7 @@ class At3Dataset(Dataset):
                 yield item
 
     def iter_kind(self, kind: At3DatasetSongKind):
-        kind_path = os.path.join(self.path, kind.value)
+        kind_path = os.path.join(self.root(), kind.value)
         for fname in os.listdir(kind_path):
             ext = os.path.splitext(fname)[1][1:].upper()
             if any([ext == kind.extension() for kind in self.file_kinds]) :
@@ -157,4 +157,7 @@ class At3Dataset(Dataset):
 
 
     def iter_json(self):
-        return iter(glob.glob(os.path.join(self.root(), "**/*.json")))
+        for kind in self.file_kinds:
+            kind_path = os.path.join(self.root(), kind.value)
+            for f in glob.glob(os.path.join(kind_path, "*.json")):
+                yield f

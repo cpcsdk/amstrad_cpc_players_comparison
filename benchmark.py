@@ -106,26 +106,29 @@ class Benchmark:
     def build_files(self):
         def handle_input(input):
             logging.info(f"Handle \"{input}\" data generation")
-            return [handle_input_player(input, player) for player in self.players]
+            return [handle_input_with_player(input, player) for player in self.players]
 
-        def handle_input_player(input, out_player: PlayerFormat):
+        def handle_input_with_player(input, out_player: PlayerFormat):
             logging.info(f"Generate data for {out_player}")
             input_fmt: MusicFormat = MusicFormat.get_format(input)
             
             expected = out_player.requires_one_of()
             convertible = input_fmt.convertible_to()
 
-            print("expected", expected)
-            print("convertibe", convertible)
-
             convert_to = set(expected).intersection(convertible).pop()
             converted_fname = input.replace(os.path.splitext(input)[1], f".{convert_to.value}")
-            convert_music_file(input, converted_fname)
-            
-            resc = crunch_music_file(converted_fname, out_player)
-            json_fname = "_".join(os.path.splitext(resc["compressed_fname"])) + ".json"
 
+
+
+            produced_fname = out_player.set_extension(converted_fname)
+            json_fname = produced_fname + ".json"
+            
             if not os.path.exists(json_fname):
+                logging.info(f"{json_fname} does not exist")
+
+                convert_music_file(input, converted_fname)
+
+                resc = crunch_music_file(converted_fname, produced_fname, out_player)
                 resp = build_replay_program(resc, out_player)
 
                 res = resc | resp
@@ -138,7 +141,7 @@ class Benchmark:
 
 
     def iter_json(self):
-        return iter(glob.glob(os.path.join(self.root(), "*.json")))
+        return self.dataset.iter_json()
 
 class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):

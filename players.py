@@ -59,8 +59,10 @@ class PlayerFormat(enum.Enum):
                 return fmt
         raise ValueError(f"Unsupported player format: {ext}")
 
+    def set_extension(self, source):
+        return os.path.splitext(source)[0] + "." + self.value
 
-def crunch_music_file(input_file: str, format: PlayerFormat) :
+def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) :
     return {
         PlayerFormat.FAP: crunch_ym_with_fap,
         PlayerFormat.AYT: crunch_ym_with_ayt,
@@ -70,7 +72,7 @@ def crunch_music_file(input_file: str, format: PlayerFormat) :
         PlayerFormat.AKY: compile_aks_with_aky,
         PlayerFormat.AKM: compile_aks_with_akm,
         PlayerFormat.CHP: compile_chp,
-    }[format](input_file)
+    }[format](input_file, output_file)
 
 def build_replay_program(data, player: PlayerFormat):
     (function, params)  = {
@@ -175,8 +177,7 @@ def __crunch_or_compile_music__(src, tgt, cmd):
         'play_time': -1
     }
 
-def crunch_ym_with_ayt(ym_fname: str):
-    ayt_fname = ym_fname.replace(".ym", ".ayt")
+def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str):
     cmd_line = f"bndbuild --direct -- ayt --verbose --target CPC \\\"{ym_fname}\\\"" # \\\"{fap_fname}\\\""
     res = __crunch_or_compile_music__(ym_fname, ayt_fname, cmd_line)
 
@@ -187,13 +188,13 @@ def crunch_ym_with_ayt(ym_fname: str):
     res['data-size'] =  os.path.getsize(ayt_fname)
     return res
 
-def crunch_ym_with_ayc(ym_fname: str):
+def crunch_ym_with_ayc(ym_fname: str, ayc_fname: str):
     raise NotImplementedError("A pc cruncher is required")
 
-def crunch_ym_with_miny(ym_fname: str):
+def crunch_ym_with_miny(ym_fname: str, miny_fname: str):
     raise NotImplementedError("Waiting the newest version compatible with YM6")
 
-def compile_chp(chp_fname: str):
+def compile_chp(chp_fname: str, _):
     assert ".CHP" in chp_fname
     chpz80_fname = chp_fname.replace(".CHP", ".CHPZ80")
     cmd_line = f"bndbuild --direct -- chipnsfx \\\"{chp_fname}\\\" \\\"{chpz80_fname}\\\""  
@@ -218,8 +219,7 @@ def compile_chp(chp_fname: str):
         'play_time': -1
     }
 
-def crunch_ym_with_fap(ym_fname: str):
-    fap_fname = ym_fname.replace(".ym", ".fap")
+def crunch_ym_with_fap(ym_fname: str, fap_fname: str):
     cmd_line = f"bndbuild --direct -- fap \\\"{ym_fname}\\\" \\\"{fap_fname}\\\""
     res = __crunch_or_compile_music__(ym_fname, fap_fname, cmd_line)
     for line in res["stdout"].splitlines():
@@ -239,19 +239,16 @@ def crunch_ym_with_fap(ym_fname: str):
             res["play_time"] = int(line)
     return res
 
-def compile_aks_with_akg(at_fname):
-    akg_fname = os.path.splitext(at_fname)[0] + ".akg"
+def compile_aks_with_akg(at_fname, akg_fname):
     cmd_line = f"bndbuild --direct -- SongToAkg -bin -adr 0x500 \\\"{at_fname}\\\" \\\"{akg_fname}\\\" "
     return __crunch_or_compile_music__(at_fname, akg_fname, cmd_line)
 
-def compile_aks_with_aky(at_fname):
-    aky_fname = os.path.splitext(at_fname)[0] + ".aky"
+def compile_aks_with_aky(at_fname, aky_fname):
     cmd_line = f"bndbuild --direct -- SongToAky -bin -adr 0x500 \\\"{at_fname}\\\" \\\"{aky_fname}\\\" "
     return __crunch_or_compile_music__(at_fname, aky_fname, cmd_line)
 
 
-def compile_aks_with_akm(at_fname):
-    akm_fname = os.path.splitext(at_fname)[0] + ".akm"
+def compile_aks_with_akm(at_fname, akm_fname):
     cmd_line = f"bndbuild --direct -- SongToAkm -bin -adr 0x500 \\\"{at_fname}\\\" \\\"{akm_fname}\\\" "
     return __crunch_or_compile_music__(at_fname, akm_fname, cmd_line)
 
