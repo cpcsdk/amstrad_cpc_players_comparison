@@ -13,7 +13,6 @@
 import os
 import logging
 import json
-import glob
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt 
@@ -22,12 +21,13 @@ from datasets import *
 from players import *
 
 class Benchmark:
-    def __init__(self, dataset: Dataset, players: None):
+    def __init__(self, name, dataset: Dataset, players: None):
         if players is None:
             players = [PlayerFormat.FAP, PlayerFormat.AYT]
 
         self.dataset = dataset
         self.players = players
+        self.name = name
 
 
     def clean(self):
@@ -42,6 +42,8 @@ class Benchmark:
 
 
     def analyse_files(self):
+        report = open(f"reports/report_{self.name}.md", "w")
+
         sizes = []
         formats = []
         sources = []
@@ -60,9 +62,13 @@ class Benchmark:
 
 
 
-        print(df)
-        print(df.pivot(index="sources", columns=["format"]))
+        report.write(f"---\ntitle: {self.name}\n---\n\n# Program size comparison\n\n")
+
         summary = df.pivot(index="sources", columns=["format"])["prog_size"].reset_index()
+        summary.to_markdown(report)
+
+
+        report.write("\n\n")
 
         ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
         print(summary.columns)
@@ -70,38 +76,47 @@ class Benchmark:
         
         plot_x = list(range(len(ordered_extensions)))
 
+        def generate_axis():
+            plt.xticks(
+                plot_x,
+                ordered_extensions
+            )
+            plt.xlabel("Format")
+            plt.ylabel("Program size")
+
+        plt.clf()
         for row in summary.iterrows():
 
             row = row[1]
-            print(row)
             plt.plot(
                 plot_x,
                 [row[k] for k in ordered_extensions],
                 c="gray",
                 alpha=0.4
             )
+        generate_axis()
+        parallal_png = f"reports/parallal_coordinates_{self.name}.png"
+        plt.savefig(parallal_png)
+        report.write(f"\n\n![Parallal coordinates]({os.path.basename(parallal_png)})\n")
 
 
-
+        plt.clf()
         sns.boxplot(df, x="format", y="prog_size")
-        plt.figure()
+        boxplot_png = f"reports/boxplot_{self.name}.png"
+        generate_axis()
+        plt.savefig(boxplot_png)
+        report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
+
+
+        plt.clf()
         sns.swarmplot(df, x="format", y="prog_size")
-        plt.figure()
+        generate_axis()
+        swarmplot_png = f"reports/swarmlot_{self.name}.png"
+        plt.savefig(swarmplot_png)
+        report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
 
 
-        plt.xticks(
-            [0, 1, 2, 3],
-            ["AKM", "FAP", "AKY", "AYT"]
-        )
-        plt.xlabel("Format")
-        plt.ylabel("Program size")
-
-        plt.show()
-
-        print(summary.to_markdown())
-
-
-            
+        report.close()
 
     def build_files(self):
         def handle_input(input):
@@ -147,6 +162,7 @@ class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):
         replay_formats = [PlayerFormat.FAP, PlayerFormat.AYT, PlayerFormat.AKY, PlayerFormat.AKM]
         super().__init__(
+            "AT3",
             At3Dataset(), 
             replay_formats
         )
@@ -156,6 +172,7 @@ class ChpBenchmark(Benchmark):
     def __init__(self):
         replay_formats = [PlayerFormat.CHP,  PlayerFormat.AKM]
         super().__init__(
+            "CHP",
             ChpDataset(),
             replay_formats
         )
