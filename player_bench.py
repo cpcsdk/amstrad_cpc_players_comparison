@@ -22,7 +22,7 @@ if __name__ == "__main__":
                     prog=sys.argv[0],
                     description='Benchmark launcher for Amstrad CPC players')
     
-    parser.add_argument("--benchmark", action="append", default="AT3", choices=['AT3'])
+    parser.add_argument("--benchmark", action="append", default=[], choices=['AT3', 'CHP'])
     parser.add_argument("--clean", action='store_true')
 
 
@@ -32,8 +32,11 @@ if __name__ == "__main__":
 
     print(args)
     benchs = []
-    if "AT3" in args.benchmark:
+    if not args.benchmark or "AT3" in args.benchmark:
         benchs.append(benchmark.ArkosTracker3Benchmark())
+
+    if 'CHP' in args.benchmark:
+        benchs.append(benchmark.ChpBenchmark())
 
     for bench in benchs:
         if args.clean:

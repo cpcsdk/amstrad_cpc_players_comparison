@@ -19,27 +19,29 @@ import glob
 
 class MusicFormat(enum.Enum):
     AKS = "aks"
-    ST = "128"
+    CHP = "CHP"
     SKS = "sks"
-    YM6 = "ym"
-    YM3 = "ym3"
+    ST = "128"
     VT2 = "vt2"
     WYZ = "wyz"
+    YM3 = "ym3"
+    YM6 = "ym"
 
     def get_format(fname: str) -> 'MusicFormat':
         ext = fname.split('.')[-1].lower()
         for fmt in MusicFormat:
-            if fmt.value == ext:
+            if fmt.value.lower() == ext.lower():
                 return fmt
         raise ValueError(f"Unsupported music format: {ext}")
 
     def convertible_to(self):
-        return  {self, MusicFormat.YM6}
-
-
-
+        if self == MusicFormat.CHP:
+            return  {self, MusicFormat.YM3}
+        else:
+            return  {self, MusicFormat.YM6}
 
 def convert_music_file(input_file: str, output_file: str):
+    logging.info(f"Convert {input_file} to {output_file}")
 
     if os.path.exists(output_file):
         return
@@ -50,21 +52,28 @@ def convert_music_file(input_file: str, output_file: str):
     if input_format == output_format:
         shutil.copyfile(input_file, output_file)
     elif input_format in [MusicFormat.ST, MusicFormat.SKS, MusicFormat.AKS, MusicFormat.VT2, MusicFormat.WYZ] and output_format == MusicFormat.YM6:
-        convert_at_to_ym(input_file, output_file)
+        convert_at_to_ym6(input_file, output_file)
+    elif input_format == MusicFormat.CHP and output_format in [MusicFormat.YM3, MusicFormat.YM6]:
+        convert_chp_to_ym3(input_file, output_file)
     else:
         raise NotImplementedError(f"Conversion between different {input_format} and {output_format} is not implemented yet.")
 
 
-def convert_at_to_ym(input, output):
+def convert_at_to_ym6(input, output):
   #  cmd = f"tools\\SongToYm.exe \\\"{input}\\\" \\\"{output}\\\""
     cmd = f"bndbuild --direct -- SongToYm  \\\"{input}\\\" \\\"{output}\\\" "
     logging.debug(f"AT2YM: {cmd}")
     subprocess.run(cmd, check=True)
 
-
+def convert_chp_to_ym3(input, output):
+    cmd = f"bndbuild --direct -- chipnsfx  \\\"{input}\\\" -y \\\"{output}\\\" "
+    logging.debug(f"chipnsfx: {cmd}")
+    subprocess.run(cmd, check=True)
 
 class Dataset:
-    def __init__(self):
+    def __init__(self, path):
+        assert path is not None
+        
         self.clean_patterns = [
             "**/*.BIN",
             "**/*.sna",
@@ -74,15 +83,23 @@ class Dataset:
             "**/*.akm",
             "**/*.aky",
             "**/*.fap",
+            "**/*.CHPB",
             "**/*.json",
         ]
+        self.path = path
 
+
+    def root(self):
+        return self.path
+    
     def clean(self):
         for pat in self.clean_patterns:
             for f in glob.glob(pat, root_dir=self.root(), recursive=True):
                 f = os.path.join(self.root(), f)
                 logging.info(f"Delete {f}")
                 os.remove(f)
+
+
 
 class At3DatasetSongKind(enum.Enum):
     ST = "128"
@@ -102,20 +119,26 @@ class At3DatasetSongKind(enum.Enum):
             At3DatasetSongKind.WYZ: MusicFormat.WYZ,
         }[self].name
     
+
+class ChpDataset(Dataset):
+    def __init__(self):
+        super().__init__(os.path.join("datasets", "chipnsfx"))
+
+    def __iter__(self):
+        for f in glob.glob(os.path.join(self.root(), "*.CHP")):
+            yield f
+            break
+
 class At3Dataset(Dataset):
     def __init__(self, file_kinds= None):
-        super().__init__()
+        super().__init__(os.path.join("datasets", "ArkosTracker3"))
         if file_kinds is None:
-            file_kinds = [At3DatasetSongKind.SKS, At3DatasetSongKind.AT3, At3DatasetSongKind.AT2, At3DatasetSongKind.ST]
-            file_kinds = [At3DatasetSongKind.AT3, At3DatasetSongKind.AT2, At3DatasetSongKind.ST]
+            file_kinds = [At3DatasetSongKind.SKS, At3DatasetSongKind.AT3, At3DatasetSongKind.AT2, At3DatasetSongKind.ST, At3DatasetSongKind.VT2,  At3DatasetSongKind.WYZ]
 
 
      #   file_kinds = [At3DatasetSongKind.VT2]
-        self.path = os.path.join("datasets", "ArkosTracker3")
         self.file_kinds = file_kinds
 
-    def root(self):
-        return self.path
 
     def __iter__(self):
         for kind in self.file_kinds:
@@ -126,12 +149,12 @@ class At3Dataset(Dataset):
         kind_path = os.path.join(self.path, kind.value)
         for fname in os.listdir(kind_path):
             ext = os.path.splitext(fname)[1][1:].upper()
-            if any([ext == kind.extension() for kind in self.file_kinds]) and not (
-                "BD10" in fname or "Bobline" in fname
-            ):
+            if any([ext == kind.extension() for kind in self.file_kinds]) :
                 logging.info(f"{fname} will be handled thanks to type {ext}")
                 yield os.path.join(kind_path, fname)
             else:
                 logging.info(f"{fname} has been filtered out ({ext})")
 
 
+    def iter_json(self):
+        return iter(glob.glob(os.path.join(self.root(), "**/*.json")))

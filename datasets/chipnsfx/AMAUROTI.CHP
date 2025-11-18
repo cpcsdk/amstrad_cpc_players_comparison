@@ -1,0 +1,13 @@
+CHIPNSFX format
+"Amaurote" damage 1987 Binary Design
+by CNGSOFT after David Whittaker
+===
+50/6 +00
+#00+00 #00+03 #00+07
+#00-05 #00-02 #00-10
+===
+#00 C#4:01 C-4:01 C#4:01 C-4:01 C-4:02 ...:..
+===
+:01 FFF1 0000 121 ChanX Ding
+:02 AF00 0000 121 ChanX Ding
+===

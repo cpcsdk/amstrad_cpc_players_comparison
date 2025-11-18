@@ -32,6 +32,9 @@ class Benchmark:
 
     def clean(self):
         self.dataset.clean()
+
+    def root(self):
+        return self.dataset.root()
         
     def execute(self):
         self.build_files() #deactivated temporarily
@@ -42,12 +45,12 @@ class Benchmark:
         sizes = []
         formats = []
         sources = []
-        for f in glob.glob(os.path.join(self.dataset.path, "*/*.json")):
+        for f in self.iter_json():
             res = json.load(open(f))
-            formats.append(os.path.splitext(res["compressed_fname"])[1])
+            formats.append(os.path.splitext(res["compressed_fname"])[1].replace("CHPZ80", "chp"))
             sizes.append(res["program_size"])
             sources.append(os.path.splitext(os.path.basename(res["compressed_fname"]))[0])
-
+            print(f)
         
         df = pd.DataFrame.from_dict({
             "format": formats,
@@ -56,21 +59,36 @@ class Benchmark:
         })
 
 
+
+        print(df)
+        print(df.pivot(index="sources", columns=["format"]))
+        summary = df.pivot(index="sources", columns=["format"])["prog_size"].reset_index()
+
+        ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
+        print(summary.columns)
+        ordered_extensions = [_ for _ in ordered_extensions if _ in summary.columns]
+        
+        plot_x = list(range(len(ordered_extensions)))
+
+        for row in summary.iterrows():
+
+            row = row[1]
+            print(row)
+            plt.plot(
+                plot_x,
+                [row[k] for k in ordered_extensions],
+                c="gray",
+                alpha=0.4
+            )
+
+
+
         sns.boxplot(df, x="format", y="prog_size")
         plt.figure()
         sns.swarmplot(df, x="format", y="prog_size")
         plt.figure()
 
-        summary = df.pivot(index="sources", columns=["format"])["prog_size"].reset_index()
-        print(summary)
-        for row in summary.iterrows():
-            row = row[1]
-            plt.plot(
-                [0,1,2,3],
-                [row[".akm"], row[".fap"], row[".aky"], row[".ayt"]],
-                c="gray",
-                alpha=0.4
-            )
+
         plt.xticks(
             [0, 1, 2, 3],
             ["AKM", "FAP", "AKY", "AYT"]
@@ -79,6 +97,9 @@ class Benchmark:
         plt.ylabel("Program size")
 
         plt.show()
+
+        print(summary.to_markdown())
+
 
             
 
@@ -98,25 +119,40 @@ class Benchmark:
             print("convertibe", convertible)
 
             convert_to = set(expected).intersection(convertible).pop()
-            converted_fname = input.replace(f".{input_fmt.value}", f".{convert_to.value}")
+            converted_fname = input.replace(os.path.splitext(input)[1], f".{convert_to.value}")
             convert_music_file(input, converted_fname)
             
             resc = crunch_music_file(converted_fname, out_player)
             json_fname = "_".join(os.path.splitext(resc["compressed_fname"])) + ".json"
 
-            if os.path.exists(json_fname):
+            if not os.path.exists(json_fname):
                 resp = build_replay_program(resc, out_player)
 
                 res = resc | resp
                 with open(json_fname, "w") as f:
                     json.dump(res, f)
+            else:
+                logging.info(f"{json_fname} already exists")
 
         return [handle_input(input) for input in self.dataset]
+
+
+    def iter_json(self):
+        return iter(glob.glob(os.path.join(self.root(), "*.json")))
 
 class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):
         replay_formats = [PlayerFormat.FAP, PlayerFormat.AYT, PlayerFormat.AKY, PlayerFormat.AKM]
         super().__init__(
             At3Dataset(), 
+            replay_formats
+        )
+
+
+class ChpBenchmark(Benchmark):
+    def __init__(self):
+        replay_formats = [PlayerFormat.CHP,  PlayerFormat.AKM]
+        super().__init__(
+            ChpDataset(),
             replay_formats
         )

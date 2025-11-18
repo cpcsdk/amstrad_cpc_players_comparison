@@ -17,6 +17,7 @@ import logging
 import platform
 
 from datasets import MusicFormat
+import utils
 
 class PlayerFormat(enum.Enum):
     FAP = "fap"
@@ -26,22 +27,29 @@ class PlayerFormat(enum.Enum):
     AKG = "akg" 
     AKM = "akm"
     AKY = "aky"
+    CHP = "chpdb"
 
     """
     Returns the list of format that could produce it 
     """
     def requires_one_of(self):
         ym_only = {MusicFormat.YM6}
+        chp_only = {MusicFormat.CHP}
+
         at_compatible = {MusicFormat.AKS, MusicFormat.SKS, MusicFormat.ST, MusicFormat.VT2, MusicFormat.WYZ}
+        
         return {
             PlayerFormat.FAP: ym_only,
             PlayerFormat.AYT: ym_only,
             PlayerFormat.MINY: ym_only,
             PlayerFormat.AYC: ym_only,
 
+            PlayerFormat.CHP: chp_only,
+
             PlayerFormat.AKG: at_compatible,
             PlayerFormat.AKY: at_compatible,
-            PlayerFormat.AKM: at_compatible,
+
+            PlayerFormat.AKM: at_compatible.union(chp_only),
         }[self]
 
     def get_format(fname: str) -> 'PlayerFormat':
@@ -52,7 +60,6 @@ class PlayerFormat(enum.Enum):
         raise ValueError(f"Unsupported player format: {ext}")
 
 
-
 def crunch_music_file(input_file: str, format: PlayerFormat) :
     return {
         PlayerFormat.FAP: crunch_ym_with_fap,
@@ -61,7 +68,8 @@ def crunch_music_file(input_file: str, format: PlayerFormat) :
         PlayerFormat.AYC: crunch_ym_with_ayc,
         PlayerFormat.AKG: compile_aks_with_akg,
         PlayerFormat.AKY: compile_aks_with_aky,
-        PlayerFormat.AKM: compile_aks_with_akm
+        PlayerFormat.AKM: compile_aks_with_akm,
+        PlayerFormat.CHP: compile_chp,
     }[format](input_file)
 
 def build_replay_program(data, player: PlayerFormat):
@@ -84,11 +92,21 @@ def build_replay_program(data, player: PlayerFormat):
         PlayerFormat.AKM: (
             build_replay_program_for_aky,
             []
+        ),
+
+        PlayerFormat.CHP: (
+            build_replay_program_for_chp,
+            []
         )
     }[player]
     
 
     return function(data["compressed_fname"], **{k: data[k] for k in params})
+
+
+def build_replay_program_for_chp(music_data_fname):
+    z80 = "players/chp/chp.asm"
+    return __build_replay_program__(music_data_fname, "", z80)
 
 def build_replay_program_for_ayt(music_data_fname):
     # TODO get the number of nops returned by the builder
@@ -141,10 +159,7 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
 
 
 def __crunch_or_compile_music__(src, tgt, cmd):
-    logging.debug(cmd)
-    res = subprocess.run(cmd, check=True, capture_output=True)
-    logging.debug(res.stdout)
-    logging.error(res.stderr)
+    res = utils.execute_process(cmd)
 
     try:
         s = os.path.getsize(tgt)
@@ -177,6 +192,31 @@ def crunch_ym_with_ayc(ym_fname: str):
 
 def crunch_ym_with_miny(ym_fname: str):
     raise NotImplementedError("Waiting the newest version compatible with YM6")
+
+def compile_chp(chp_fname: str):
+    assert ".CHP" in chp_fname
+    chpz80_fname = chp_fname.replace(".CHP", ".CHPZ80")
+    cmd_line = f"bndbuild --direct -- chipnsfx \\\"{chp_fname}\\\" \\\"{chpz80_fname}\\\""  
+    res = utils.execute_process(cmd_line)
+
+    chpb_fname = chp_fname.replace(".CHP", ".CHPB")
+    cmd_line = f"bndbuild --direct -- basm \\\"{chpz80_fname}\\\" -o \\\"{chpb_fname}\\\""  
+    res = utils.execute_process(cmd_line)
+
+    try:
+        s = os.path.getsize(chpb_fname)
+    except :
+        s = -1
+
+    return {
+        'original_fname': chp_fname,
+        'compressed_fname': chpz80_fname,
+        'stdout': res.stdout.decode('utf-8'),
+        'stderr': res.stderr.decode('utf-8'),
+        'buffer_size': -1, # TODO need to compute
+        'data_size': s,
+        'play_time': -1
+    }
 
 def crunch_ym_with_fap(ym_fname: str):
     fap_fname = ym_fname.replace(".ym", ".fap")
