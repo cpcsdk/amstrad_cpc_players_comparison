@@ -15,11 +15,12 @@ import logging
 import json
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 from joblib import delayed, Parallel
 
 from datasets import *
 from players import *
+
 
 class Benchmark:
     def __init__(self, name, dataset: Dataset, players: None):
@@ -30,17 +31,15 @@ class Benchmark:
         self.players = players
         self.name = name
 
-
     def clean(self):
         self.dataset.clean()
 
     def root(self):
         return self.dataset.root()
-        
-    def execute(self):
-        self.build_files() #deactivated temporarily
-        self.analyse_files()
 
+    def execute(self):
+        self.build_files()  # deactivated temporarily
+        self.analyse_files()
 
     def analyse_files(self):
         report = open(f"reports/report_{self.name}.md", "w")
@@ -50,20 +49,19 @@ class Benchmark:
         sources = []
         for f in self.iter_json():
             res = json.load(open(f))
-            formats.append(os.path.splitext(res["compressed_fname"])[1].replace("CHPZ80", "chp"))
+            formats.append(
+                os.path.splitext(res["compressed_fname"])[1].replace("CHPZ80", "chp")
+            )
             sizes.append(res["program_size"])
-            sources.append(os.path.splitext(os.path.basename(res["compressed_fname"]))[0])
-        
-        df = pd.DataFrame.from_dict({
-            "format": formats,
-            "prog_size": sizes,
-            "sources": sources
-        })
+            sources.append(
+                os.path.splitext(os.path.basename(res["compressed_fname"]))[0]
+            )
 
-
+        df = pd.DataFrame.from_dict(
+            {"format": formats, "prog_size": sizes, "sources": sources}
+        )
 
         report.write(f"---\ntitle: {self.name}\n---\n\n# Program size comparison\n\n")
-
 
         print(df)
         summary = df.pivot(index="sources", columns=["format"])["prog_size"]
@@ -71,76 +69,64 @@ class Benchmark:
         summary = summary.reset_index()
         summary.to_markdown(report)
 
-
         report.write("\n\n")
 
         ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
         print(summary.columns)
         ordered_extensions = [_ for _ in ordered_extensions if _ in summary.columns]
-        
+
         plot_x = list(range(len(ordered_extensions)))
 
         def generate_axis():
-            plt.xticks(
-                plot_x,
-                ordered_extensions
-            )
+            plt.xticks(plot_x, ordered_extensions)
             plt.xlabel("Format")
             plt.ylabel("Program size")
 
         plt.clf()
         for row in summary.iterrows():
             row = row[1]
-            plt.plot(
-                plot_x,
-                [row[k] for k in ordered_extensions],
-                c="gray",
-                alpha=0.4
-            )
+            plt.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
         generate_axis()
         parallal_png = f"reports/parallal_coordinates_{self.name}.png"
         plt.savefig(parallal_png)
         report.write(f"\n\n![Parallal coordinates]({os.path.basename(parallal_png)})\n")
 
-
         plt.clf()
         sns.boxplot(df, x="format", y="prog_size")
         boxplot_png = f"reports/boxplot_{self.name}.png"
-       # generate_axis()
+        # generate_axis()
         plt.savefig(boxplot_png)
         report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
 
-
         plt.clf()
         sns.swarmplot(df, x="format", y="prog_size")
-      #  generate_axis()
+        #  generate_axis()
         swarmplot_png = f"reports/swarmlot_{self.name}.png"
         plt.savefig(swarmplot_png)
         report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
-
 
         report.close()
 
     def build_files(self):
         def handle_input(input):
-            logging.info(f"Handle \"{input}\" data generation")
+            logging.info(f'Handle "{input}" data generation')
             return [handle_input_with_player(input, player) for player in self.players]
 
         def handle_input_with_player(input, out_player: PlayerFormat):
             logging.info(f"Generate data for {out_player}")
             input_fmt: MusicFormat = MusicFormat.get_format(input)
-            
+
             expected = out_player.requires_one_of()
             convertible = input_fmt.convertible_to()
 
             convert_to = set(expected).intersection(convertible).pop()
-            converted_fname = input.replace(os.path.splitext(input)[1], f".{convert_to.value}")
-
-
+            converted_fname = input.replace(
+                os.path.splitext(input)[1], f".{convert_to.value}"
+            )
 
             produced_fname = out_player.set_extension(converted_fname)
             json_fname = produced_fname + ".json"
-            
+
             if not os.path.exists(json_fname):
                 logging.info(f"{json_fname} does not exist")
 
@@ -155,27 +141,26 @@ class Benchmark:
             else:
                 logging.info(f"{json_fname} already exists")
 
-        return Parallel(n_jobs=-1, verbose=3)(delayed(handle_input)(input) for input in self.dataset)
-
+        return Parallel(n_jobs=-1, verbose=3)(
+            delayed(handle_input)(input) for input in self.dataset
+        )
 
     def iter_json(self):
         return self.dataset.iter_json()
 
+
 class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):
-        replay_formats = [PlayerFormat.FAP, PlayerFormat.AYT, PlayerFormat.AKY, PlayerFormat.AKM]
-        super().__init__(
-            "AT3",
-            At3Dataset(), 
-            replay_formats
-        )
+        replay_formats = [
+            PlayerFormat.FAP,
+            PlayerFormat.AYT,
+            PlayerFormat.AKY,
+            PlayerFormat.AKM,
+        ]
+        super().__init__("AT3", At3Dataset(), replay_formats)
 
 
 class ChpBenchmark(Benchmark):
     def __init__(self):
-        replay_formats = [PlayerFormat.CHP,  PlayerFormat.AKM]
-        super().__init__(
-            "CHP",
-            ChpDataset(),
-            replay_formats
-        )
+        replay_formats = [PlayerFormat.CHP, PlayerFormat.AKM]
+        super().__init__("CHP", ChpDataset(), replay_formats)
