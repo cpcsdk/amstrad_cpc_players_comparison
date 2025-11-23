@@ -1,13 +1,14 @@
 
     org 0x500
 PLY_AKM_REMOVE_HOOKS
+PLY_AKM_HARDWARE_CPC = 1
 AKM_File
 		incbin MUSIC_DATA_FNAME
 
 		run $
         BREAPOINT
 StartExample
-		ld sp,MyProgram
+		ld sp,0x500
 		ld hl,#c9fb		; Cpc interrupt reduced to ei/ret
 		ld (#38),hl		;
 
