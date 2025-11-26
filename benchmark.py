@@ -45,6 +45,7 @@ class Benchmark:
         report = open(f"reports/report_{self.name}.md", "w")
 
         sizes = []
+        zx0sizes = []
         formats = []
         sources = []
         for f in self.iter_json():
@@ -53,57 +54,65 @@ class Benchmark:
                 os.path.splitext(res["compressed_fname"])[1].replace("CHPZ80", "chp")
             )
             sizes.append(res["program_size"])
+            zx0sizes.append(res["program_zx0_size"])
             sources.append(
                 os.path.splitext(os.path.basename(res["compressed_fname"]))[0]
             )
 
         df = pd.DataFrame.from_dict(
-            {"format": formats, "prog_size": sizes, "sources": sources}
+            {"format": formats, "prog_size": sizes, "zx0_prog_size": zx0sizes, "sources": sources}
         )
 
-        report.write(f"---\ntitle: {self.name}\n---\n\n# Program size comparison\n\n")
+        title = {
+            'prog_size': "Raw program size",
+            'zx0_prog_size': "Crunch (zx0) program size (without decrunch routine and data reloction)"
+        }
 
-        print(df)
-        summary = df.pivot(index="sources", columns=["format"])["prog_size"]
-        print(summary.mean())
-        summary = summary.reset_index()
-        summary.to_markdown(report)
 
-        report.write("\n\n")
+        for comparison_key in ["prog_size", "zx0_prog_size"]:
 
-        ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
-        print(summary.columns)
-        ordered_extensions = [_ for _ in ordered_extensions if _ in summary.columns]
 
-        plot_x = list(range(len(ordered_extensions)))
+            report.write(f"---\ntitle: {self.name}\n---\n\n# {title[comparison_key]}\n\n")
 
-        def generate_axis():
-            plt.xticks(plot_x, ordered_extensions)
-            plt.xlabel("Format")
-            plt.ylabel("Program size")
+            summary = df.pivot(index="sources", columns=["format"])[comparison_key]
+            print(summary.mean())
+            summary = summary.reset_index()
+            summary.to_markdown(report)
+            report.write("\n\n")
 
-        plt.clf()
-        for row in summary.iterrows():
-            row = row[1]
-            plt.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
-        generate_axis()
-        parallal_png = f"reports/parallal_coordinates_{self.name}.png"
-        plt.savefig(parallal_png)
-        report.write(f"\n\n![Parallal coordinates]({os.path.basename(parallal_png)})\n")
+            ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
+            print(summary.columns)
+            ordered_extensions = [_ for _ in ordered_extensions if _ in summary.columns]
 
-        plt.clf()
-        sns.boxplot(df, x="format", y="prog_size")
-        boxplot_png = f"reports/boxplot_{self.name}.png"
-        # generate_axis()
-        plt.savefig(boxplot_png)
-        report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
+            plot_x = list(range(len(ordered_extensions)))
 
-        plt.clf()
-        sns.swarmplot(df, x="format", y="prog_size")
-        #  generate_axis()
-        swarmplot_png = f"reports/swarmlot_{self.name}.png"
-        plt.savefig(swarmplot_png)
-        report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
+            def generate_axis():
+                plt.xticks(plot_x, ordered_extensions)
+                plt.xlabel("Format")
+                plt.ylabel("Program size")
+
+            plt.clf()
+            for row in summary.iterrows():
+                row = row[1]
+                plt.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
+            generate_axis()
+            parallal_png = f"reports/{comparison_key}_parallal_coordinates_{self.name}.png"
+            plt.savefig(parallal_png)
+            report.write(f"\n\n![Parallal coordinates]({os.path.basename(parallal_png)})\n")
+
+            plt.clf()
+            sns.boxplot(df, x="format", y=comparison_key)
+            boxplot_png = f"reports/{comparison_key}_boxplot_{self.name}.png"
+            # generate_axis()
+            plt.savefig(boxplot_png)
+            report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
+
+            plt.clf()
+            sns.swarmplot(df, x="format", y=comparison_key)
+            #  generate_axis()
+            swarmplot_png = f"reports/{comparison_key}_swarmlot_{self.name}.png"
+            plt.savefig(swarmplot_png)
+            report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
 
         report.close()
 
@@ -124,6 +133,8 @@ class Benchmark:
                 os.path.splitext(input)[1], f".{convert_to.value}"
             )
 
+        
+
             produced_fname = out_player.set_extension(converted_fname)
             json_fname = produced_fname + ".json"
 
@@ -140,8 +151,12 @@ class Benchmark:
                     json.dump(res, f)
             else:
                 logging.info(f"{json_fname} already exists")
+                res = json.load(open(json_fname))
 
-        return Parallel(n_jobs=-1, verbose=3)(
+            #handle the zx0 file
+
+
+        return Parallel(n_jobs=1, verbose=3)(
             delayed(handle_input)(input) for input in self.dataset
         )
 
@@ -164,3 +179,9 @@ class ChpBenchmark(Benchmark):
     def __init__(self):
         replay_formats = [PlayerFormat.CHP, PlayerFormat.AKM]
         super().__init__("CHP", ChpDataset(), replay_formats)
+
+
+class PaCiDemoBenchmark(Benchmark):
+    def __init__(self):
+        replay_formats = [PlayerFormat.AYT, PlayerFormat.FAP]
+        super().__init__("PACIDEMO", PaCiDemoDataset(), replay_formats)

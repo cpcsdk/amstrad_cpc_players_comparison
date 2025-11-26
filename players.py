@@ -151,7 +151,15 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
     )
 
     execute_process(cmd)
-    return {"program_size": os.path.getsize(amsdos_fname) - 128}
+    program_size = os.path.getsize(amsdos_fname) - 128 #header has to be removed
+
+    zx0_fname = amsdos_fname + ".zx0"
+    cmd = f'bndbuild --direct -- compress --cruncher zx0 --input \\"{amsdos_fname}\\" --output \\"{zx0_fname}\\"'
+    execute_process(cmd)
+    program_zx0_size = os.path.getsize(zx0_fname) #no header to remove
+    
+    
+    return {"program_size": program_size, "program_zx0_size": program_zx0_size}
 
 
 def __crunch_or_compile_music__(src, tgt, cmd):
@@ -174,7 +182,14 @@ def __crunch_or_compile_music__(src, tgt, cmd):
 
 def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str):
     cmd_line = f'bndbuild --direct -- ayt --verbose --target CPC \\"{ym_fname}\\"'  # \\\"{fap_fname}\\\""
-    res = __crunch_or_compile_music__(ym_fname, ayt_fname, cmd_line)
+
+    try:
+        res = __crunch_or_compile_music__(ym_fname, ayt_fname, cmd_line)
+    except Exception as e:
+        if not os.path.exists(ayt_fname):
+            raise e
+        else:
+            pass # printed an error message BUT generated the file ...
 
     # fix missing -o --output
     if os.path.exists(ayt_fname):

@@ -22,11 +22,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--benchmark", action="append", default=[], choices=["AT3", "CHP"]
+        "--benchmark", action="append", default=[], choices=["AT3", "CHP", "PACIDEMO"]
     )
     parser.add_argument("--clean", action="store_true")
 
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=logging.INFO)
 
     args = parser.parse_args()
 
@@ -36,6 +36,9 @@ if __name__ == "__main__":
 
     if "CHP" in args.benchmark:
         benchs.append(benchmark.ChpBenchmark())
+
+    if "PACIDEMO" in args.benchmark:
+        benchs.append(benchmark.PaCiDemoBenchmark())
 
     for bench in benchs:
         if args.clean:
