@@ -72,7 +72,7 @@ class Benchmark:
         for comparison_key in ["prog_size", "zx0_prog_size"]:
 
 
-            report.write("f# {title[comparison_key]}\n\n")
+            report.write(f"# {title[comparison_key]}\n\n")
 
             summary = df.pivot(index="sources", columns=["format"])[comparison_key]
             summary = summary.reset_index()

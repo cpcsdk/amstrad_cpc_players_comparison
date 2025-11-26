@@ -2,7 +2,7 @@
 title: AT3
 ---
 
-f# {title[comparison_key]}
+# Raw program size
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
 |---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
@@ -98,7 +98,7 @@ Mean
 
 
 ![Swarmplot](prog_size_swarmlot_AT3.png)
-f# {title[comparison_key]}
+# Crunch (zx0) program size (without decrunch routine and data reloction)
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
 |---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
