@@ -2,7 +2,7 @@
 title: AT3
 ---
 
-# Raw program size
+f# {title[comparison_key]}
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
 |---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
@@ -80,6 +80,15 @@ title: AT3
 | 71 | jinj_med                                   |   1519 |   1985 |   3258 |   5058 |
 | 72 | maryjane2                                  |   2917 |   4882 |   9225 |   7106 |
 
+Mean
+
+| format   |        0 |
+|:---------|---------:|
+| .akm     |  3948.33 |
+| .aky     |  8876.55 |
+| .ayt     | 16657.6  |
+| .fap     | 10894.1  |
+
 
 
 ![Parallal coordinates](prog_size_parallal_coordinates_AT3.png)
@@ -89,11 +98,7 @@ title: AT3
 
 
 ![Swarmplot](prog_size_swarmlot_AT3.png)
----
-title: AT3
----
-
-# Crunch (zx0) program size (without decrunch routine and data reloction)
+f# {title[comparison_key]}
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
 |---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
@@ -170,6 +175,15 @@ title: AT3
 | 70 | Ultrasyd - Morons                          |   2718 |   4657 |   8571 |   6168 |
 | 71 | jinj_med                                   |    896 |   1014 |   1005 |   1456 |
 | 72 | maryjane2                                  |   1530 |   1850 |   2334 |   2928 |
+
+Mean
+
+| format   |       0 |
+|:---------|--------:|
+| .akm     | 2010.11 |
+| .aky     | 4318.03 |
+| .ayt     | 4659.38 |
+| .fap     | 4443.79 |
 
 
 

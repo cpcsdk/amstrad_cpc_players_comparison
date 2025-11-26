@@ -68,17 +68,22 @@ class Benchmark:
             'zx0_prog_size': "Crunch (zx0) program size (without decrunch routine and data reloction)"
         }
 
-
+        report.write(f"---\ntitle: {self.name}\n---\n\n")
         for comparison_key in ["prog_size", "zx0_prog_size"]:
 
 
-            report.write(f"---\ntitle: {self.name}\n---\n\n# {title[comparison_key]}\n\n")
+            report.write("f# {title[comparison_key]}\n\n")
 
             summary = df.pivot(index="sources", columns=["format"])[comparison_key]
-            print(summary.mean())
             summary = summary.reset_index()
             summary.to_markdown(report)
             report.write("\n\n")
+
+            print(summary)
+            report.write("Mean\n\n")
+            summary.drop("sources",axis=1).mean().to_markdown(report)
+            report.write("\n\n")
+
 
             ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
             print(summary.columns)
