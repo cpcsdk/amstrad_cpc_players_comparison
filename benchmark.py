@@ -17,6 +17,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from joblib import delayed, Parallel
+from scipy.stats import wilcoxon
 
 from datasets import *
 from players import *
@@ -84,10 +85,29 @@ class Benchmark:
             summary.drop("sources",axis=1).mean().to_markdown(report)
             report.write("\n\n")
 
+  
 
             ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
             print(summary.columns)
             ordered_extensions = [_ for _ in ordered_extensions if _ in summary.columns]
+
+            for i in range(len(ordered_extensions)):
+                col1 = ordered_extensions[i]
+                for j in range (i+1, len(ordered_extensions)):
+                    col2 = ordered_extensions[j]
+                    res = wilcoxon(summary[col1], summary[col2])
+
+                    if res.pvalue < 0.05:
+                        if summary[col1].mean() < summary[col2].mean():
+                            best = col1
+                        else:
+                            best = col2
+                        code = f"dissimilar (best={best})"
+                    else:
+                        code = "similar"
+
+                    report.write(f" - {col1} vs {col2}: {code}\n")
+
 
             plot_x = list(range(len(ordered_extensions)))
 

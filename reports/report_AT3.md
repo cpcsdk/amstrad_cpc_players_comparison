@@ -89,6 +89,12 @@ Mean
 | .ayt     | 16657.6  |
 | .fap     | 10894.1  |
 
+ - .akm vs .fap: dissimilar (best=.akm)
+ - .akm vs .aky: dissimilar (best=.akm)
+ - .akm vs .ayt: dissimilar (best=.akm)
+ - .fap vs .aky: dissimilar (best=.aky)
+ - .fap vs .ayt: dissimilar (best=.fap)
+ - .aky vs .ayt: dissimilar (best=.aky)
 
 
 ![Parallal coordinates](prog_size_parallal_coordinates_AT3.png)
@@ -185,6 +191,12 @@ Mean
 | .ayt     | 4659.38 |
 | .fap     | 4443.79 |
 
+ - .akm vs .fap: dissimilar (best=.akm)
+ - .akm vs .aky: dissimilar (best=.akm)
+ - .akm vs .ayt: dissimilar (best=.akm)
+ - .fap vs .aky: dissimilar (best=.aky)
+ - .fap vs .ayt: similar
+ - .aky vs .ayt: dissimilar (best=.aky)
 
 
 ![Parallal coordinates](zx0_prog_size_parallal_coordinates_AT3.png)
