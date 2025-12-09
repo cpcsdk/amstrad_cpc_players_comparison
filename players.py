@@ -83,7 +83,7 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.AYT: profiler_header + 22 + 9,   # 37 bytes (JP method)
             PlayerFormat.MINY: None,
             PlayerFormat.AYC: None,
-            PlayerFormat.AKG: None,
+            PlayerFormat.AKG: profiler_header + 12 + 8,   # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
             PlayerFormat.AKY: profiler_header + 11 + 8,   # 25 bytes total
             PlayerFormat.AKM: profiler_header + 9 + 9,    # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
             PlayerFormat.CHP: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
@@ -109,6 +109,7 @@ def build_replay_program(data, player: PlayerFormat):
     (function, params) = {
         PlayerFormat.FAP: (build_replay_program_for_fap, ["buffer_size"]),
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
+        PlayerFormat.AKG: (build_replay_program_for_akg, []),
         PlayerFormat.AKY: (build_replay_program_for_aky, []),
         PlayerFormat.AKM: (build_replay_program_for_akm, []),
         PlayerFormat.CHP: (build_replay_program_for_chp, []),
@@ -127,6 +128,11 @@ def build_replay_program_for_ayt(music_data_fname, player: PlayerFormat):
     #      ideally, it should be provided by the PC program
     z80 = "players/ayt/ayt.asm"
     return __build_replay_program__(music_data_fname, "-i ", z80, player)
+
+
+def build_replay_program_for_akg(music_data_fname, player: PlayerFormat):
+    z80 = "players/akg/akg.asm"
+    return __build_replay_program__(music_data_fname, "", z80, player)
 
 
 def build_replay_program_for_aky(music_data_fname, player: PlayerFormat):
@@ -293,6 +299,7 @@ def crunch_ym_with_fap(ym_fname: str, fap_fname: str):
 
 def compile_aks_with_akg(at_fname, akg_fname):
     cmd_line = f'bndbuild --direct -- SongToAkg -bin -adr 0x506 \\"{at_fname}\\" \\"{akg_fname}\\" '
+    cmd_line = f'tools\\SongToAkg -bin -adr 0x506 "{at_fname}" "{akg_fname}" '
     return __crunch_or_compile_music__(at_fname, akg_fname, cmd_line)
 
 

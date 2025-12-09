@@ -96,7 +96,7 @@ class Benchmark:
 
       
 
-                preferred_order = [".chp", ".akm", ".fap", ".aky", ".ayt"]
+                preferred_order = [".chp", ".akm", ".akg", ".fap", ".aky", ".ayt"]
                 ordered_extensions = [c for c in preferred_order if c in summary.columns]
                 print(summary.columns)
 
@@ -208,6 +208,7 @@ class ArkosTracker3Benchmark(Benchmark):
         replay_formats = [
             PlayerFormat.FAP,
             PlayerFormat.AYT,
+            PlayerFormat.AKG,
             PlayerFormat.AKY,
             PlayerFormat.AKM,
         ]
