@@ -70,18 +70,23 @@ class PlayerFormat(enum.Enum):
     
 
     def profiler_extra_size(self):
-        """return the number of bytes consummed by the extra profiling code"""
-
-        profiler_init_bytes = 3+3 #2 jps
+        """Return the number of bytes consumed by the extra profiling code
+        
+        Profiling code consists of:
+        - 2 jp instructions at start (6 bytes)
+        - profiler_init routine
+        - profiler_run routine
+        """
+        profiler_header = 6  # 2 jp instructions (jp profiler_init, jp profiler_run)
         return {
-            PlayerFormat.FAP: None,
-            PlayerFormat.AYT: None,
+            PlayerFormat.FAP: profiler_header + 19 + 15,  # 40 bytes total
+            PlayerFormat.AYT: profiler_header + 22 + 9,   # 37 bytes (JP method)
             PlayerFormat.MINY: None,
             PlayerFormat.AYC: None,
             PlayerFormat.AKG: None,
-            PlayerFormat.AKY: None,
-            PlayerFormat.AKM: profiler_init_bytes + (1+3+1+3+1) + (1+3+1+3),
-            PlayerFormat.CHP: profiler_init_bytes + (3) + (1+3+1+3),
+            PlayerFormat.AKY: profiler_header + 11 + 8,   # 25 bytes total
+            PlayerFormat.AKM: profiler_header + 9 + 9,    # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
+            PlayerFormat.CHP: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
         }[self]
     
     def load_address(self):

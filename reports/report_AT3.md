@@ -97,13 +97,13 @@ Mean
  - .aky vs .ayt: dissimilar (best=.aky)
 
 
-![Parallal coordinates](prog_size_parallal_coordinates_AT3.png)
+![Parallel coordinates](prog_size_parallel_coordinates_AT3.png)
 
 
 ![Boxplot](prog_size_boxplot_AT3.png)
 
 
-![Swarmplot](prog_size_swarmlot_AT3.png)
+![Swarmplot](prog_size_swarmplot_AT3.png)
 # Crunch (zx0) program size (without decrunch routine and data reloction)
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
@@ -199,13 +199,13 @@ Mean
  - .aky vs .ayt: dissimilar (best=.aky)
 
 
-![Parallal coordinates](zx0_prog_size_parallal_coordinates_AT3.png)
+![Parallel coordinates](zx0_prog_size_parallel_coordinates_AT3.png)
 
 
 ![Boxplot](zx0_prog_size_boxplot_AT3.png)
 
 
-![Swarmplot](zx0_prog_size_swarmlot_AT3.png)
+![Swarmplot](zx0_prog_size_swarmplot_AT3.png)
 # Maximum execution time (in nops)
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
@@ -301,10 +301,10 @@ Mean
  - .aky vs .ayt: dissimilar (best=.ayt)
 
 
-![Parallal coordinates](max_execution_time_parallal_coordinates_AT3.png)
+![Parallel coordinates](max_execution_time_parallel_coordinates_AT3.png)
 
 
 ![Boxplot](max_execution_time_boxplot_AT3.png)
 
 
-![Swarmplot](max_execution_time_swarmlot_AT3.png)
+![Swarmplot](max_execution_time_swarmplot_AT3.png)

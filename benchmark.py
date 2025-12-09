@@ -16,6 +16,7 @@ import json
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from itertools import combinations
 from joblib import delayed, Parallel
 from scipy.stats import wilcoxon
 
@@ -95,57 +96,63 @@ class Benchmark:
 
       
 
-                ordered_extensions = [".chp", ".akm", ".fap", ".aky", ".ayt"]
+                preferred_order = [".chp", ".akm", ".fap", ".aky", ".ayt"]
+                ordered_extensions = [c for c in preferred_order if c in summary.columns]
                 print(summary.columns)
-                ordered_extensions = [_ for _ in ordered_extensions if _ in summary.columns]
 
-                for i in range(len(ordered_extensions)):
-                    col1 = ordered_extensions[i]
-                    for j in range (i+1, len(ordered_extensions)):
-                        col2 = ordered_extensions[j]
-                        res = wilcoxon(summary[col1], summary[col2])
+                for col1, col2 in combinations(ordered_extensions, 2):
+                    res = wilcoxon(summary[col1], summary[col2])
 
-                        if res.pvalue < 0.05:
-                            if summary[col1].mean() < summary[col2].mean():
-                                best = col1
-                            else:
-                                best = col2
-                            code = f"dissimilar (best={best})"
-                        else:
-                            code = "similar"
+                    if res.pvalue < 0.05:
+                        best = col1 if summary[col1].mean() < summary[col2].mean() else col2
+                        code = f"dissimilar (best={best})"
+                    else:
+                        code = "similar"
 
-                        report.write(f" - {col1} vs {col2}: {code}\n")
+                    report.write(f" - {col1} vs {col2}: {code}\n")
 
-
+                # Generate plots
                 plot_x = list(range(len(ordered_extensions)))
+                
+                # Parallel coordinates plot
+                fig, ax = plt.subplots(figsize=(10, 6))
+                for _, row in summary.iterrows():
+                    ax.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
+                ax.set_xticks(plot_x)
+                ax.set_xticklabels(ordered_extensions)
+                ax.set_xlabel("Format")
+                ax.set_ylabel(title[comparison_key])
+                parallel_png = f"reports/{comparison_key}_parallel_coordinates_{self.name}.png"
+                try:
+                    fig.savefig(parallel_png, dpi=100, bbox_inches='tight')
+                    report.write(f"\n\n![Parallel coordinates]({os.path.basename(parallel_png)})\n")
+                except Exception as e:
+                    logging.error(f"Failed to save {parallel_png}: {e}")
+                plt.close(fig)
 
-                def generate_axis():
-                    plt.xticks(plot_x, ordered_extensions)
-                    plt.xlabel("Format")
-                    plt.ylabel("Program size")
-
-                plt.clf()
-                for row in summary.iterrows():
-                    row = row[1]
-                    plt.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
-                generate_axis()
-                parallal_png = f"reports/{comparison_key}_parallal_coordinates_{self.name}.png"
-                plt.savefig(parallal_png)
-                report.write(f"\n\n![Parallal coordinates]({os.path.basename(parallal_png)})\n")
-
-                plt.clf()
-                sns.boxplot(df, x="format", y=comparison_key)
+                # Boxplot
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.boxplot(data=df, x="format", y=comparison_key, ax=ax, order=ordered_extensions)
+                ax.set_ylabel(title[comparison_key])
                 boxplot_png = f"reports/{comparison_key}_boxplot_{self.name}.png"
-                # generate_axis()
-                plt.savefig(boxplot_png)
-                report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
+                try:
+                    fig.savefig(boxplot_png, dpi=100, bbox_inches='tight')
+                    report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
+                except Exception as e:
+                    logging.error(f"Failed to save {boxplot_png}: {e}")
+                plt.close(fig)
 
-                plt.clf()
-                sns.swarmplot(df, x="format", y=comparison_key)
-                #  generate_axis()
-                swarmplot_png = f"reports/{comparison_key}_swarmlot_{self.name}.png"
-                plt.savefig(swarmplot_png)
-                report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
+                # Swarmplot
+                fig, ax = plt.subplots(figsize=(10, 6))
+                sns.swarmplot(data=df, x="format", y=comparison_key, ax=ax, order=ordered_extensions)
+                ax.set_ylabel(title[comparison_key])
+                swarmplot_png = f"reports/{comparison_key}_swarmplot_{self.name}.png"
+                try:
+                    fig.savefig(swarmplot_png, dpi=100, bbox_inches='tight')
+                    report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
+                except Exception as e:
+                    logging.error(f"Failed to save {swarmplot_png}: {e}")
+                plt.close(fig)
 
     def build_files(self):
         def handle_input(input):
