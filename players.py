@@ -114,32 +114,32 @@ def build_replay_program(data, player: PlayerFormat):
         PlayerFormat.CHP: (build_replay_program_for_chp, []),
     }[player]
 
-    return function(data["compressed_fname"], **{k: data[k] for k in params})
+    return function(data["compressed_fname"], player, **{k: data[k] for k in params})
 
 
-def build_replay_program_for_chp(music_data_fname):
+def build_replay_program_for_chp(music_data_fname, player: PlayerFormat):
     z80 = "players/chp/chp.asm"
-    return __build_replay_program__(music_data_fname, "", z80)
+    return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_ayt(music_data_fname):
+def build_replay_program_for_ayt(music_data_fname, player: PlayerFormat):
     # TODO get the number of nops returned by the builder
     #      ideally, it should be provided by the PC program
     z80 = "players/ayt/ayt.asm"
-    return __build_replay_program__(music_data_fname, "-i ", z80)
+    return __build_replay_program__(music_data_fname, "-i ", z80, player)
 
 
-def build_replay_program_for_aky(music_data_fname):
+def build_replay_program_for_aky(music_data_fname, player: PlayerFormat):
     z80 = "players/aky/aky.asm"
-    return __build_replay_program__(music_data_fname, "", z80)
+    return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_akm(music_data_fname):
+def build_replay_program_for_akm(music_data_fname, player: PlayerFormat):
     z80 = "players/akm/akm.asm"
-    return __build_replay_program__(music_data_fname, "", z80)
+    return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_fap(music_data_fname, buffer_size):
+def build_replay_program_for_fap(music_data_fname, player: PlayerFormat, buffer_size):
     z80 = "players/fap/fap.asm"
 
     extra_cmd = (
@@ -148,14 +148,12 @@ def build_replay_program_for_fap(music_data_fname, buffer_size):
         + f'\\"-DMUSIC_BUFF_SIZE={buffer_size}\\" '
     )
 
-    return __build_replay_program__(music_data_fname, extra_cmd, z80)
+    return __build_replay_program__(music_data_fname, extra_cmd, z80, player)
 
 
-def profile(amsdos_file, profile_address):
-    pass
 
 
-def __build_replay_program__(music_data_fname, extra_cmd, z80):
+def __build_replay_program__(music_data_fname, extra_cmd, z80, player: PlayerFormat = None):
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
     clean_amsdos_fname = base + ".BIN"
@@ -181,6 +179,12 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
 
     execute_process(cmd)
     program_size = os.path.getsize(amsdos_fname) #- 128 #header has to be removed
+
+    # Subtract profiling overhead if player format provided
+    if player is not None:
+        overhead = player.profiler_extra_size()
+        if overhead is not None:
+            program_size = max(0, program_size - overhead)
 
     zx0_fname = amsdos_fname + ".zx0"
     cmd = f'bndbuild --direct -- compress --cruncher zx0 --input \\"{amsdos_fname}\\" --output \\"{zx0_fname}\\"'
