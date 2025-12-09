@@ -93,17 +93,21 @@ class Dataset:
         assert path is not None
 
         self.clean_patterns = [
-            "**/*.BIN",
-            "**/*.sna",
-            "**/*.ym",  # XXX this ine can be dangerous for new datasets
-            "**/*.ayt",
-            "**/*.akg",
-            "**/*.akm",
-            "**/*.aky",
-            "**/*.fap",
-            "**/*.CHPB",
-            "**/*.json",
+            "*.akg",
+            "*.akm",
+            "*.aky",
+            "*.ayt",
+            "*.BIN",
+            "*.CHPB",
+            "*.CHPZ80",
+            "*.CSV",
+            "*.fap",
+            "*.json",
+            "*.sna",
+            "*.ym",  # XXX this ine can be dangerous for new datasets
+            "*.zx0"
         ]
+        self.clean_pattern_folder_part = None
         self.path = path
 
     def root(self):
@@ -114,7 +118,8 @@ class Dataset:
 
     def clean(self):
         for pat in self.clean_patterns:
-            for f in glob.glob(pat, root_dir=self.root(), recursive=True):
+            print(pat, self.root())
+            for f in glob.glob(os.path.join("**",pat), root_dir=self.root(), recursive=True):
                 f = os.path.join(self.root(), f)
                 logging.info(f"Delete {f}")
                 os.remove(f)
@@ -173,7 +178,7 @@ class At3Dataset(Dataset):
         kind_path = os.path.join(self.root(), kind.value)
         for fname in os.listdir(kind_path):
             ext = os.path.splitext(fname)[1][1:].upper()
-            if any([ext == kind.extension() for kind in self.file_kinds]):
+            if any([ext == available_kind.extension() for available_kind in self.file_kinds]):
                 logging.info(f"{fname} will be handled thanks to type {ext}")
                 yield os.path.join(kind_path, fname)
             else:

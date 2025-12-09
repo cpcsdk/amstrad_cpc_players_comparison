@@ -1,8 +1,15 @@
 
     org 0x500
+
+		; START Specific code for the profiler ; should not county
+		jp profiler_init
+		jp profiler_run
+		; STOP Specific code for the profiler
+
 PLY_AKM_REMOVE_HOOKS
 PLY_AKM_HARDWARE_CPC = 1
 AKM_File
+		assert $ == 0x506
 		incbin MUSIC_DATA_FNAME
 
 		run $
@@ -52,7 +59,21 @@ WaitVsync
 
  include "PlayerAkm.asm"
 
-
+	; START Specific code for the profiler ; should not count
+profiler_init
+	
+        di
+		ld sp, 0x500 
+        ld hl, AKM_File : xor a
+        call PLY_AKM_Init
+        ei
+	jp 0xffff
+profiler_run
+	di
+	call PLY_AKM_Play		; call method for the player. 
+	ei
+	jp 0xffff
+	; STOP specific code for the profiler
 
     save MUSIC_EXEC_FNAME
 

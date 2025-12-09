@@ -8,16 +8,24 @@
 ;;----------------------------------------------------------------------------------------------------------------------------------------------
 AYT_Player	equ #100		; Address for player created by builder (247 to 317 bytes according AYT file & Player settings) 
 					; + 57 bytes of AY Init routine when there are less than 14 registers in AYT files.
-AYT_Builder	equ #300		; Builder can be deleted once AYT file is initialised and player created.
 ;AYT_File	equ #1000		; Address of AYT file in memory
+MyStack equ AYT_Player
 
-MyProgram	equ #500
+Loading	equ #500
 ;;----------------------------------------------------------------------------------------------------------------------------------------------
 ;;============================================================================================================================================
-		org AYT_Builder
+		org Loading
+		; START Specific code for the profiler ; should not count
+		jp profiler_init
+		jp profiler_run
+		; STOP Specific code for the profiler
+	
+AYT_Builder
+
+		
 		read "AytPlayerBuilder-CPC.asm"
 ;;============================================================================================================================================
-		org MyProgram		; Test program
+MyProgram		
 		run $
         BREAPOINT
 StartExample
@@ -97,14 +105,36 @@ AYT_Player_ReloadSP equ $+1
 		jr MainLoop
 
 ;;============================================================================================================================================
-		ds 20
-MyStack
 ;;**********************************************************************************************************************************************
 ;; FILE AYT 
 ;;**********************************************************************************************************************************************
 AYT_File
 		incbin MUSIC_DATA_FNAME
 
+	; START Specific code for the profiler ; should not count
+profiler_init
+	ld ix,AYT_File		; Ptr on AYT_File
+	ld de,AYT_Player	; Ptr of Adress where Player is built
+	ld a,1			; Nb of loop for the music
+    if PlayerAccessByJP
+		ld hl,profiler_run_return	; Ptr where player come back
+    endif
+	call AYT_Builder	; Build the player
+    if PlayerAccessByJP
+		ld (profiler_run_ReloadSP),sp ; Save current Stack Pointer 
+    endif
+	jp 0xffff
+profiler_run
+    if PlayerAccessByJP
+	jp AYT_Player		; jump to the player
+profiler_run_return
+profiler_run_ReloadSP equ $+1
+	ld sp,0			
+    else
+	call AYT_Player		; call method for the player. 
+    endif
+	jp 0xffff
+	; STOP specific code for the profiler
 
     save MUSIC_EXEC_FNAME
 

@@ -67,7 +67,25 @@ class PlayerFormat(enum.Enum):
 
     def set_extension(self, source):
         return os.path.splitext(source)[0] + "." + self.value
+    
 
+    def profiler_extra_size(self):
+        """return the number of bytes consummed by the extra profiling code"""
+
+        profiler_init_bytes = 3+3 #2 jps
+        return {
+            PlayerFormat.FAP: None,
+            PlayerFormat.AYT: None,
+            PlayerFormat.MINY: None,
+            PlayerFormat.AYC: None,
+            PlayerFormat.AKG: None,
+            PlayerFormat.AKY: None,
+            PlayerFormat.AKM: profiler_init_bytes + (1+3+1+3+1) + (1+3+1+3),
+            PlayerFormat.CHP: profiler_init_bytes + (3) + (1+3+1+3),
+        }[self]
+    
+    def load_address(self):
+        return 0x500
 
 def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat):
     return {
@@ -87,7 +105,7 @@ def build_replay_program(data, player: PlayerFormat):
         PlayerFormat.FAP: (build_replay_program_for_fap, ["buffer_size"]),
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
         PlayerFormat.AKY: (build_replay_program_for_aky, []),
-        PlayerFormat.AKM: (build_replay_program_for_aky, []),
+        PlayerFormat.AKM: (build_replay_program_for_akm, []),
         PlayerFormat.CHP: (build_replay_program_for_chp, []),
     }[player]
 
@@ -128,17 +146,23 @@ def build_replay_program_for_fap(music_data_fname, buffer_size):
     return __build_replay_program__(music_data_fname, extra_cmd, z80)
 
 
+def profile(amsdos_file, profile_address):
+    pass
+
+
 def __build_replay_program__(music_data_fname, extra_cmd, z80):
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
-    amsdos_fname = base + ".BIN"
+    clean_amsdos_fname = base + ".BIN"
     sna_fname = base + ".sna"
 
     if "Windows" in platform.system():
         rep = r"\\\\"
-        amsdos_fname = amsdos_fname.replace("\\", rep)
+        amsdos_fname = clean_amsdos_fname.replace("\\", rep)
         music_data_fname = music_data_fname.replace("\\", rep)
         sna_fname = sna_fname.replace("\\", rep)
+    else:
+        amsdos_fname = clean_amsdos_fname
 
     cmd = (
         f"bndbuild --direct --with_expansion -- basm "
@@ -151,7 +175,7 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
     )
 
     execute_process(cmd)
-    program_size = os.path.getsize(amsdos_fname) - 128 #header has to be removed
+    program_size = os.path.getsize(amsdos_fname) #- 128 #header has to be removed
 
     zx0_fname = amsdos_fname + ".zx0"
     cmd = f'bndbuild --direct -- compress --cruncher zx0 --input \\"{amsdos_fname}\\" --output \\"{zx0_fname}\\"'
@@ -159,7 +183,11 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80):
     program_zx0_size = os.path.getsize(zx0_fname) #no header to remove
     
     
-    return {"program_size": program_size, "program_zx0_size": program_zx0_size}
+    return {
+        "program_name": clean_amsdos_fname,
+        "program_size": program_size, 
+        "program_zx0_size": program_zx0_size
+    }
 
 
 def __crunch_or_compile_music__(src, tgt, cmd):
@@ -167,7 +195,7 @@ def __crunch_or_compile_music__(src, tgt, cmd):
 
     try:
         s = os.path.getsize(tgt)
-    except:
+    except OSError:
         s = -1
     return {
         "original_fname": src,
@@ -219,7 +247,7 @@ def compile_chp(chp_fname: str, _):
 
     try:
         s = os.path.getsize(chpb_fname)
-    except:
+    except OSError:
         s = -1
 
     return {
@@ -255,15 +283,15 @@ def crunch_ym_with_fap(ym_fname: str, fap_fname: str):
 
 
 def compile_aks_with_akg(at_fname, akg_fname):
-    cmd_line = f'bndbuild --direct -- SongToAkg -bin -adr 0x500 \\"{at_fname}\\" \\"{akg_fname}\\" '
+    cmd_line = f'bndbuild --direct -- SongToAkg -bin -adr 0x506 \\"{at_fname}\\" \\"{akg_fname}\\" '
     return __crunch_or_compile_music__(at_fname, akg_fname, cmd_line)
 
 
 def compile_aks_with_aky(at_fname, aky_fname):
-    cmd_line = f'bndbuild --direct -- SongToAky -bin -adr 0x500 \\"{at_fname}\\" \\"{aky_fname}\\" '
+    cmd_line = f'bndbuild --direct -- SongToAky -bin -adr 0x506 \\"{at_fname}\\" \\"{aky_fname}\\" '
     return __crunch_or_compile_music__(at_fname, aky_fname, cmd_line)
 
 
 def compile_aks_with_akm(at_fname, akm_fname):
-    cmd_line = f'bndbuild --direct -- SongToAkm -bin -adr 0x500 \\"{at_fname}\\" \\"{akm_fname}\\" '
+    cmd_line = f'bndbuild --direct -- SongToAkm -bin -adr 0x506 \\"{at_fname}\\" \\"{akm_fname}\\" '
     return __crunch_or_compile_music__(at_fname, akm_fname, cmd_line)

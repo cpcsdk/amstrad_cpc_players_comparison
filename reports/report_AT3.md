@@ -6,88 +6,88 @@ title: AT3
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
 |---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
-|  0 | 2018_EA_demosong                           |   2380 |   4088 |   6088 |   6338 |
-|  1 | 2018_nq_skrju_demosong                     |   3996 |   6212 |   7827 |   8130 |
-|  2 | Andy Severn - Lop Ears                     |   1823 |   4017 |   6590 |   8642 |
-|  3 | Doclands - Buzz-o-Meter (YM)               |   5540 |   9395 |  20081 |   9410 |
-|  4 | Doclands - Pong Cracktro (YM)              |   7451 |  11517 |  19285 |  11970 |
-|  5 | Doclands - Slowly But (YM)                 |   4788 |   8005 |  12007 |   7362 |
-|  6 | Doclands - The Rivals (YM)                 |   5895 |  11671 |  18547 |   9410 |
-|  7 | Doclands - The Saga (YM)                   |   5314 |   9081 |  15515 |   8386 |
-|  8 | Doclands - Tiny Things (YM)                |   4866 |   8917 |  16125 |  10690 |
-|  9 | Doclands - Truly Yours (YM)                |   5955 |  11791 |  16527 |  10434 |
-| 10 | Doclands - Your Credits (YM)               |   3690 |   5755 |   9890 |   8642 |
-| 11 | Excellence in Art 2018 - Just add cream    |   3872 |   8475 |  18577 |  17090 |
-| 12 | FenyxKell - BD10n'nOeuf                    |   2789 |  10173 |  12117 |  10946 |
-| 13 | FenyxKell - Bobline                        |   2487 |   6076 |  10515 |   7874 |
-| 14 | FenyxKell - KellyOn                        |   5147 |  10202 |  13966 |   9922 |
-| 15 | FenyxKell - Smoke                          |   1888 |   2754 |   3687 |   4802 |
-| 16 | FenyxKell - Solarium                       |   2519 |   3578 |   6316 |   6082 |
-| 17 | FenyxKell - Spectrum Castle                |   3944 |  15636 |  25327 |  13250 |
-| 18 | Giherem - Bancaloide                       |   2592 |   5220 |  10524 |   6850 |
-| 19 | Playing with effects                       |   1743 |   6245 |   9580 |   6594 |
-| 20 | PulkoMandy - Renegade Remix                |   4139 |  11412 |  44005 |  16322 |
-| 21 | SoundEffects                               |   1501 |   1605 |   1517 |   4290 |
-| 22 | Targhan - A Harmless Grenade               |   2334 |   4832 |   8871 |   6850 |
-| 23 | Targhan - Crtc                             |   7490 |  19261 |  40287 |  19906 |
-| 24 | Targhan - Crtc - End part                  |   2729 |   8974 |  11366 |   8898 |
-| 25 | Targhan - Dead On Time - Ingame            |   3028 |   6973 |   9428 |   7106 |
-| 26 | Targhan - Dead On Time - Main Menu         |   2673 |   5472 |   8871 |   6594 |
-| 27 | Targhan - Dead On Time - Sound Effects     |   1718 |   1906 |   2990 |   4802 |
-| 28 | Targhan - DemoIzArt - End Part             |   9727 |  29436 |  49918 |  26050 |
-| 29 | Targhan - DemoIzArt - Twist Part           |   7059 |  17345 |  27492 |  16578 |
-| 30 | Targhan - Hocus Pocus                      |   5709 |  16438 |  26206 |  15560 |
-| 31 | Targhan - Midline Process - Carpet         |   8272 |  17982 |  39392 |  20674 |
-| 32 | Targhan - Midline Process - Molusk         |   8453 |  23980 |  47479 |  30402 |
-| 33 | Targhan - Ooops                            |   1685 |   2499 |   4597 |   5314 |
-| 34 | Targhan - Orion Prime - Danger Ahead       |   1581 |   2276 |   2710 |   4546 |
-| 35 | Targhan - Orion Prime - Fight              |   1697 |   2665 |   4409 |   5058 |
-| 36 | Targhan - Orion Prime - Introduction       |   5683 |  22856 |  33282 |  14786 |
-| 37 | Targhan - Orion Prime - Level 1            |   3164 |   8701 |  24782 |  10952 |
-| 38 | Targhan - Orion Prime - Level 4 - Theme 1  |   3042 |   7028 |  26365 |  10946 |
-| 39 | Targhan - Orion Prime - Level 4 - Theme 2  |   3322 |  16233 |  25456 |  14018 |
-| 40 | Targhan - Star Sabre - Boss Theme          |   2124 |   3861 |   5111 |   5570 |
-| 41 | Targhan - Star Sabre - Ingame              |   3668 |   9697 |  16928 |   9922 |
-| 42 | Targhan - Star Sabre - Intermission        |   2516 |   6222 |  10784 |   7874 |
-| 43 | Targhan - Star Sabre - Main Menu           |   3347 |   9537 |  17842 |  10178 |
-| 44 | Targhan - Wunderbar                        |   2102 |   3964 |  10845 |   6850 |
-| 45 | Tom&Jerry - Boules Et Bits (Extended)      |   4112 |   8404 |  19816 |  16066 |
-| 46 | Tom&Jerry - From Scratch - Part 1          |   3095 |   5937 |  10856 |   6338 |
-| 47 | Tom&Jerry - From Scratch - Part 2          |   2486 |   3928 |  10250 |   8642 |
-| 48 | Tom&Jerry - From Scratch - Part 3          |   2845 |   5038 |   7496 |   7618 |
-| 49 | Tom&Jerry - From Scratch - Part 4          |   2827 |   4541 |  10520 |   7362 |
-| 50 | Tom&Jerry - Le Crime Du Parking - End Game |   1900 |   3332 |   5463 |   5570 |
-| 51 | Tom&Jerry - Le Crime Du Parking - Intro    |   2969 |   8745 |  19015 |  13250 |
-| 52 | Tom&Jerry - Sudoku - Menu                  |   1788 |   3070 |   4409 |   5058 |
-| 53 | Tom&Jerry - Sudoku - Notice                |   1613 |   2519 |   4709 |   5058 |
-| 54 | Tom&Jerry - Sudoku - Sundat                |   1808 |   4113 |   4437 |   5058 |
-| 55 | Tom&Jerry - Sudoku - Theme 1               |   4271 |   8928 |  31471 |  20162 |
-| 56 | Tom&Jerry - Sudoku - Theme 2               |   3928 |  11781 |  25230 |  10952 |
-| 57 | Tom&Jerry - Sudoku - Victory               |   1807 |   2992 |   3584 |   5058 |
-| 58 | Totta - BaraBadaBastu                      |   2498 |   4505 |   7304 |   7624 |
-| 59 | Totta - Crawlers                           |   5237 |   9877 |  13622 |   9928 |
-| 60 | Totta - Hardy                              |  10485 |  21289 |  32639 |  18376 |
-| 61 | Totta - Mellow                             |   5326 |  12798 |  21977 |  14530 |
-| 62 | Totta - Rezzy                              |   6795 |  13330 |  19803 |  12226 |
-| 63 | Totta - Room5                              |   3329 |   9190 |   9863 |  10690 |
-| 64 | UltraSyd - Dead Floppy                     |   2507 |   4767 |  14134 |  11970 |
-| 65 | UltraSyd - Fractal                         |   5349 |   8177 |  19171 |  15298 |
-| 66 | UltraSyd - Fuck It                         |   6028 |  11425 |  23873 |  14792 |
-| 67 | UltraSyd - Robot                           |   5545 |  12299 |  28495 |  18370 |
-| 68 | UltraSyd - The End                         |   6526 |  14277 |  30260 |  22722 |
-| 69 | UltraSyd - YM Type                         |   3857 |  12193 |  23759 |  16584 |
-| 70 | Ultrasyd - Morons                          |   7419 |  13703 |  41341 |  20930 |
-| 71 | jinj_med                                   |   1519 |   1985 |   3258 |   5058 |
-| 72 | maryjane2                                  |   2917 |   4882 |   9225 |   7106 |
+|  0 | 2018_EA_demosong                           |   2788 |   4241 |   6196 |   6500 |
+|  1 | 2018_nq_skrju_demosong                     |   4404 |   6365 |   7935 |   8292 |
+|  2 | Andy Severn - Lop Ears                     |   2231 |   4170 |   6698 |   8804 |
+|  3 | Doclands - Buzz-o-Meter (YM)               |   5948 |   9548 |  20189 |   9572 |
+|  4 | Doclands - Pong Cracktro (YM)              |   7859 |  11670 |  19393 |  12132 |
+|  5 | Doclands - Slowly But (YM)                 |   5196 |   8158 |  12115 |   7524 |
+|  6 | Doclands - The Rivals (YM)                 |   6303 |  11824 |  18655 |   9572 |
+|  7 | Doclands - The Saga (YM)                   |   5722 |   9234 |  15623 |   8548 |
+|  8 | Doclands - Tiny Things (YM)                |   5274 |   9070 |  16233 |  10852 |
+|  9 | Doclands - Truly Yours (YM)                |   6363 |  11944 |  16635 |  10596 |
+| 10 | Doclands - Your Credits (YM)               |   4098 |   5908 |   9998 |   8804 |
+| 11 | Excellence in Art 2018 - Just add cream    |   4280 |   8628 |  18685 |  17252 |
+| 12 | FenyxKell - BD10n'nOeuf                    |   3197 |  10326 |  12225 |  11108 |
+| 13 | FenyxKell - Bobline                        |   2895 |   6229 |  10623 |   8036 |
+| 14 | FenyxKell - KellyOn                        |   5555 |  10355 |  14074 |  10084 |
+| 15 | FenyxKell - Smoke                          |   2296 |   2907 |   3795 |   4964 |
+| 16 | FenyxKell - Solarium                       |   2927 |   3731 |   6424 |   6244 |
+| 17 | FenyxKell - Spectrum Castle                |   4352 |  15789 |  25435 |  13412 |
+| 18 | Giherem - Bancaloide                       |   3000 |   5373 |  10632 |   7012 |
+| 19 | Playing with effects                       |   2151 |   6398 |   9688 |   6756 |
+| 20 | PulkoMandy - Renegade Remix                |   4547 |  11565 |  44113 |  16484 |
+| 21 | SoundEffects                               |   1909 |   1758 |   1625 |   4452 |
+| 22 | Targhan - A Harmless Grenade               |   2742 |   4985 |   8979 |   7012 |
+| 23 | Targhan - Crtc                             |   7898 |  19414 |  40395 |  20068 |
+| 24 | Targhan - Crtc - End part                  |   3137 |   9127 |  11474 |   9060 |
+| 25 | Targhan - Dead On Time - Ingame            |   3436 |   7126 |   9536 |   7268 |
+| 26 | Targhan - Dead On Time - Main Menu         |   3081 |   5625 |   8979 |   6756 |
+| 27 | Targhan - Dead On Time - Sound Effects     |   2126 |   2059 |   3098 |   4964 |
+| 28 | Targhan - DemoIzArt - End Part             |  10135 |  29589 |  50026 |  26212 |
+| 29 | Targhan - DemoIzArt - Twist Part           |   7467 |  17498 |  27600 |  16740 |
+| 30 | Targhan - Hocus Pocus                      |   6117 |  16591 |  26314 |  15722 |
+| 31 | Targhan - Midline Process - Carpet         |   8680 |  18135 |  39500 |  20836 |
+| 32 | Targhan - Midline Process - Molusk         |   8861 |  24133 |  47587 |  30564 |
+| 33 | Targhan - Ooops                            |   2093 |   2652 |   4705 |   5476 |
+| 34 | Targhan - Orion Prime - Danger Ahead       |   1989 |   2429 |   2818 |   4708 |
+| 35 | Targhan - Orion Prime - Fight              |   2105 |   2818 |   4517 |   5220 |
+| 36 | Targhan - Orion Prime - Introduction       |   6091 |  23009 |  33390 |  14948 |
+| 37 | Targhan - Orion Prime - Level 1            |   3572 |   8854 |  24890 |  11114 |
+| 38 | Targhan - Orion Prime - Level 4 - Theme 1  |   3450 |   7181 |  26473 |  11108 |
+| 39 | Targhan - Orion Prime - Level 4 - Theme 2  |   3730 |  16386 |  25564 |  14180 |
+| 40 | Targhan - Star Sabre - Boss Theme          |   2532 |   4014 |   5219 |   5732 |
+| 41 | Targhan - Star Sabre - Ingame              |   4076 |   9850 |  17036 |  10084 |
+| 42 | Targhan - Star Sabre - Intermission        |   2924 |   6375 |  10892 |   8036 |
+| 43 | Targhan - Star Sabre - Main Menu           |   3755 |   9690 |  17950 |  10340 |
+| 44 | Targhan - Wunderbar                        |   2510 |   4117 |  10953 |   7012 |
+| 45 | Tom&Jerry - Boules Et Bits (Extended)      |   4520 |   8557 |  19924 |  16228 |
+| 46 | Tom&Jerry - From Scratch - Part 1          |   3503 |   6090 |  10964 |   6500 |
+| 47 | Tom&Jerry - From Scratch - Part 2          |   2894 |   4081 |  10358 |   8804 |
+| 48 | Tom&Jerry - From Scratch - Part 3          |   3253 |   5191 |   7604 |   7780 |
+| 49 | Tom&Jerry - From Scratch - Part 4          |   3235 |   4694 |  10628 |   7524 |
+| 50 | Tom&Jerry - Le Crime Du Parking - End Game |   2308 |   3485 |   5571 |   5732 |
+| 51 | Tom&Jerry - Le Crime Du Parking - Intro    |   3377 |   8898 |  19123 |  13412 |
+| 52 | Tom&Jerry - Sudoku - Menu                  |   2196 |   3223 |   4517 |   5476 |
+| 53 | Tom&Jerry - Sudoku - Notice                |   2021 |   2672 |   4817 |   5220 |
+| 54 | Tom&Jerry - Sudoku - Sundat                |   2216 |   4266 |   4545 |   5220 |
+| 55 | Tom&Jerry - Sudoku - Theme 1               |   4679 |   9081 |  31579 |  20324 |
+| 56 | Tom&Jerry - Sudoku - Theme 2               |   4336 |  11934 |  25338 |  11114 |
+| 57 | Tom&Jerry - Sudoku - Victory               |   2215 |   3145 |   3692 |   5220 |
+| 58 | Totta - BaraBadaBastu                      |   2906 |   4658 |   7412 |   8042 |
+| 59 | Totta - Crawlers                           |   5645 |  10030 |  13730 |  10090 |
+| 60 | Totta - Hardy                              |  10893 |  21442 |  32747 |  18538 |
+| 61 | Totta - Mellow                             |   5734 |  12951 |  22085 |  14692 |
+| 62 | Totta - Rezzy                              |   7203 |  13483 |  19911 |  12388 |
+| 63 | Totta - Room5                              |   3737 |   9343 |   9971 |  10852 |
+| 64 | UltraSyd - Dead Floppy                     |   2915 |   4920 |  14242 |  12132 |
+| 65 | UltraSyd - Fractal                         |   5757 |   8330 |  19279 |  15460 |
+| 66 | UltraSyd - Fuck It                         |   6436 |  11578 |  23981 |  14954 |
+| 67 | UltraSyd - Robot                           |   5953 |  12452 |  28603 |  18532 |
+| 68 | UltraSyd - The End                         |   6934 |  14430 |  30368 |  22884 |
+| 69 | UltraSyd - YM Type                         |   4265 |  12346 |  23867 |  16746 |
+| 70 | Ultrasyd - Morons                          |   7827 |  13856 |  41449 |  21348 |
+| 71 | jinj_med                                   |   1927 |   2138 |   3366 |   5220 |
+| 72 | maryjane2                                  |   3325 |   5035 |   9333 |   7268 |
 
 Mean
 
 | format   |        0 |
 |:---------|---------:|
-| .akm     |  3948.33 |
-| .aky     |  8876.55 |
-| .ayt     | 16657.6  |
-| .fap     | 10894.1  |
+| .akm     |  4356.33 |
+| .aky     |  9029.55 |
+| .ayt     | 16765.6  |
+| .fap     | 11066.6  |
 
  - .akm vs .fap: dissimilar (best=.akm)
  - .akm vs .aky: dissimilar (best=.akm)
@@ -108,88 +108,88 @@ Mean
 
 |    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
 |---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
-|  0 | 2018_EA_demosong                           |   1407 |   2101 |   1620 |   2023 |
-|  1 | 2018_nq_skrju_demosong                     |   1712 |   2690 |   3138 |   3344 |
-|  2 | Andy Severn - Lop Ears                     |   1049 |   2316 |   1588 |   1950 |
-|  3 | Doclands - Buzz-o-Meter (YM)               |   2389 |   3995 |   4428 |   3943 |
-|  4 | Doclands - Pong Cracktro (YM)              |   2911 |   4897 |   4979 |   5292 |
-|  5 | Doclands - Slowly But (YM)                 |   2116 |   3193 |   2349 |   2722 |
-|  6 | Doclands - The Rivals (YM)                 |   2669 |   4462 |   4934 |   4164 |
-|  7 | Doclands - The Saga (YM)                   |   2424 |   3817 |   3076 |   3731 |
-|  8 | Doclands - Tiny Things (YM)                |   2005 |   3628 |   3634 |   4276 |
-|  9 | Doclands - Truly Yours (YM)                |   2425 |   5145 |   3962 |   4574 |
-| 10 | Doclands - Your Credits (YM)               |   1605 |   2242 |   2192 |   3258 |
-| 11 | Excellence in Art 2018 - Just add cream    |   1821 |   4552 |   5082 |   5380 |
-| 12 | FenyxKell - BD10n'nOeuf                    |   1579 |   5503 |   3779 |   3505 |
-| 13 | FenyxKell - Bobline                        |   1493 |   3545 |   3071 |   3291 |
-| 14 | FenyxKell - KellyOn                        |   2706 |   6140 |   5593 |   5356 |
-| 15 | FenyxKell - Smoke                          |   1073 |   1671 |   1313 |   1529 |
-| 16 | FenyxKell - Solarium                       |   1387 |   1908 |   1790 |   1848 |
-| 17 | FenyxKell - Spectrum Castle                |   2282 |   8896 |   9786 |   7649 |
-| 18 | Giherem - Bancaloide                       |   1332 |   2386 |   3820 |   2328 |
-| 19 | Playing with effects                       |   1083 |   3292 |   2863 |   2539 |
-| 20 | PulkoMandy - Renegade Remix                |   2509 |   5145 |   8094 |   5689 |
-| 21 | SoundEffects                               |    857 |    909 |    818 |   1080 |
-| 22 | Targhan - A Harmless Grenade               |   1473 |   2964 |   2877 |   3064 |
-| 23 | Targhan - Crtc                             |   4283 |  10080 |  14546 |  10816 |
-| 24 | Targhan - Crtc - End part                  |   1542 |   3977 |   3441 |   3640 |
-| 25 | Targhan - Dead On Time - Ingame            |   1827 |   3267 |   3358 |   3163 |
-| 26 | Targhan - Dead On Time - Main Menu         |   1640 |   2833 |   2583 |   2700 |
-| 27 | Targhan - Dead On Time - Sound Effects     |   1015 |   1088 |   1349 |   1378 |
-| 28 | Targhan - DemoIzArt - End Part             |   5049 |  15960 |  13808 |  12777 |
-| 29 | Targhan - DemoIzArt - Twist Part           |   3552 |   8024 |   8753 |   8927 |
-| 30 | Targhan - Hocus Pocus                      |   3294 |   9201 |   9892 |   9368 |
-| 31 | Targhan - Midline Process - Carpet         |   4134 |   9315 |  11542 |  10860 |
-| 32 | Targhan - Midline Process - Molusk         |   5050 |  13153 |  15083 |  16081 |
-| 33 | Targhan - Ooops                            |   1019 |   1376 |   1391 |   1765 |
-| 34 | Targhan - Orion Prime - Danger Ahead       |    897 |   1076 |    901 |   1062 |
-| 35 | Targhan - Orion Prime - Fight              |    994 |   1451 |   2292 |   1621 |
-| 36 | Targhan - Orion Prime - Introduction       |   3565 |  11816 |  10553 |   8334 |
-| 37 | Targhan - Orion Prime - Level 1            |   1938 |   4362 |   6242 |   4523 |
-| 38 | Targhan - Orion Prime - Level 4 - Theme 1  |   1869 |   3012 |   3875 |   3775 |
-| 39 | Targhan - Orion Prime - Level 4 - Theme 2  |   1773 |   8674 |   7195 |   5423 |
-| 40 | Targhan - Star Sabre - Boss Theme          |   1357 |   2117 |   2194 |   2223 |
-| 41 | Targhan - Star Sabre - Ingame              |   2306 |   4924 |   6535 |   5099 |
-| 42 | Targhan - Star Sabre - Intermission        |   1447 |   3200 |   4384 |   3226 |
-| 43 | Targhan - Star Sabre - Main Menu           |   1976 |   4688 |   5398 |   4872 |
-| 44 | Targhan - Wunderbar                        |   1342 |   2170 |   2987 |   2737 |
-| 45 | Tom&Jerry - Boules Et Bits (Extended)      |   2198 |   3987 |   5497 |   4954 |
-| 46 | Tom&Jerry - From Scratch - Part 1          |   1424 |   2919 |   3613 |   2524 |
-| 47 | Tom&Jerry - From Scratch - Part 2          |   1452 |   1978 |   2294 |   2625 |
-| 48 | Tom&Jerry - From Scratch - Part 3          |   1377 |   2539 |   2264 |   2420 |
-| 49 | Tom&Jerry - From Scratch - Part 4          |   1465 |   2110 |   3019 |   3003 |
-| 50 | Tom&Jerry - Le Crime Du Parking - End Game |   1097 |   1512 |   1618 |   1580 |
-| 51 | Tom&Jerry - Le Crime Du Parking - Intro    |   1790 |   4499 |   5225 |   4778 |
-| 52 | Tom&Jerry - Sudoku - Menu                  |   1017 |   1534 |   1314 |   1373 |
-| 53 | Tom&Jerry - Sudoku - Notice                |    950 |   1327 |   1340 |   1359 |
-| 54 | Tom&Jerry - Sudoku - Sundat                |   1066 |   1848 |   1382 |   1260 |
-| 55 | Tom&Jerry - Sudoku - Theme 1               |   2463 |   4255 |   6188 |   6421 |
-| 56 | Tom&Jerry - Sudoku - Theme 2               |   2258 |   5791 |   5900 |   4899 |
-| 57 | Tom&Jerry - Sudoku - Victory               |   1003 |   1359 |   1064 |   1274 |
-| 58 | Totta - BaraBadaBastu                      |   1429 |   2301 |   2243 |   3036 |
-| 59 | Totta - Crawlers                           |   2206 |   4679 |   4147 |   4515 |
-| 60 | Totta - Hardy                              |   4308 |  10009 |  10888 |  10681 |
-| 61 | Totta - Mellow                             |   2906 |   5251 |   5420 |   6069 |
-| 62 | Totta - Rezzy                              |   2739 |   6634 |   5881 |   5903 |
-| 63 | Totta - Room5                              |   1892 |   5114 |   3219 |   4749 |
-| 64 | UltraSyd - Dead Floppy                     |   1379 |   2160 |   2863 |   3124 |
-| 65 | UltraSyd - Fractal                         |   1947 |   3252 |   4153 |   4768 |
-| 66 | UltraSyd - Fuck It                         |   2369 |   4350 |   5467 |   5527 |
-| 67 | UltraSyd - Robot                           |   2559 |   6212 |   7049 |   6898 |
-| 68 | UltraSyd - The End                         |   2365 |   5522 |   7257 |   7421 |
-| 69 | UltraSyd - YM Type                         |   1759 |   5392 |   5832 |   5779 |
-| 70 | Ultrasyd - Morons                          |   2718 |   4657 |   8571 |   6168 |
-| 71 | jinj_med                                   |    896 |   1014 |   1005 |   1456 |
-| 72 | maryjane2                                  |   1530 |   1850 |   2334 |   2928 |
+|  0 | 2018_EA_demosong                           |   1901 |   2115 |   1636 |   2049 |
+|  1 | 2018_nq_skrju_demosong                     |   2211 |   2707 |   3155 |   3371 |
+|  2 | Andy Severn - Lop Ears                     |   1549 |   2330 |   1604 |   1977 |
+|  3 | Doclands - Buzz-o-Meter (YM)               |   2883 |   4010 |   4446 |   3970 |
+|  4 | Doclands - Pong Cracktro (YM)              |   3412 |   4919 |   4995 |   5318 |
+|  5 | Doclands - Slowly But (YM)                 |   2612 |   3216 |   2365 |   2748 |
+|  6 | Doclands - The Rivals (YM)                 |   3170 |   4488 |   4951 |   4191 |
+|  7 | Doclands - The Saga (YM)                   |   2924 |   3830 |   3092 |   3758 |
+|  8 | Doclands - Tiny Things (YM)                |   2510 |   3639 |   3649 |   4302 |
+|  9 | Doclands - Truly Yours (YM)                |   2921 |   5163 |   3978 |   4601 |
+| 10 | Doclands - Your Credits (YM)               |   2103 |   2253 |   2209 |   3285 |
+| 11 | Excellence in Art 2018 - Just add cream    |   2326 |   4563 |   5099 |   5407 |
+| 12 | FenyxKell - BD10n'nOeuf                    |   2077 |   5519 |   3796 |   3532 |
+| 13 | FenyxKell - Bobline                        |   1993 |   3562 |   3087 |   3317 |
+| 14 | FenyxKell - KellyOn                        |   3209 |   6151 |   5610 |   5383 |
+| 15 | FenyxKell - Smoke                          |   1566 |   1686 |   1329 |   1555 |
+| 16 | FenyxKell - Solarium                       |   1889 |   1921 |   1807 |   1875 |
+| 17 | FenyxKell - Spectrum Castle                |   2778 |   8911 |   9805 |   7676 |
+| 18 | Giherem - Bancaloide                       |   1835 |   2404 |   3838 |   2355 |
+| 19 | Playing with effects                       |   1583 |   3308 |   2880 |   2565 |
+| 20 | PulkoMandy - Renegade Remix                |   3007 |   5158 |   8123 |   5716 |
+| 21 | SoundEffects                               |   1357 |    924 |    832 |   1106 |
+| 22 | Targhan - A Harmless Grenade               |   1971 |   2981 |   2894 |   3091 |
+| 23 | Targhan - Crtc                             |   4782 |  10096 |  14575 |  10843 |
+| 24 | Targhan - Crtc - End part                  |   2037 |   3992 |   3458 |   3667 |
+| 25 | Targhan - Dead On Time - Ingame            |   2325 |   3281 |   3374 |   3189 |
+| 26 | Targhan - Dead On Time - Main Menu         |   2137 |   2849 |   2600 |   2726 |
+| 27 | Targhan - Dead On Time - Sound Effects     |   1513 |   1104 |   1365 |   1404 |
+| 28 | Targhan - DemoIzArt - End Part             |   5554 |  15982 |  13836 |  12804 |
+| 29 | Targhan - DemoIzArt - Twist Part           |   4052 |   8047 |   8770 |   8955 |
+| 30 | Targhan - Hocus Pocus                      |   3790 |   9222 |   9910 |   9395 |
+| 31 | Targhan - Midline Process - Carpet         |   4627 |   9325 |  11571 |  10888 |
+| 32 | Targhan - Midline Process - Molusk         |   5554 |  13170 |  15112 |  16109 |
+| 33 | Targhan - Ooops                            |   1517 |   1387 |   1407 |   1792 |
+| 34 | Targhan - Orion Prime - Danger Ahead       |   1399 |   1093 |    917 |   1089 |
+| 35 | Targhan - Orion Prime - Fight              |   1496 |   1466 |   2309 |   1647 |
+| 36 | Targhan - Orion Prime - Introduction       |   4068 |  11831 |  10582 |   8360 |
+| 37 | Targhan - Orion Prime - Level 1            |   2436 |   4376 |   6259 |   4550 |
+| 38 | Targhan - Orion Prime - Level 4 - Theme 1  |   2367 |   3029 |   3893 |   3802 |
+| 39 | Targhan - Orion Prime - Level 4 - Theme 2  |   2275 |   8680 |   7212 |   5449 |
+| 40 | Targhan - Star Sabre - Boss Theme          |   1852 |   2133 |   2210 |   2249 |
+| 41 | Targhan - Star Sabre - Ingame              |   2804 |   4935 |   6552 |   5126 |
+| 42 | Targhan - Star Sabre - Intermission        |   1946 |   3218 |   4401 |   3253 |
+| 43 | Targhan - Star Sabre - Main Menu           |   2481 |   4704 |   5415 |   4899 |
+| 44 | Targhan - Wunderbar                        |   1845 |   2188 |   3004 |   2763 |
+| 45 | Tom&Jerry - Boules Et Bits (Extended)      |   2700 |   4008 |   5514 |   4981 |
+| 46 | Tom&Jerry - From Scratch - Part 1          |   1925 |   2928 |   3630 |   2551 |
+| 47 | Tom&Jerry - From Scratch - Part 2          |   1950 |   1993 |   2311 |   2652 |
+| 48 | Tom&Jerry - From Scratch - Part 3          |   1875 |   2551 |   2280 |   2446 |
+| 49 | Tom&Jerry - From Scratch - Part 4          |   1968 |   2121 |   3036 |   3029 |
+| 50 | Tom&Jerry - Le Crime Du Parking - End Game |   1594 |   1528 |   1635 |   1606 |
+| 51 | Tom&Jerry - Le Crime Du Parking - Intro    |   2287 |   4506 |   5243 |   4805 |
+| 52 | Tom&Jerry - Sudoku - Menu                  |   1519 |   1551 |   1330 |   1399 |
+| 53 | Tom&Jerry - Sudoku - Notice                |   1447 |   1345 |   1357 |   1386 |
+| 54 | Tom&Jerry - Sudoku - Sundat                |   1568 |   1866 |   1398 |   1286 |
+| 55 | Tom&Jerry - Sudoku - Theme 1               |   2958 |   4267 |   6206 |   6448 |
+| 56 | Tom&Jerry - Sudoku - Theme 2               |   2756 |   5804 |   5917 |   4924 |
+| 57 | Tom&Jerry - Sudoku - Victory               |   1502 |   1375 |   1079 |   1300 |
+| 58 | Totta - BaraBadaBastu                      |   1928 |   2317 |   2260 |   3063 |
+| 59 | Totta - Crawlers                           |   2704 |   4698 |   4164 |   4542 |
+| 60 | Totta - Hardy                              |   4809 |  10020 |  10906 |  10709 |
+| 61 | Totta - Mellow                             |   3405 |   5269 |   5437 |   6096 |
+| 62 | Totta - Rezzy                              |   3234 |   6650 |   5898 |   5930 |
+| 63 | Totta - Room5                              |   2395 |   5128 |   3237 |   4776 |
+| 64 | UltraSyd - Dead Floppy                     |   1877 |   2177 |   2880 |   3151 |
+| 65 | UltraSyd - Fractal                         |   2449 |   3270 |   4171 |   4795 |
+| 66 | UltraSyd - Fuck It                         |   2865 |   4369 |   5485 |   5554 |
+| 67 | UltraSyd - Robot                           |   3056 |   6228 |   7067 |   6925 |
+| 68 | UltraSyd - The End                         |   2862 |   5542 |   7274 |   7448 |
+| 69 | UltraSyd - YM Type                         |   2263 |   5407 |   5848 |   5806 |
+| 70 | Ultrasyd - Morons                          |   3221 |   4670 |   8600 |   6196 |
+| 71 | jinj_med                                   |   1399 |   1031 |   1021 |   1482 |
+| 72 | maryjane2                                  |   2025 |   1869 |   2350 |   2953 |
 
 Mean
 
 | format   |       0 |
 |:---------|--------:|
-| .akm     | 2010.11 |
-| .aky     | 4318.03 |
-| .ayt     | 4659.38 |
-| .fap     | 4443.79 |
+| .akm     | 2509.38 |
+| .aky     | 4333.62 |
+| .ayt     | 4677.34 |
+| .fap     | 4470.49 |
 
  - .akm vs .fap: dissimilar (best=.akm)
  - .akm vs .aky: dissimilar (best=.akm)
@@ -206,3 +206,105 @@ Mean
 
 
 ![Swarmplot](zx0_prog_size_swarmlot_AT3.png)
+# Maximum execution time (in nops)
+
+|    | sources                                    |   .akm |   .aky |   .ayt |   .fap |
+|---:|:-------------------------------------------|-------:|-------:|-------:|-------:|
+|  0 | 2018_EA_demosong                           |   3045 |   1181 |    392 |    631 |
+|  1 | 2018_nq_skrju_demosong                     |   2776 |   1181 |    392 |    631 |
+|  2 | Andy Severn - Lop Ears                     |   3299 |   1181 |    422 |    607 |
+|  3 | Doclands - Buzz-o-Meter (YM)               |   2658 |   1181 |    453 |    631 |
+|  4 | Doclands - Pong Cracktro (YM)              |   2750 |   1181 |    423 |    655 |
+|  5 | Doclands - Slowly But (YM)                 |   2725 |   1181 |    392 |    607 |
+|  6 | Doclands - The Rivals (YM)                 |   2731 |   1181 |    453 |    655 |
+|  7 | Doclands - The Saga (YM)                   |   2614 |   1181 |    453 |    607 |
+|  8 | Doclands - Tiny Things (YM)                |   2708 |   1181 |    423 |    655 |
+|  9 | Doclands - Truly Yours (YM)                |   2712 |   1181 |    453 |    655 |
+| 10 | Doclands - Your Credits (YM)               |   2499 |   1181 |    453 |    655 |
+| 11 | Excellence in Art 2018 - Just add cream    |   2799 |   1181 |    453 |    655 |
+| 12 | FenyxKell - BD10n'nOeuf                    |   2492 |   1181 |    422 |    607 |
+| 13 | FenyxKell - Bobline                        |   2388 |   1181 |    423 |    655 |
+| 14 | FenyxKell - KellyOn                        |   2498 |   1181 |    453 |    655 |
+| 15 | FenyxKell - Smoke                          |   2476 |   1181 |    362 |    607 |
+| 16 | FenyxKell - Solarium                       |   2533 |   1181 |    453 |    655 |
+| 17 | FenyxKell - Spectrum Castle                |   2552 |   1181 |    453 |    655 |
+| 18 | Giherem - Bancaloide                       |   2315 |   1181 |    453 |    655 |
+| 19 | Playing with effects                       |   2169 |   1181 |    331 |    607 |
+| 20 | PulkoMandy - Renegade Remix                |   2371 |   1181 |    453 |    655 |
+| 21 | SoundEffects                               |   1890 |   1181 |    269 |    607 |
+| 22 | Targhan - A Harmless Grenade               |   2779 |   1181 |    453 |    655 |
+| 23 | Targhan - Crtc                             |   2830 |   1181 |    453 |    655 |
+| 24 | Targhan - Crtc - End part                  |   2731 |   1181 |    453 |    655 |
+| 25 | Targhan - Dead On Time - Ingame            |   2209 |   1181 |    301 |    607 |
+| 26 | Targhan - Dead On Time - Main Menu         |   2876 |   1181 |    422 |    631 |
+| 27 | Targhan - Dead On Time - Sound Effects     |   1911 |   1181 |    269 |    607 |
+| 28 | Targhan - DemoIzArt - End Part             |   2557 |   1181 |    423 |    631 |
+| 29 | Targhan - DemoIzArt - Twist Part           |   2539 |   1181 |    453 |    655 |
+| 30 | Targhan - Hocus Pocus                      |   2809 |   1181 |    453 |    723 |
+| 31 | Targhan - Midline Process - Carpet         |   2568 |   1181 |    453 |    655 |
+| 32 | Targhan - Midline Process - Molusk         |   2604 |   1181 |    453 |    631 |
+| 33 | Targhan - Ooops                            |   2402 |   1181 |    453 |    655 |
+| 34 | Targhan - Orion Prime - Danger Ahead       |   2504 |   1181 |    392 |    607 |
+| 35 | Targhan - Orion Prime - Fight              |   2921 |   1181 |    453 |    655 |
+| 36 | Targhan - Orion Prime - Introduction       |   2552 |   1181 |    453 |    655 |
+| 37 | Targhan - Orion Prime - Level 1            |   2291 |   1181 |    423 |    723 |
+| 38 | Targhan - Orion Prime - Level 4 - Theme 1  |   2443 |   1181 |    453 |    655 |
+| 39 | Targhan - Orion Prime - Level 4 - Theme 2  |   2382 |   1181 |    423 |    607 |
+| 40 | Targhan - Star Sabre - Boss Theme          |   2739 |   1181 |    453 |    655 |
+| 41 | Targhan - Star Sabre - Ingame              |   2422 |   1181 |    453 |   3679 |
+| 42 | Targhan - Star Sabre - Intermission        |   2559 |   1181 |    453 |    655 |
+| 43 | Targhan - Star Sabre - Main Menu           |   2522 |   1181 |    453 |    655 |
+| 44 | Targhan - Wunderbar                        |   2410 |   1181 |    453 |    655 |
+| 45 | Tom&Jerry - Boules Et Bits (Extended)      |   2534 |   1181 |    453 |    655 |
+| 46 | Tom&Jerry - From Scratch - Part 1          |   2499 |   1181 |    453 |    607 |
+| 47 | Tom&Jerry - From Scratch - Part 2          |   2363 |   1181 |    423 |    655 |
+| 48 | Tom&Jerry - From Scratch - Part 3          |   2259 |   1181 |    453 |    655 |
+| 49 | Tom&Jerry - From Scratch - Part 4          |   2272 |   1181 |    453 |    655 |
+| 50 | Tom&Jerry - Le Crime Du Parking - End Game |   2346 |   1181 |    331 |    607 |
+| 51 | Tom&Jerry - Le Crime Du Parking - Intro    |   2441 |   1181 |    453 |    655 |
+| 52 | Tom&Jerry - Sudoku - Menu                  |   2331 |   1181 |    332 |    607 |
+| 53 | Tom&Jerry - Sudoku - Notice                |   2322 |   1181 |    361 |    607 |
+| 54 | Tom&Jerry - Sudoku - Sundat                |   2271 |   1181 |    332 |    607 |
+| 55 | Tom&Jerry - Sudoku - Theme 1               |   2294 |   1181 |    453 |    655 |
+| 56 | Tom&Jerry - Sudoku - Theme 2               |   2387 |   1181 |    453 |    675 |
+| 57 | Tom&Jerry - Sudoku - Victory               |   2324 |   1181 |    332 |    607 |
+| 58 | Totta - BaraBadaBastu                      |   2496 |   1181 |    423 |    723 |
+| 59 | Totta - Crawlers                           |   2450 |   1181 |    453 |    723 |
+| 60 | Totta - Hardy                              |   2798 |   1181 |    453 |    699 |
+| 61 | Totta - Mellow                             |   2407 |   1181 |    392 |    607 |
+| 62 | Totta - Rezzy                              |   2706 |   1181 |    453 |    655 |
+| 63 | Totta - Room5                              |   2452 |   1181 |    299 |    607 |
+| 64 | UltraSyd - Dead Floppy                     |   2120 |   1181 |    453 |    655 |
+| 65 | UltraSyd - Fractal                         |   2335 |   1181 |    453 |    631 |
+| 66 | UltraSyd - Fuck It                         |   2244 |   1181 |    453 |    723 |
+| 67 | UltraSyd - Robot                           |   2461 |   1181 |    453 |    655 |
+| 68 | UltraSyd - The End                         |   2414 |   1181 |    453 |    655 |
+| 69 | UltraSyd - YM Type                         |   2292 |   1181 |    453 |    723 |
+| 70 | Ultrasyd - Morons                          |   2169 |   1181 |    453 |    655 |
+| 71 | jinj_med                                   |   2197 |   1181 |    361 |    607 |
+| 72 | maryjane2                                  |   2309 |   1181 |    392 |    607 |
+
+Mean
+
+| format   |        0 |
+|:---------|---------:|
+| .akm     | 2493.88  |
+| .aky     | 1181     |
+| .ayt     |  422.11  |
+| .fap     |  686.781 |
+
+ - .akm vs .fap: dissimilar (best=.fap)
+ - .akm vs .aky: dissimilar (best=.aky)
+ - .akm vs .ayt: dissimilar (best=.ayt)
+ - .fap vs .aky: dissimilar (best=.fap)
+ - .fap vs .ayt: dissimilar (best=.ayt)
+ - .aky vs .ayt: dissimilar (best=.ayt)
+
+
+![Parallal coordinates](max_execution_time_parallal_coordinates_AT3.png)
+
+
+![Boxplot](max_execution_time_boxplot_AT3.png)
+
+
+![Swarmplot](max_execution_time_swarmlot_AT3.png)

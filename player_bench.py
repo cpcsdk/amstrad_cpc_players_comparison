@@ -17,6 +17,8 @@ import sys
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     parser = argparse.ArgumentParser(
         prog=sys.argv[0], description="Benchmark launcher for Amstrad CPC players"
     )
@@ -26,7 +28,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("--clean", action="store_true")
 
-    logging.basicConfig(level=logging.INFO)
 
     args = parser.parse_args()
 

@@ -1,5 +1,10 @@
 
     org 0x500
+		; START Specific code for the profiler ; should not county
+		jp profiler_init
+		jp profiler_run
+		; STOP Specific code for the profiler
+
 
 CHIPNSFX_FLAG=4+256
 
@@ -80,10 +85,18 @@ song_header:
     DEFW song_b-$-2
     DEFW song_c-$-2
 
-
+	; START Specific code for the profiler ; should not count
+profiler_init
+	; Nothing to do here
+	jp 0xffff
+profiler_run
+	di
+	call chip_play
+	ei
+	jp 0xffff
+	; STOP specific code for the profiler
 
 
     save MUSIC_EXEC_FNAME
-
 		
 
