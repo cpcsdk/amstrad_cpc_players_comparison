@@ -825,13 +825,13 @@ Mean
  - .chp vs .akm: dissimilar (best=.chp)
 
 
-![Parallal coordinates](prog_size_parallal_coordinates_CHP.png)
+![Parallel coordinates](prog_size_parallel_coordinates_CHP.png)
 
 
 ![Boxplot](prog_size_boxplot_CHP.png)
 
 
-![Swarmplot](prog_size_swarmlot_CHP.png)
+![Swarmplot](prog_size_swarmplot_CHP.png)
 # Crunch (zx0) program size (without decrunch routine and data reloction)
 
 |     | sources   |   .akm |   .chp |
@@ -1655,13 +1655,13 @@ Mean
  - .chp vs .akm: dissimilar (best=.chp)
 
 
-![Parallal coordinates](zx0_prog_size_parallal_coordinates_CHP.png)
+![Parallel coordinates](zx0_prog_size_parallel_coordinates_CHP.png)
 
 
 ![Boxplot](zx0_prog_size_boxplot_CHP.png)
 
 
-![Swarmplot](zx0_prog_size_swarmlot_CHP.png)
+![Swarmplot](zx0_prog_size_swarmplot_CHP.png)
 # Maximum execution time (in nops)
 
 |     | sources   |   .akm |   .chp |
@@ -2485,10 +2485,35 @@ Mean
  - .chp vs .akm: similar
 
 
-![Parallal coordinates](max_execution_time_parallal_coordinates_CHP.png)
+![Parallel coordinates](max_execution_time_parallel_coordinates_CHP.png)
 
 
 ![Boxplot](max_execution_time_boxplot_CHP.png)
 
 
-![Swarmplot](max_execution_time_swarmlot_CHP.png)
+![Swarmplot](max_execution_time_swarmplot_CHP.png)
+
+
+# Spider Charts by Player Format
+
+
+
+![Spider Charts by Format](spider_charts_CHP.png)
+
+Note: In spider charts, values closer to the center (0.0) indicate better performance (lower size/time).
+
+
+# Program Size vs Maximum Execution Time
+
+
+
+![Scatter Plot](scatter_prog_size_vs_exec_time_CHP.png)
+
+
+# Player Formats Comparison (Median Values)
+
+
+
+![Scatter Plot - Median Values](scatter_median_prog_size_vs_exec_time_CHP.png)
+
+Note: Ellipses show ±1 standard deviation around median values. The dashed line represents the Pareto front (non-dominated players).
