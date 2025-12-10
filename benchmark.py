@@ -25,7 +25,7 @@ from players import *
 from profile import *
 
 class Benchmark:
-    def __init__(self, name, dataset: Dataset, players: None):
+    def __init__(self, name: str, dataset: Dataset, players: list | None = None) -> None:
         if players is None:
             players = [PlayerFormat.FAP, PlayerFormat.AYT]
 
@@ -33,17 +33,17 @@ class Benchmark:
         self.players = players
         self.name = name
 
-    def clean(self):
+    def clean(self) -> None:
         self.dataset.clean()
 
-    def root(self):
+    def root(self) -> str:
         return self.dataset.root()
 
-    def execute(self):
+    def execute(self) -> None:
         self.build_files()  # deactivated temporarily
         self.analyse_files()
 
-    def analyse_files(self):
+    def analyse_files(self) -> None:
         with open(f"reports/report_{self.name}.md", "w") as report:
             sizes = []
             zx0sizes = []
@@ -84,7 +84,7 @@ class Benchmark:
 
                 report.write(f"# {title[comparison_key]}\n\n")
 
-                summary = df.pivot(index="sources", columns=["format"])[comparison_key]
+                summary: pd.DataFrame = df.pivot(index="sources", columns=["format"])[comparison_key]
                 summary = summary.reset_index()
                 summary.to_markdown(report)
                 report.write("\n\n")
@@ -154,12 +154,12 @@ class Benchmark:
                     logging.error(f"Failed to save {swarmplot_png}: {e}")
                 plt.close(fig)
 
-    def build_files(self):
-        def handle_input(input):
+    def build_files(self) -> None:
+        def handle_input(input: str) -> list:
             logging.info(f'Handle "{input}" data generation')
             return [handle_input_with_player(input, player) for player in self.players]
 
-        def handle_input_with_player(input, out_player: PlayerFormat):
+        def handle_input_with_player(input: str, out_player: PlayerFormat) -> dict:
             logging.info(f"Generate data for {out_player}")
             input_fmt: MusicFormat = MusicFormat.get_format(input)
 
@@ -193,13 +193,13 @@ class Benchmark:
                 res = json.load(open(json_fname))
 
             #handle the zx0 file
-
+            return res
 
         return Parallel(n_jobs=1, verbose=3)(
             delayed(handle_input)(input) for input in self.dataset
         )
 
-    def iter_json(self):
+    def iter_json(self) -> list:
         return self.dataset.iter_json()
 
 

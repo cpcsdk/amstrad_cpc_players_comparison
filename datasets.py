@@ -16,6 +16,7 @@ import os
 import subprocess
 import logging
 import glob
+from abc import ABC, abstractmethod
 from utils import execute_process
 
 
@@ -29,6 +30,7 @@ class MusicFormat(enum.Enum):
     YM3 = "ym3"
     YM6 = "ym"
 
+    @staticmethod
     def get_format(fname: str) -> "MusicFormat":
         ext = fname.split(".")[-1].lower()
         for fmt in MusicFormat:
@@ -36,14 +38,14 @@ class MusicFormat(enum.Enum):
                 return fmt
         raise ValueError(f"Unsupported music format: {ext}")
 
-    def convertible_to(self):
+    def convertible_to(self) -> set:
         if self == MusicFormat.CHP:
             return {self, MusicFormat.YM3}
         else:
             return {self, MusicFormat.YM6}
 
 
-def convert_music_file(input_file: str, output_file: str):
+def convert_music_file(input_file: str, output_file: str) -> None:
     logging.info(f"Convert {input_file} to {output_file}")
 
     if os.path.exists(output_file):
@@ -88,7 +90,7 @@ def convert_chp_to_ym3(input, output):
     execute_process(cmd)
 
 
-class Dataset:
+class Dataset(ABC):
     def __init__(self, path):
         assert path is not None
 
@@ -112,6 +114,11 @@ class Dataset:
 
     def root(self):
         return self.path
+
+    @abstractmethod
+    def __iter__(self):
+        """Return an iterator over dataset items"""
+        pass
 
     def iter_json(self):
         return iter(glob.glob(os.path.join(self.root(), "*.json")))

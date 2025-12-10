@@ -58,6 +58,7 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.AKM: at_compatible.union(chp_only),
         }[self]
 
+    @staticmethod
     def get_format(fname: str) -> "PlayerFormat":
         ext = fname.split(".")[-1].lower()
         for fmt in PlayerFormat:
@@ -65,7 +66,7 @@ class PlayerFormat(enum.Enum):
                 return fmt
         raise ValueError(f"Unsupported player format: {ext}")
 
-    def set_extension(self, source):
+    def set_extension(self, source: str) -> str:
         return os.path.splitext(source)[0] + "." + self.value
     
 
@@ -92,7 +93,7 @@ class PlayerFormat(enum.Enum):
     def load_address(self):
         return 0x500
 
-def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat):
+def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -> dict:
     return {
         PlayerFormat.FAP: crunch_ym_with_fap,
         PlayerFormat.AYT: crunch_ym_with_ayt,
@@ -105,7 +106,7 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat):
     }[format](input_file, output_file)
 
 
-def build_replay_program(data, player: PlayerFormat):
+def build_replay_program(data: dict, player: PlayerFormat) -> dict:
     (function, params) = {
         PlayerFormat.FAP: (build_replay_program_for_fap, ["buffer_size"]),
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
@@ -118,34 +119,34 @@ def build_replay_program(data, player: PlayerFormat):
     return function(data["compressed_fname"], player, **{k: data[k] for k in params})
 
 
-def build_replay_program_for_chp(music_data_fname, player: PlayerFormat):
+def build_replay_program_for_chp(music_data_fname: str, player: PlayerFormat) -> dict:
     z80 = "players/chp/chp.asm"
     return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_ayt(music_data_fname, player: PlayerFormat):
+def build_replay_program_for_ayt(music_data_fname: str, player: PlayerFormat) -> dict:
     # TODO get the number of nops returned by the builder
     #      ideally, it should be provided by the PC program
     z80 = "players/ayt/ayt.asm"
     return __build_replay_program__(music_data_fname, "-i ", z80, player)
 
 
-def build_replay_program_for_akg(music_data_fname, player: PlayerFormat):
+def build_replay_program_for_akg(music_data_fname: str, player: PlayerFormat) -> dict:
     z80 = "players/akg/akg.asm"
     return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_aky(music_data_fname, player: PlayerFormat):
+def build_replay_program_for_aky(music_data_fname: str, player: PlayerFormat) -> dict:
     z80 = "players/aky/aky.asm"
     return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_akm(music_data_fname, player: PlayerFormat):
+def build_replay_program_for_akm(music_data_fname: str, player: PlayerFormat) -> dict:
     z80 = "players/akm/akm.asm"
     return __build_replay_program__(music_data_fname, "", z80, player)
 
 
-def build_replay_program_for_fap(music_data_fname, player: PlayerFormat, buffer_size):
+def build_replay_program_for_fap(music_data_fname: str, player: PlayerFormat, buffer_size: int) -> dict:
     z80 = "players/fap/fap.asm"
 
     extra_cmd = (
@@ -159,7 +160,7 @@ def build_replay_program_for_fap(music_data_fname, player: PlayerFormat, buffer_
 
 
 
-def __build_replay_program__(music_data_fname, extra_cmd, z80, player: PlayerFormat = None):
+def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, player: PlayerFormat | None = None) -> dict:
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
     clean_amsdos_fname = base + ".BIN"
@@ -205,7 +206,7 @@ def __build_replay_program__(music_data_fname, extra_cmd, z80, player: PlayerFor
     }
 
 
-def __crunch_or_compile_music__(src, tgt, cmd):
+def __crunch_or_compile_music__(src: str, tgt: str, cmd: str) -> dict:
     res = utils.execute_process(cmd)
 
     try:
@@ -223,7 +224,7 @@ def __crunch_or_compile_music__(src, tgt, cmd):
     }
 
 
-def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str):
+def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str) -> dict:
     cmd_line = f'bndbuild --direct -- ayt --verbose --target CPC \\"{ym_fname}\\"'  # \\\"{fap_fname}\\\""
 
     try:
@@ -242,11 +243,11 @@ def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str):
     return res
 
 
-def crunch_ym_with_ayc(ym_fname: str, ayc_fname: str):
+def crunch_ym_with_ayc(ym_fname: str, ayc_fname: str) -> dict:
     raise NotImplementedError("A pc cruncher is required")
 
 
-def crunch_ym_with_miny(ym_fname: str, miny_fname: str):
+def crunch_ym_with_miny(ym_fname: str, miny_fname: str) -> dict:
     raise NotImplementedError("Waiting the newest version compatible with YM6")
 
 
@@ -276,7 +277,7 @@ def compile_chp(chp_fname: str, _):
     }
 
 
-def crunch_ym_with_fap(ym_fname: str, fap_fname: str):
+def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
     cmd_line = f'bndbuild --direct -- fap \\"{ym_fname}\\" \\"{fap_fname}\\"'
     res = __crunch_or_compile_music__(ym_fname, fap_fname, cmd_line)
     for line in res["stdout"].splitlines():
@@ -284,16 +285,16 @@ def crunch_ym_with_fap(ym_fname: str, fap_fname: str):
         PLAY_TIME = "Play time"
 
         if DECRUNCH_BUFF_SIZE in line:
-            line = line.split(":")[1]
-            line: str = line.split("(")[0]
-            line = line.strip()
-            res["buffer_size"] = int(line)
+            parts = line.split(":")[1]
+            parts = parts.split("(")[0]
+            parts = parts.strip()
+            res["buffer_size"] = int(parts)
 
         elif PLAY_TIME in line:
-            line = line.split(":")[1]
-            line = line.split("N")[0]
-            line = line.strip()
-            res["play_time"] = int(line)
+            time_parts = line.split(":")[1]
+            time_parts = time_parts.split("N")[0]
+            time_parts = time_parts.strip()
+            res["play_time"] = int(time_parts)
     return res
 
 
