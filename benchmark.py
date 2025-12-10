@@ -306,8 +306,15 @@ class Benchmark:
         ax.set_xlabel("Program Size (bytes)")
         ax.set_ylabel("Maximum Execution Time (nops)")
         ax.set_title("Program Size vs Maximum Execution Time by Player Format")
-        ax.legend()
         ax.grid(True, alpha=0.3)
+
+        # Add reference lines
+        ax.axvline(x=16384, color='red', linestyle=':', linewidth=1.5, alpha=0.6, label='bank limitation')
+        ax.axvline(x=0x8000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
+        ax.axvline(x=0xC000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
+        ax.axhline(y=3328, color='blue', linestyle=':', linewidth=1.5, alpha=0.6, label='1 halt')
+        
+        ax.legend()
 
         scatter_png = f"reports/scatter_prog_size_vs_exec_time_{self.name}.png"
         try:

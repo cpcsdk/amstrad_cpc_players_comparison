@@ -48,7 +48,8 @@ def compute_pareto_front(df: pd.DataFrame, x_col: str, y_col: str) -> List[int]:
 
 def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
                       x_col: str, y_col: str, scatter_size: int = 180,
-                      line_style: str = 'k--', include_label: bool = True) -> None:
+                      line_style: str = 'k--', include_label: bool = True,
+                      add_bank_marker: bool = True) -> None:
     """
     Draw the Pareto front on a matplotlib axis.
     
@@ -61,6 +62,7 @@ def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
         scatter_size: Size of scatter points (default 180)
         line_style: Line style for the front (default 'k--')
         include_label: Whether to add labels to the Pareto line and points (default True)
+        add_bank_marker: Whether to add 4096 bank marker line (default True)
     """
     if pareto_indices:
         pareto_df = df.iloc[pareto_indices].sort_values(x_col)
@@ -75,3 +77,10 @@ def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
         ax.scatter(pareto_df[x_col], pareto_df[y_col],
                   s=scatter_size, facecolors='none', edgecolors='black',
                   linewidths=2, zorder=3, label=point_label)
+    
+    # Add bank marker lines
+    if add_bank_marker:
+        ax.axvline(x=16384, color='red', linestyle=':', linewidth=1.5, alpha=0.6, label='bank limitation')
+        ax.axvline(x=0x8000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
+        ax.axvline(x=0xC000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
+        ax.axhline(y=3328, color='blue', linestyle=':', linewidth=1.5, alpha=0.6, label='1 halt')
