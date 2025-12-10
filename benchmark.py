@@ -217,9 +217,10 @@ class Benchmark:
                 
                 values += values[:1]
                 
+                color = format_colors.get(fmt, None)
                 # Plot
-                ax.plot(angles, values, 'o-', linewidth=2, label=fmt)
-                ax.fill(angles, values, alpha=0.25)
+                ax.plot(angles, values, 'o-', linewidth=2, label=fmt, color=color)
+                ax.fill(angles, values, alpha=0.25, color=color)
                 ax.set_xticks(angles[:-1])
                 ax.set_xticklabels(categories, size=8)
                 ax.set_ylim(0, 1)
