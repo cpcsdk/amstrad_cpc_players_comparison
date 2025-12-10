@@ -93,6 +93,8 @@ class Benchmark:
             # Compute format ordering once
             preferred_order = [".chp", ".akm", ".akg", ".fap", ".aky", ".ayt"]
             ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
+            format_palette = sns.color_palette("tab10", n_colors=len(ordered_extensions))
+            format_colors = dict(zip(ordered_extensions, format_palette))
 
             report.write(f"---\ntitle: {self.name}\n---\n\n")
             for comparison_key in ["prog_size", "zx0_prog_size", "max_execution_time"]:
@@ -249,7 +251,15 @@ class Benchmark:
             
             for fmt in ordered_extensions:
                 format_data = df[df["format"] == fmt]
-                ax.scatter(format_data["prog_size"], format_data["max_execution_time"], label=fmt, s=100, alpha=0.6, zorder=2)
+                ax.scatter(
+                    format_data["prog_size"],
+                    format_data["max_execution_time"],
+                    label=fmt,
+                    s=100,
+                    alpha=0.6,
+                    zorder=2,
+                    color=format_colors.get(fmt)
+                )
             
             ax.set_xlabel("Program Size (bytes)")
             ax.set_ylabel("Maximum Execution Time (nops)")
@@ -288,12 +298,12 @@ class Benchmark:
             player_df = pd.DataFrame(player_stats)
             
             # Create scatter plot with ellipses showing variability
-            colors = plt.cm.tab10(np.linspace(0, 1, len(player_df)))
             handles = []
             labels = []
             for idx, (_, row) in enumerate(player_df.iterrows()):
+                color = format_colors.get(row["format"], "C0")
                 # Plot center point (capture handle for legend)
-                sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=colors[idx], label=row["format"])
+                sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=color, label=row["format"])
                 handles.append(sc)
                 labels.append(row["format"])
                 
@@ -303,7 +313,7 @@ class Benchmark:
                     width=2*row["std_prog_size"],
                     height=2*row["std_exec_time"],
                     alpha=0.2,
-                    color=colors[idx]
+                    color=color
                 )
                 ax.add_patch(ellipse)
                 
