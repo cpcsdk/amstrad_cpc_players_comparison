@@ -16,9 +16,11 @@ import json
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 from itertools import combinations
 from joblib import delayed, Parallel
 from scipy.stats import wilcoxon
+from math import pi
 
 from datasets import *
 from players import *
@@ -40,7 +42,7 @@ class Benchmark:
         return self.dataset.root()
 
     def execute(self) -> None:
-        self.build_files()  # deactivated temporarily
+        self.build_files()
         self.analyse_files()
 
     def analyse_files(self) -> None:
@@ -50,6 +52,9 @@ class Benchmark:
             formats = []
             sources = []
             max_execution_time = []
+            min_execution_time = []
+            mean_execution_time = []
+            init_time = []
             for f in self.iter_json():
                 with open(f) as json_file:
                     res = json.load(json_file)
@@ -62,12 +67,18 @@ class Benchmark:
                     os.path.splitext(os.path.basename(res["compressed_fname"]))[0]
                 )
                 max_execution_time.append(res["nops_exec_max"])
+                min_execution_time.append(res["nops_exec_min"])
+                mean_execution_time.append(res["nops_exec_mean"])
+                init_time.append(res["nops_init"])
 
             df = pd.DataFrame.from_dict(
                 {"format": formats, 
                  "prog_size": sizes, 
                  "zx0_prog_size": zx0sizes, 
                  "max_execution_time": max_execution_time,
+                 "min_execution_time": min_execution_time,
+                 "mean_execution_time": mean_execution_time,
+                 "init_time": init_time,
                  "sources": sources
                  }
             )
@@ -77,6 +88,10 @@ class Benchmark:
                 'zx0_prog_size': "Crunch (zx0) program size (without decrunch routine and data reloction)",
                 'max_execution_time': "Maximum execution time (in nops)"
             }
+
+            # Compute format ordering once
+            preferred_order = [".chp", ".akm", ".akg", ".fap", ".aky", ".ayt"]
+            ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
 
             report.write(f"---\ntitle: {self.name}\n---\n\n")
             for comparison_key in ["prog_size", "zx0_prog_size", "max_execution_time"]:
@@ -95,9 +110,6 @@ class Benchmark:
                 report.write("\n\n")
 
       
-
-                preferred_order = [".chp", ".akm", ".akg", ".fap", ".aky", ".ayt"]
-                ordered_extensions = [c for c in preferred_order if c in summary.columns]
                 print(summary.columns)
 
                 for col1, col2 in combinations(ordered_extensions, 2):
@@ -153,6 +165,77 @@ class Benchmark:
                 except Exception as e:
                     logging.error(f"Failed to save {swarmplot_png}: {e}")
                 plt.close(fig)
+
+            # Spider chart matrix - one chart per player format
+            report.write("\n\n# Spider Charts by Player Format\n\n")
+            
+            # Metrics to include in spider chart - get from dataframe columns (exclude format and sources)
+            metrics = [col for col in df.columns if col not in ["format", "sources"]]
+            
+            # Calculate number of rows and columns for subplot grid
+            n_formats = len(ordered_extensions)
+            n_cols = min(3, n_formats)
+            n_rows = (n_formats + n_cols - 1) // n_cols
+            
+            fig, axes = plt.subplots(n_rows, n_cols, figsize=(6*n_cols, 6*n_rows), subplot_kw=dict(projection='polar'))
+            if n_formats == 1:
+                axes = np.array([axes])
+            axes = axes.flatten()
+            
+            for idx, fmt in enumerate(ordered_extensions):
+                ax = axes[idx]
+                
+                # Filter data for this format
+                format_data = df[df["format"] == fmt]
+                
+                # Prepare data for spider chart
+                categories = metrics
+                N = len(categories)
+                
+                # Compute angles for each axis
+                angles = [n / float(N) * 2 * pi for n in range(N)]
+                angles += angles[:1]
+                
+                # Normalize each metric to 0-1 scale (inverse for sizes - smaller is better)
+                values = []
+                for metric in metrics:
+                    metric_values = format_data[metric].values
+                    if len(metric_values) > 0:
+                        # For execution times and sizes, lower is better, so don't invert
+                        max_val = df[metric].max()
+                        min_val = df[metric].min()
+                        if max_val == min_val:
+                            normalized = 0.5  # All values are identical
+                        else:
+                            normalized = (metric_values.mean() - min_val) / (max_val - min_val)
+                        values.append(normalized)
+                    else:
+                        values.append(0)
+                
+                values += values[:1]
+                
+                # Plot
+                ax.plot(angles, values, 'o-', linewidth=2, label=fmt)
+                ax.fill(angles, values, alpha=0.25)
+                ax.set_xticks(angles[:-1])
+                ax.set_xticklabels(categories, size=8)
+                ax.set_ylim(0, 1)
+                ax.set_title(f"{fmt}", size=12, weight='bold', pad=20)
+                ax.grid(True)
+            
+            # Hide unused subplots
+            for idx in range(n_formats, len(axes)):
+                axes[idx].set_visible(False)
+            
+            plt.tight_layout()
+            spider_png = f"reports/spider_charts_{self.name}.png"
+            try:
+                fig.savefig(spider_png, dpi=100, bbox_inches='tight')
+                report.write(f"\n\n![Spider Charts by Format]({os.path.basename(spider_png)})\n")
+                report.write("\nNote: In spider charts, values closer to the center (0.0) indicate better performance (lower size/time).\n")
+            except Exception as e:
+                logging.error(f"Failed to save {spider_png}: {e}")
+            plt.close(fig)
 
     def build_files(self) -> None:
         def handle_input(input: str) -> list:

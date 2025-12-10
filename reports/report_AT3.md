@@ -323,3 +323,12 @@ Mean
 
 
 ![Swarmplot](max_execution_time_swarmplot_AT3.png)
+
+
+# Spider Charts by Player Format
+
+
+
+![Spider Charts by Format](spider_charts_AT3.png)
+
+Note: In spider charts, values closer to the center (0.0) indicate better performance (lower size/time).
