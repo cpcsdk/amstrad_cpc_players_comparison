@@ -26,6 +26,7 @@ from matplotlib.patches import Ellipse
 from datasets import *
 from players import *
 from profile import *
+from utils import compute_pareto_front, draw_pareto_front
 
 class Benchmark:
     def __init__(self, name: str, dataset: Dataset, players: list | None = None) -> None:
@@ -127,249 +128,13 @@ class Benchmark:
                     report.write(f" - {col1} vs {col2}: {code}\n")
 
                 # Generate plots
-                plot_x = list(range(len(ordered_extensions)))
-                
-                # Parallel coordinates plot
-                fig, ax = plt.subplots(figsize=(10, 6))
-                for _, row in summary.iterrows():
-                    ax.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
-                ax.set_xticks(plot_x)
-                ax.set_xticklabels(ordered_extensions)
-                ax.set_xlabel("Format")
-                ax.set_ylabel(title[comparison_key])
-                parallel_png = f"reports/{comparison_key}_parallel_coordinates_{self.name}.png"
-                try:
-                    fig.savefig(parallel_png, dpi=100, bbox_inches='tight')
-                    report.write(f"\n\n![Parallel coordinates]({os.path.basename(parallel_png)})\n")
-                except Exception as e:
-                    logging.error(f"Failed to save {parallel_png}: {e}")
-                plt.close(fig)
+                self._plot_parallel_coordinates(summary, ordered_extensions, comparison_key, title[comparison_key], report)
+                self._plot_boxplot(df, ordered_extensions, comparison_key, title[comparison_key], report)
+                self._plot_swarmplot(df, ordered_extensions, comparison_key, title[comparison_key], report)
 
-                # Boxplot
-                fig, ax = plt.subplots(figsize=(10, 6))
-                sns.boxplot(data=df, x="format", y=comparison_key, ax=ax, order=ordered_extensions)
-                ax.set_ylabel(title[comparison_key])
-                boxplot_png = f"reports/{comparison_key}_boxplot_{self.name}.png"
-                try:
-                    fig.savefig(boxplot_png, dpi=100, bbox_inches='tight')
-                    report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
-                except Exception as e:
-                    logging.error(f"Failed to save {boxplot_png}: {e}")
-                plt.close(fig)
-
-                # Swarmplot
-                fig, ax = plt.subplots(figsize=(10, 6))
-                sns.swarmplot(data=df, x="format", y=comparison_key, ax=ax, order=ordered_extensions)
-                ax.set_ylabel(title[comparison_key])
-                swarmplot_png = f"reports/{comparison_key}_swarmplot_{self.name}.png"
-                try:
-                    fig.savefig(swarmplot_png, dpi=100, bbox_inches='tight')
-                    report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
-                except Exception as e:
-                    logging.error(f"Failed to save {swarmplot_png}: {e}")
-                plt.close(fig)
-
-            # Spider chart matrix - one chart per player format
-            report.write("\n\n# Spider Charts by Player Format\n\n")
-            
-            # Metrics to include in spider chart - get from dataframe columns (exclude format and sources)
-            metrics = [col for col in df.columns if col not in ["format", "sources"]]
-            
-            # Calculate number of rows and columns for subplot grid
-            n_formats = len(ordered_extensions)
-            n_cols = min(3, n_formats)
-            n_rows = (n_formats + n_cols - 1) // n_cols
-            
-            fig, axes = plt.subplots(n_rows, n_cols, figsize=(6*n_cols, 6*n_rows), subplot_kw=dict(projection='polar'))
-            if n_formats == 1:
-                axes = np.array([axes])
-            axes = axes.flatten()
-            
-            for idx, fmt in enumerate(ordered_extensions):
-                ax = axes[idx]
-                
-                # Filter data for this format
-                format_data = df[df["format"] == fmt]
-                
-                # Prepare data for spider chart
-                categories = metrics
-                N = len(categories)
-                
-                # Compute angles for each axis
-                angles = [n / float(N) * 2 * pi for n in range(N)]
-                angles += angles[:1]
-                
-                # Normalize each metric to 0-1 scale (inverse for sizes - smaller is better)
-                values = []
-                for metric in metrics:
-                    metric_values = format_data[metric].values
-                    if len(metric_values) > 0:
-                        # For execution times and sizes, lower is better, so don't invert
-                        max_val = df[metric].max()
-                        min_val = df[metric].min()
-                        if max_val == min_val:
-                            normalized = 0.5  # All values are identical
-                        else:
-                            normalized = (metric_values.mean() - min_val) / (max_val - min_val)
-                        values.append(normalized)
-                    else:
-                        values.append(0)
-                
-                values += values[:1]
-                
-                color = format_colors.get(fmt, None)
-                # Plot
-                ax.plot(angles, values, 'o-', linewidth=2, label=fmt, color=color)
-                ax.fill(angles, values, alpha=0.25, color=color)
-                ax.set_xticks(angles[:-1])
-                ax.set_xticklabels(categories, size=8)
-                ax.set_ylim(0, 1)
-                ax.set_title(f"{fmt}", size=12, weight='bold', pad=20)
-                ax.grid(True)
-            
-            # Hide unused subplots
-            for idx in range(n_formats, len(axes)):
-                axes[idx].set_visible(False)
-            
-            plt.tight_layout()
-            spider_png = f"reports/spider_charts_{self.name}.png"
-            try:
-                fig.savefig(spider_png, dpi=100, bbox_inches='tight')
-                report.write(f"\n\n![Spider Charts by Format]({os.path.basename(spider_png)})\n")
-                report.write("\nNote: In spider charts, values closer to the center (0.0) indicate better performance (lower size/time).\n")
-            except Exception as e:
-                logging.error(f"Failed to save {spider_png}: {e}")
-            plt.close(fig)
-
-            # Scatter plot: prog_size vs max_execution_time
-            report.write("\n\n# Program Size vs Maximum Execution Time\n\n")
-            fig, ax = plt.subplots(figsize=(10, 6))
-            
-            # Draw lines connecting points for each source
-            for source in df["sources"].unique():
-                source_data = df[df["sources"] == source].sort_values("prog_size")
-                ax.plot(source_data["prog_size"], source_data["max_execution_time"], color="gray", alpha=0.2, linewidth=1, zorder=1)
-            
-            for fmt in ordered_extensions:
-                format_data = df[df["format"] == fmt]
-                ax.scatter(
-                    format_data["prog_size"],
-                    format_data["max_execution_time"],
-                    label=fmt,
-                    s=100,
-                    alpha=0.6,
-                    zorder=2,
-                    color=format_colors.get(fmt)
-                )
-            
-            ax.set_xlabel("Program Size (bytes)")
-            ax.set_ylabel("Maximum Execution Time (nops)")
-            ax.set_title("Program Size vs Maximum Execution Time by Player Format")
-            ax.legend()
-            ax.grid(True, alpha=0.3)
-            
-            scatter_png = f"reports/scatter_prog_size_vs_exec_time_{self.name}.png"
-            try:
-                fig.savefig(scatter_png, dpi=100, bbox_inches='tight')
-                report.write(f"\n\n![Scatter Plot]({os.path.basename(scatter_png)})\n")
-            except Exception as e:
-                logging.error(f"Failed to save {scatter_png}: {e}")
-            plt.close(fig)
-
-            # Scatter plot: aggregated by player format (median values)
-            report.write("\n\n# Player Formats Comparison (Median Values)\n\n")
-            fig, ax = plt.subplots(figsize=(10, 6))
-            
-            # Aggregate data by player format using median and std
-            player_stats = []
-            for fmt in ordered_extensions:
-                format_data = df[df["format"] == fmt]
-                median_prog_size = format_data["prog_size"].median()
-                median_exec_time = format_data["max_execution_time"].median()
-                std_prog_size = format_data["prog_size"].std()
-                std_exec_time = format_data["max_execution_time"].std()
-                player_stats.append({
-                    "format": fmt,
-                    "prog_size": median_prog_size,
-                    "max_execution_time": median_exec_time,
-                    "std_prog_size": std_prog_size if not np.isnan(std_prog_size) else 0,
-                    "std_exec_time": std_exec_time if not np.isnan(std_exec_time) else 0
-                })
-            
-            player_df = pd.DataFrame(player_stats)
-            
-            # Create scatter plot with ellipses showing variability
-            handles = []
-            labels = []
-            for idx, (_, row) in enumerate(player_df.iterrows()):
-                color = format_colors.get(row["format"], "C0")
-                # Plot center point (capture handle for legend)
-                sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=color, label=row["format"])
-                handles.append(sc)
-                labels.append(row["format"])
-                
-                # Draw ellipse representing 1 standard deviation
-                ellipse = Ellipse(
-                    (row["prog_size"], row["max_execution_time"]),
-                    width=2*row["std_prog_size"],
-                    height=2*row["std_exec_time"],
-                    alpha=0.2,
-                    color=color
-                )
-                ax.add_patch(ellipse)
-                
-                # Add format label near the point for quick reading
-                ax.annotate(row["format"], (row["prog_size"], row["max_execution_time"]), 
-                           xytext=(5, 5), textcoords="offset points", fontsize=10)
-            
-            # Compute and draw Pareto front
-            # A point is on Pareto front if no other point dominates it (lower in both dimensions)
-            pareto_indices = []
-            for i in range(len(player_df)):
-                is_dominated = False
-                for j in range(len(player_df)):
-                    if i != j:
-                        # Point j dominates point i if j is better (lower) in both axes
-                        if (player_df.iloc[j]["prog_size"] <= player_df.iloc[i]["prog_size"] and
-                            player_df.iloc[j]["max_execution_time"] <= player_df.iloc[i]["max_execution_time"]):
-                            # Check if it's strictly better in at least one dimension
-                            if (player_df.iloc[j]["prog_size"] < player_df.iloc[i]["prog_size"] or
-                                player_df.iloc[j]["max_execution_time"] < player_df.iloc[i]["max_execution_time"]):
-                                is_dominated = True
-                                break
-                if not is_dominated:
-                    pareto_indices.append(i)
-            
-            if pareto_indices:
-                pareto_df = player_df.iloc[pareto_indices].sort_values("prog_size")
-                ax.plot(pareto_df["prog_size"], pareto_df["max_execution_time"], 
-                        'k--', linewidth=2, alpha=0.5, label="Pareto Front")
-                # Highlight Pareto points with black outline
-                ax.scatter(
-                    pareto_df["prog_size"],
-                    pareto_df["max_execution_time"],
-                    s=240,
-                    facecolors='none',
-                    edgecolors='black',
-                    linewidths=1.5,
-                    zorder=3,
-                    label="Pareto Points"
-                )
-            
-            ax.set_xlabel("Median Program Size (bytes)")
-            ax.set_ylabel("Median Maximum Execution Time (nops)")
-            ax.set_title("Player Formats Comparison (Median Values ± 1 Std Dev)")
-            ax.grid(True, alpha=0.3)
-            ax.legend()
-            
-            scatter_median_png = f"reports/scatter_median_prog_size_vs_exec_time_{self.name}.png"
-            try:
-                fig.savefig(scatter_median_png, dpi=100, bbox_inches='tight')
-                report.write(f"\n\n![Scatter Plot - Median Values]({os.path.basename(scatter_median_png)})\n")
-                report.write("\nNote: Ellipses show ±1 standard deviation around median values. The dashed line represents the Pareto front (non-dominated players).\n")
-            except Exception as e:
-                logging.error(f"Failed to save {scatter_median_png}: {e}")
-            plt.close(fig)
+            self._plot_spider(df, ordered_extensions, format_colors, report)
+            self._plot_scatter_tracks(df, ordered_extensions, format_colors, report)
+            self._plot_scatter_median(df, ordered_extensions, format_colors, report)
 
     def build_files(self) -> None:
         def handle_input(input: str) -> list:
@@ -412,12 +177,203 @@ class Benchmark:
             #handle the zx0 file
             return res
 
-        return Parallel(n_jobs=1, verbose=3)(
+        return Parallel(n_jobs=-1, verbose=3)(
             delayed(handle_input)(input) for input in self.dataset
         )
 
     def iter_json(self) -> list:
         return self.dataset.iter_json()
+
+    # Plotting helpers
+    def _plot_parallel_coordinates(self, summary: pd.DataFrame, ordered_extensions: list[str], comparison_key: str, title: str, report) -> None:
+        plot_x = list(range(len(ordered_extensions)))
+        fig, ax = plt.subplots(figsize=(10, 6))
+        for _, row in summary.iterrows():
+            ax.plot(plot_x, [row[k] for k in ordered_extensions], c="gray", alpha=0.4)
+        ax.set_xticks(plot_x)
+        ax.set_xticklabels(ordered_extensions)
+        ax.set_xlabel("Format")
+        ax.set_ylabel(title)
+        parallel_png = f"reports/{comparison_key}_parallel_coordinates_{self.name}.png"
+        try:
+            fig.savefig(parallel_png, dpi=100, bbox_inches='tight')
+            report.write(f"\n\n![Parallel coordinates]({os.path.basename(parallel_png)})\n")
+        except Exception as e:
+            logging.error(f"Failed to save {parallel_png}: {e}")
+        plt.close(fig)
+
+    def _plot_boxplot(self, df: pd.DataFrame, ordered_extensions: list[str], comparison_key: str, title: str, report) -> None:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.boxplot(data=df, x="format", y=comparison_key, ax=ax, order=ordered_extensions)
+        ax.set_ylabel(title)
+        boxplot_png = f"reports/{comparison_key}_boxplot_{self.name}.png"
+        try:
+            fig.savefig(boxplot_png, dpi=100, bbox_inches='tight')
+            report.write(f"\n\n![Boxplot]({os.path.basename(boxplot_png)})\n")
+        except Exception as e:
+            logging.error(f"Failed to save {boxplot_png}: {e}")
+        plt.close(fig)
+
+    def _plot_swarmplot(self, df: pd.DataFrame, ordered_extensions: list[str], comparison_key: str, title: str, report) -> None:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.swarmplot(data=df, x="format", y=comparison_key, ax=ax, order=ordered_extensions)
+        ax.set_ylabel(title)
+        swarmplot_png = f"reports/{comparison_key}_swarmplot_{self.name}.png"
+        try:
+            fig.savefig(swarmplot_png, dpi=100, bbox_inches='tight')
+            report.write(f"\n\n![Swarmplot]({os.path.basename(swarmplot_png)})\n")
+        except Exception as e:
+            logging.error(f"Failed to save {swarmplot_png}: {e}")
+        plt.close(fig)
+
+    def _plot_spider(self, df: pd.DataFrame, ordered_extensions: list[str], format_colors: dict[str, tuple], report) -> None:
+        report.write("\n\n# Spider Charts by Player Format\n\n")
+        metrics = [col for col in df.columns if col not in ["format", "sources"]]
+        n_formats = len(ordered_extensions)
+        n_cols = min(3, n_formats)
+        n_rows = (n_formats + n_cols - 1) // n_cols
+
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(6*n_cols, 6*n_rows), subplot_kw=dict(projection='polar'))
+        if n_formats == 1:
+            axes = np.array([axes])
+        axes = axes.flatten()
+
+        for idx, fmt in enumerate(ordered_extensions):
+            ax = axes[idx]
+            format_data = df[df["format"] == fmt]
+            categories = metrics
+            N = len(categories)
+
+            angles = [n / float(N) * 2 * pi for n in range(N)]
+            angles += angles[:1]
+
+            values = []
+            for metric in metrics:
+                metric_values = format_data[metric].values
+                if len(metric_values) > 0:
+                    max_val = df[metric].max()
+                    min_val = df[metric].min()
+                    if max_val == min_val:
+                        normalized = 0.5
+                    else:
+                        normalized = (metric_values.mean() - min_val) / (max_val - min_val)
+                    values.append(normalized)
+                else:
+                    values.append(0)
+
+            values += values[:1]
+            color = format_colors.get(fmt, None)
+            ax.plot(angles, values, 'o-', linewidth=2, label=fmt, color=color)
+            ax.fill(angles, values, alpha=0.25, color=color)
+            ax.set_xticks(angles[:-1])
+            ax.set_xticklabels(categories, size=8)
+            ax.set_ylim(0, 1)
+            ax.set_title(f"{fmt}", size=12, weight='bold', pad=20)
+            ax.grid(True)
+
+        for idx in range(n_formats, len(axes)):
+            axes[idx].set_visible(False)
+
+        plt.tight_layout()
+        spider_png = f"reports/spider_charts_{self.name}.png"
+        try:
+            fig.savefig(spider_png, dpi=100, bbox_inches='tight')
+            report.write(f"\n\n![Spider Charts by Format]({os.path.basename(spider_png)})\n")
+            report.write("\nNote: In spider charts, values closer to the center (0.0) indicate better performance (lower size/time).\n")
+        except Exception as e:
+            logging.error(f"Failed to save {spider_png}: {e}")
+        plt.close(fig)
+
+    def _plot_scatter_tracks(self, df: pd.DataFrame, ordered_extensions: list[str], format_colors: dict[str, tuple], report) -> None:
+        report.write("\n\n# Program Size vs Maximum Execution Time\n\n")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        for source in df["sources"].unique():
+            source_data = df[df["sources"] == source].sort_values("prog_size")
+            ax.plot(source_data["prog_size"], source_data["max_execution_time"], color="gray", alpha=0.2, linewidth=1, zorder=1)
+
+        for fmt in ordered_extensions:
+            format_data = df[df["format"] == fmt]
+            ax.scatter(
+                format_data["prog_size"],
+                format_data["max_execution_time"],
+                label=fmt,
+                s=100,
+                alpha=0.6,
+                zorder=2,
+                color=format_colors.get(fmt)
+            )
+
+        ax.set_xlabel("Program Size (bytes)")
+        ax.set_ylabel("Maximum Execution Time (nops)")
+        ax.set_title("Program Size vs Maximum Execution Time by Player Format")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        scatter_png = f"reports/scatter_prog_size_vs_exec_time_{self.name}.png"
+        try:
+            fig.savefig(scatter_png, dpi=100, bbox_inches='tight')
+            report.write(f"\n\n![Scatter Plot]({os.path.basename(scatter_png)})\n")
+        except Exception as e:
+            logging.error(f"Failed to save {scatter_png}: {e}")
+        plt.close(fig)
+
+    def _plot_scatter_median(self, df: pd.DataFrame, ordered_extensions: list[str], format_colors: dict[str, tuple], report) -> None:
+        report.write("\n\n# Player Formats Comparison (Median Values)\n\n")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        player_stats = []
+        for fmt in ordered_extensions:
+            format_data = df[df["format"] == fmt]
+            median_prog_size = format_data["prog_size"].median()
+            median_exec_time = format_data["max_execution_time"].median()
+            std_prog_size = format_data["prog_size"].std()
+            std_exec_time = format_data["max_execution_time"].std()
+            player_stats.append({
+                "format": fmt,
+                "prog_size": median_prog_size,
+                "max_execution_time": median_exec_time,
+                "std_prog_size": std_prog_size if not np.isnan(std_prog_size) else 0,
+                "std_exec_time": std_exec_time if not np.isnan(std_exec_time) else 0
+            })
+
+        player_df = pd.DataFrame(player_stats)
+
+        handles = []
+        labels = []
+        for _, row in player_df.iterrows():
+            color = format_colors.get(row["format"], "C0")
+            sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=color, label=row["format"])
+            handles.append(sc)
+            labels.append(row["format"])
+
+            ellipse = Ellipse(
+                (row["prog_size"], row["max_execution_time"]),
+                width=2*row["std_prog_size"],
+                height=2*row["std_exec_time"],
+                alpha=0.2,
+                color=color
+            )
+            ax.add_patch(ellipse)
+            ax.annotate(row["format"], (row["prog_size"], row["max_execution_time"]),
+                        xytext=(5, 5), textcoords="offset points", fontsize=10)
+
+        pareto_indices = compute_pareto_front(player_df, "prog_size", "max_execution_time")
+        draw_pareto_front(ax, player_df, pareto_indices, "prog_size", "max_execution_time",
+                         scatter_size=240, include_label=True)
+
+        ax.set_xlabel("Median Program Size (bytes)")
+        ax.set_ylabel("Median Maximum Execution Time (nops)")
+        ax.set_title("Player Formats Comparison (Median Values ± 1 Std Dev)")
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+
+        scatter_median_png = f"reports/scatter_median_prog_size_vs_exec_time_{self.name}.png"
+        try:
+            fig.savefig(scatter_median_png, dpi=100, bbox_inches='tight')
+            report.write(f"\n\n![Scatter Plot - Median Values]({os.path.basename(scatter_median_png)})\n")
+            report.write("\nNote: Ellipses show ±1 standard deviation around median values. The dashed line represents the Pareto front (non-dominated players).\n")
+        except Exception as e:
+            logging.error(f"Failed to save {scatter_median_png}: {e}")
+        plt.close(fig)
 
 
 class ArkosTracker3Benchmark(Benchmark):
