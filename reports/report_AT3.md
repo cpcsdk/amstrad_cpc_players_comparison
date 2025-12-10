@@ -339,3 +339,12 @@ Note: In spider charts, values closer to the center (0.0) indicate better perfor
 
 
 ![Scatter Plot](scatter_prog_size_vs_exec_time_AT3.png)
+
+
+# Player Formats Comparison (Median Values)
+
+
+
+![Scatter Plot - Median Values](scatter_median_prog_size_vs_exec_time_AT3.png)
+
+Note: Ellipses show ±1 standard deviation around median values. The dashed line represents the Pareto front (non-dominated players).

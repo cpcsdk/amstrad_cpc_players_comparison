@@ -21,6 +21,7 @@ from itertools import combinations
 from joblib import delayed, Parallel
 from scipy.stats import wilcoxon
 from math import pi
+from matplotlib.patches import Ellipse
 
 from datasets import *
 from players import *
@@ -262,6 +263,101 @@ class Benchmark:
                 report.write(f"\n\n![Scatter Plot]({os.path.basename(scatter_png)})\n")
             except Exception as e:
                 logging.error(f"Failed to save {scatter_png}: {e}")
+            plt.close(fig)
+
+            # Scatter plot: aggregated by player format (median values)
+            report.write("\n\n# Player Formats Comparison (Median Values)\n\n")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            
+            # Aggregate data by player format using median and std
+            player_stats = []
+            for fmt in ordered_extensions:
+                format_data = df[df["format"] == fmt]
+                median_prog_size = format_data["prog_size"].median()
+                median_exec_time = format_data["max_execution_time"].median()
+                std_prog_size = format_data["prog_size"].std()
+                std_exec_time = format_data["max_execution_time"].std()
+                player_stats.append({
+                    "format": fmt,
+                    "prog_size": median_prog_size,
+                    "max_execution_time": median_exec_time,
+                    "std_prog_size": std_prog_size if not np.isnan(std_prog_size) else 0,
+                    "std_exec_time": std_exec_time if not np.isnan(std_exec_time) else 0
+                })
+            
+            player_df = pd.DataFrame(player_stats)
+            
+            # Create scatter plot with ellipses showing variability
+            colors = plt.cm.tab10(np.linspace(0, 1, len(player_df)))
+            handles = []
+            labels = []
+            for idx, (_, row) in enumerate(player_df.iterrows()):
+                # Plot center point (capture handle for legend)
+                sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=colors[idx], label=row["format"])
+                handles.append(sc)
+                labels.append(row["format"])
+                
+                # Draw ellipse representing 1 standard deviation
+                ellipse = Ellipse(
+                    (row["prog_size"], row["max_execution_time"]),
+                    width=2*row["std_prog_size"],
+                    height=2*row["std_exec_time"],
+                    alpha=0.2,
+                    color=colors[idx]
+                )
+                ax.add_patch(ellipse)
+                
+                # Add format label near the point for quick reading
+                ax.annotate(row["format"], (row["prog_size"], row["max_execution_time"]), 
+                           xytext=(5, 5), textcoords="offset points", fontsize=10)
+            
+            # Compute and draw Pareto front
+            # A point is on Pareto front if no other point dominates it (lower in both dimensions)
+            pareto_indices = []
+            for i in range(len(player_df)):
+                is_dominated = False
+                for j in range(len(player_df)):
+                    if i != j:
+                        # Point j dominates point i if j is better (lower) in both axes
+                        if (player_df.iloc[j]["prog_size"] <= player_df.iloc[i]["prog_size"] and
+                            player_df.iloc[j]["max_execution_time"] <= player_df.iloc[i]["max_execution_time"]):
+                            # Check if it's strictly better in at least one dimension
+                            if (player_df.iloc[j]["prog_size"] < player_df.iloc[i]["prog_size"] or
+                                player_df.iloc[j]["max_execution_time"] < player_df.iloc[i]["max_execution_time"]):
+                                is_dominated = True
+                                break
+                if not is_dominated:
+                    pareto_indices.append(i)
+            
+            if pareto_indices:
+                pareto_df = player_df.iloc[pareto_indices].sort_values("prog_size")
+                ax.plot(pareto_df["prog_size"], pareto_df["max_execution_time"], 
+                        'k--', linewidth=2, alpha=0.5, label="Pareto Front")
+                # Highlight Pareto points with black outline
+                ax.scatter(
+                    pareto_df["prog_size"],
+                    pareto_df["max_execution_time"],
+                    s=240,
+                    facecolors='none',
+                    edgecolors='black',
+                    linewidths=1.5,
+                    zorder=3,
+                    label="Pareto Points"
+                )
+            
+            ax.set_xlabel("Median Program Size (bytes)")
+            ax.set_ylabel("Median Maximum Execution Time (nops)")
+            ax.set_title("Player Formats Comparison (Median Values ± 1 Std Dev)")
+            ax.grid(True, alpha=0.3)
+            ax.legend()
+            
+            scatter_median_png = f"reports/scatter_median_prog_size_vs_exec_time_{self.name}.png"
+            try:
+                fig.savefig(scatter_median_png, dpi=100, bbox_inches='tight')
+                report.write(f"\n\n![Scatter Plot - Median Values]({os.path.basename(scatter_median_png)})\n")
+                report.write("\nNote: Ellipses show ±1 standard deviation around median values. The dashed line represents the Pareto front (non-dominated players).\n")
+            except Exception as e:
+                logging.error(f"Failed to save {scatter_median_png}: {e}")
             plt.close(fig)
 
     def build_files(self) -> None:
