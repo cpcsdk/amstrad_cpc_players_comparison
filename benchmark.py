@@ -237,6 +237,33 @@ class Benchmark:
                 logging.error(f"Failed to save {spider_png}: {e}")
             plt.close(fig)
 
+            # Scatter plot: prog_size vs max_execution_time
+            report.write("\n\n# Program Size vs Maximum Execution Time\n\n")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            
+            # Draw lines connecting points for each source
+            for source in df["sources"].unique():
+                source_data = df[df["sources"] == source].sort_values("prog_size")
+                ax.plot(source_data["prog_size"], source_data["max_execution_time"], color="gray", alpha=0.2, linewidth=1, zorder=1)
+            
+            for fmt in ordered_extensions:
+                format_data = df[df["format"] == fmt]
+                ax.scatter(format_data["prog_size"], format_data["max_execution_time"], label=fmt, s=100, alpha=0.6, zorder=2)
+            
+            ax.set_xlabel("Program Size (bytes)")
+            ax.set_ylabel("Maximum Execution Time (nops)")
+            ax.set_title("Program Size vs Maximum Execution Time by Player Format")
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            
+            scatter_png = f"reports/scatter_prog_size_vs_exec_time_{self.name}.png"
+            try:
+                fig.savefig(scatter_png, dpi=100, bbox_inches='tight')
+                report.write(f"\n\n![Scatter Plot]({os.path.basename(scatter_png)})\n")
+            except Exception as e:
+                logging.error(f"Failed to save {scatter_png}: {e}")
+            plt.close(fig)
+
     def build_files(self) -> None:
         def handle_input(input: str) -> list:
             logging.info(f'Handle "{input}" data generation')

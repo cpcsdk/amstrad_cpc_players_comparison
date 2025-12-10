@@ -332,3 +332,10 @@ Mean
 ![Spider Charts by Format](spider_charts_AT3.png)
 
 Note: In spider charts, values closer to the center (0.0) indicate better performance (lower size/time).
+
+
+# Program Size vs Maximum Execution Time
+
+
+
+![Scatter Plot](scatter_prog_size_vs_exec_time_AT3.png)
