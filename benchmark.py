@@ -294,17 +294,8 @@ class Benchmark:
                 'max_execution_time': "Maximum execution time (in nops)"
             }
 
-            # Canonical ordering: prefer the order of players configured for this benchmark
-            # Stable color mapping: derive a palette deterministically from
-            # the benchmark's `self.players` order so colors remain consistent
-            # across runs and plots. Then restrict to present formats.
-            preferred_order = [p.name for p in self.players]
-            palette_full = sns.color_palette("tab10", n_colors=max(1, len(preferred_order)))
-            full_color_map = dict(zip(preferred_order, palette_full))
-
-            # Keep only formats present in the dataframe (preserve player order)
-            ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
-            format_colors = {k: full_color_map.get(k) for k in ordered_extensions}
+            # Prepare canonical ordering and color mapping for plots
+            ordered_extensions, format_colors = plots.prepare_format_colors(self, df)
 
             report.write(f"---\ntitle: {self.name}\n---\n\n")
 
@@ -428,27 +419,6 @@ class Benchmark:
                     logging.exception(f"Failed to remove {f}")
 
         logging.info(f"Removed {removed} produced files for {self.name}")
-
-    def _palette_for_ordered(self, format_colors: dict, ordered_extensions: list):
-        """Return a palette mapping (format -> color) for the given ordered formats.
-
-        This centralizes palette construction so plotting helpers stay consistent.
-        If `format_colors` is None, returns None to let seaborn pick defaults.
-        """
-        if format_colors is None:
-            return None
-
-        # Ensure palette contains an entry for every requested format.
-        # If the provided `format_colors` lacks some keys, fall back to a
-        # generated categorical palette and prefer any explicit colors.
-        palette = {}
-        auto_palette = sns.color_palette("tab10", n_colors=max(1, len(ordered_extensions)))
-        for i, fmt in enumerate(ordered_extensions):
-            palette[fmt] = format_colors.get(fmt, auto_palette[i % len(auto_palette)])
-            if "CHPB" in palette:
-                palette["CHP"] = palette["CHPB"]
-        return palette
-
 
 class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):

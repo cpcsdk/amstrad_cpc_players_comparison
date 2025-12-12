@@ -77,6 +77,41 @@ def plot_spider(benchmark, df: pd.DataFrame, ordered_extensions: list, format_co
     plt.close(fig)
 
 
+def _palette_for_ordered(format_colors: dict, ordered_extensions: list):
+    """Return a palette mapping (format -> color) for the given ordered formats.
+
+    Centralized palette construction used by plotting helpers. If
+    `format_colors` is None, returns None to let seaborn pick defaults.
+    """
+    if format_colors is None:
+        return None
+
+    palette = {}
+    auto_palette = sns.color_palette("tab10", n_colors=max(1, len(ordered_extensions)))
+    for i, fmt in enumerate(ordered_extensions):
+        palette[fmt] = format_colors.get(fmt, auto_palette[i % len(auto_palette)])
+    # Backwards compatibility: map CHPB -> CHP if present
+    if "CHPB" in palette:
+        palette["CHP"] = palette["CHPB"]
+    return palette
+
+
+def prepare_format_colors(benchmark, df: pd.DataFrame):
+    """Derive the ordered formats and a color mapping for the present formats.
+
+    Returns (ordered_extensions, format_colors)
+    """
+    # Canonical ordering: prefer the order of players configured for this benchmark
+    preferred_order = [p.name for p in getattr(benchmark, 'players', [])]
+    palette_full = sns.color_palette("tab10", n_colors=max(1, len(preferred_order)))
+    full_color_map = dict(zip(preferred_order, palette_full))
+
+    # Keep only formats present in the dataframe (preserve player order)
+    ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
+    format_colors = {k: full_color_map.get(k) for k in ordered_extensions}
+    return ordered_extensions, format_colors
+
+
 def plot_scatter_tracks(benchmark, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report) -> None:
     report.write("\n\n# Program Size vs Maximum Execution Time\n\n")
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -226,8 +261,8 @@ def plot_parallel_coordinates(benchmark, summary: pd.DataFrame, ordered_extensio
 
 def plot_boxplot(benchmark, df: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, format_colors: dict = None, report=None) -> None:
     fig, ax = plt.subplots(figsize=(10, 6))
-    # Build palette mapping for ordered_extensions using benchmark helper
-    palette = benchmark._palette_for_ordered(format_colors, ordered_extensions)
+    # Build palette mapping for ordered_extensions using local helper
+    palette = _palette_for_ordered(format_colors, ordered_extensions)
 
     # Use hue='format' with dodge=False to apply explicit palette without deprecation warning
     try:
@@ -255,8 +290,8 @@ def plot_boxplot(benchmark, df: pd.DataFrame, ordered_extensions: list, comparis
 
 def plot_violin(benchmark, df: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, format_colors: dict = None, report=None) -> None:
     fig, ax = plt.subplots(figsize=(10, 6))
-    # Build palette mapping for ordered_extensions using benchmark helper
-    palette = benchmark._palette_for_ordered(format_colors, ordered_extensions)
+    # Build palette mapping for ordered_extensions using local helper
+    palette = _palette_for_ordered(format_colors, ordered_extensions)
 
     try:
         sns.violinplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
