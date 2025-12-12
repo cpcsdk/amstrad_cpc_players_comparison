@@ -15,6 +15,7 @@ import os
 from typing import Iterable, List
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -146,7 +147,10 @@ def _plot_pareto_scatter(df: pd.DataFrame, music_path: str, save_plot: str | Non
     # Plot points
     for _, row in df.iterrows():
         color = format_colors[row["player"]]
-        ax.scatter(row["program_size"], row["nops_exec_max"], s=150, alpha=0.7, color=color, label=row["player"])
+        # Use square marker for stable players, circle for others
+        player_format = PlayerFormat[row["player"].upper()]
+        marker = 's' if player_format.is_stable() else 'o'
+        ax.scatter(row["program_size"], row["nops_exec_max"], s=150, alpha=0.7, color=color, marker=marker, label=row["player"])
         ax.annotate(row["player"], (row["program_size"], row["nops_exec_max"]),
                    xytext=(5, 5), textcoords="offset points", fontsize=9)
 
@@ -160,6 +164,11 @@ def _plot_pareto_scatter(df: pd.DataFrame, music_path: str, save_plot: str | Non
     ax.set_title(f"{music_name} - Player Comparison")
     ax.legend(loc="best", fontsize=9)
     ax.grid(True, alpha=0.3)
+    ax.set_xlim(left=0)
+    ax.set_ylim(bottom=0)
+    
+    # Format x-axis as hexadecimal with decimal in parentheses
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"0x{int(x):04X} ({int(x)})"))
 
     if save_plot:
         try:

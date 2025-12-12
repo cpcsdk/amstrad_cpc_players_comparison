@@ -97,7 +97,7 @@ class Dataset(ABC):
         self.clean_patterns = [
             "*.akg",
             "*.akm",
-            "*.aky",
+            "*.akys",
             "*.ayt",
             "*.BIN",
             "*.CHPB",
@@ -107,7 +107,8 @@ class Dataset(ABC):
             "*.json",
             "*.sna",
             "*.ym",  # XXX this ine can be dangerous for new datasets
-            "*.zx0"
+            "*.zx0",
+            "*_playerconfig.asm"
         ]
         self.clean_pattern_folder_part = None
         self.path = path

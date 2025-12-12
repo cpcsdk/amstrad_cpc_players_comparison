@@ -8,7 +8,13 @@ import matplotlib.pyplot as plt
 
 def execute_process(cmd):
     logging.debug(cmd)
-    res = subprocess.run(cmd, check=True, capture_output=True)
+    try:
+        res = subprocess.run(cmd, check=True, capture_output=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Command failed with return code {e.returncode}")
+        logging.error(e.stdout.decode("utf-8"))
+        logging.error(e.stderr.decode("utf-8"))
+        raise e
 
     logging.debug(res.stdout)
     if res.stderr.decode("utf-8").strip():
@@ -66,17 +72,47 @@ def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
     """
     if pareto_indices:
         pareto_df = df.iloc[pareto_indices].sort_values(x_col)
-        
+
+        # Lazy import to avoid circular dependency with players.py
+        try:
+            from players import PlayerFormat  # type: ignore
+        except Exception:
+            PlayerFormat = None  # fallback if import fails
+
+        def _is_stable(row) -> bool:
+            if PlayerFormat is None:
+                return False
+            try:
+                if "player" in row:
+                    return PlayerFormat[row["player"].upper()].is_stable()
+                if "format" in row:
+                    fmt_val = row["format"]
+                    return PlayerFormat.get_format(fmt_val).is_stable()
+            except Exception:
+                return False
+            return False
+
         # Draw the line connecting Pareto points
         line_label = "Pareto Front" if include_label else None
         ax.plot(pareto_df[x_col], pareto_df[y_col],
                 line_style, linewidth=2, alpha=0.5, label=line_label)
-        
-        # Draw the points
+
+        # Draw the points with marker based on stability
         point_label = "Pareto Points" if include_label else None
-        ax.scatter(pareto_df[x_col], pareto_df[y_col],
-                  s=scatter_size, facecolors='none', edgecolors='black',
-                  linewidths=2, zorder=3, label=point_label)
+        for _, row in pareto_df.iterrows():
+            marker = 's' if _is_stable(row) else 'o'
+            ax.scatter(
+                row[x_col],
+                row[y_col],
+                s=scatter_size,
+                facecolors='none',
+                edgecolors='black',
+                linewidths=2,
+                zorder=3,
+                marker=marker,
+                label=point_label,
+            )
+            point_label = None
     
     # Add bank marker lines
     if add_bank_marker:

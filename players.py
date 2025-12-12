@@ -28,7 +28,7 @@ class PlayerFormat(enum.Enum):
     AYC = "ayc"
     AKG = "akg"
     AKM = "akm"
-    AKY = "aky"
+    AKYS = "akys"
     CHP = "chpdb"
 
     """
@@ -54,7 +54,7 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.AYC: ym_only,
             PlayerFormat.CHP: chp_only,
             PlayerFormat.AKG: at_compatible,
-            PlayerFormat.AKY: at_compatible,
+            PlayerFormat.AKYS: at_compatible,
             PlayerFormat.AKM: at_compatible.union(chp_only),
         }[self]
 
@@ -85,13 +85,17 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.MINY: None,
             PlayerFormat.AYC: None,
             PlayerFormat.AKG: profiler_header + 12 + 8,   # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
-            PlayerFormat.AKY: profiler_header + 11 + 8,   # 25 bytes total
+            PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total
             PlayerFormat.AKM: profiler_header + 9 + 9,    # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
             PlayerFormat.CHP: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
         }[self]
     
     def load_address(self):
         return 0x500
+    
+    def is_stable(self) -> bool:
+        """Return True if the player format has stable/constant CPU consumption."""
+        return self in (PlayerFormat.AKYS, PlayerFormat.AYC, PlayerFormat.FAP)
 
 def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -> dict:
     return {
@@ -100,21 +104,23 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -
         PlayerFormat.MINY: crunch_ym_with_miny,
         PlayerFormat.AYC: crunch_ym_with_ayc,
         PlayerFormat.AKG: compile_aks_with_akg,
-        PlayerFormat.AKY: compile_aks_with_aky,
+        PlayerFormat.AKYS: compile_aks_with_akys,
         PlayerFormat.AKM: compile_aks_with_akm,
         PlayerFormat.CHP: compile_chp,
     }[format](input_file, output_file)
 
 
 def build_replay_program(data: dict, player: PlayerFormat) -> dict:
+
     (function, params) = {
         PlayerFormat.FAP: (build_replay_program_for_fap, ["buffer_size"]),
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
-        PlayerFormat.AKG: (build_replay_program_for_akg, []),
-        PlayerFormat.AKY: (build_replay_program_for_aky, []),
-        PlayerFormat.AKM: (build_replay_program_for_akm, []),
+        PlayerFormat.AKG: (build_replay_program_for_akg, ["player_config"]),
+        PlayerFormat.AKYS: (build_replay_program_for_akys, ["player_config"]),
+        PlayerFormat.AKM: (build_replay_program_for_akm, ["player_config"]),
         PlayerFormat.CHP: (build_replay_program_for_chp, []),
     }[player]
+
 
     return function(data["compressed_fname"], player, **{k: data[k] for k in params})
 
@@ -131,19 +137,19 @@ def build_replay_program_for_ayt(music_data_fname: str, player: PlayerFormat) ->
     return __build_replay_program__(music_data_fname, "-i ", z80, player)
 
 
-def build_replay_program_for_akg(music_data_fname: str, player: PlayerFormat) -> dict:
+def build_replay_program_for_akg(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
     z80 = "players/akg/akg.asm"
-    return __build_replay_program__(music_data_fname, "", z80, player)
+    return __build_replay_program__(music_data_fname, "", z80, player, config=player_config)
 
 
-def build_replay_program_for_aky(music_data_fname: str, player: PlayerFormat) -> dict:
-    z80 = "players/aky/aky.asm"
-    return __build_replay_program__(music_data_fname, "", z80, player)
+def build_replay_program_for_akys(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
+    z80 = "players/akys/akys.asm"
+    return __build_replay_program__(music_data_fname,   "",z80, player, config=player_config)
 
 
-def build_replay_program_for_akm(music_data_fname: str, player: PlayerFormat) -> dict:
+def build_replay_program_for_akm(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
     z80 = "players/akm/akm.asm"
-    return __build_replay_program__(music_data_fname, "", z80, player)
+    return __build_replay_program__(music_data_fname, "", z80, player, player_config)
 
 
 def build_replay_program_for_fap(music_data_fname: str, player: PlayerFormat, buffer_size: int) -> dict:
@@ -160,7 +166,7 @@ def build_replay_program_for_fap(music_data_fname: str, player: PlayerFormat, bu
 
 
 
-def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, player: PlayerFormat | None = None) -> dict:
+def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, player: PlayerFormat | None = None, config: str | None = None) -> dict:
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
     clean_amsdos_fname = base + ".BIN"
@@ -171,6 +177,8 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
         amsdos_fname = clean_amsdos_fname.replace("\\", rep)
         music_data_fname = music_data_fname.replace("\\", rep)
         sna_fname = sna_fname.replace("\\", rep)
+        if config:
+            config = config.replace("\\", rep)
     else:
         amsdos_fname = clean_amsdos_fname
 
@@ -180,7 +188,14 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
         + " "
         + f'\\"-DMUSIC_DATA_FNAME=\\\\\\"{music_data_fname}\\\\\\"\\"  '
         + f'\\"-DMUSIC_EXEC_FNAME=\\\\\\"{amsdos_fname}\\\\\\"\\" '
-        + f"--snapshot "
+
+    )
+
+    if config is not None:
+        cmd += f'\\"-DPLAYER_CONFIG_FNAME=\\\\\\"{config}\\\\\\"\\" '
+
+    cmd += (
+        f"--snapshot "
         + f'-o \\"{sna_fname}\\" \\"{z80}\\" '
     )
 
@@ -225,7 +240,7 @@ def __crunch_or_compile_music__(src: str, tgt: str, cmd: str) -> dict:
 
 
 def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str) -> dict:
-    cmd_line = f'bndbuild --direct -- ayt --verbose --target CPC \\"{ym_fname}\\"'  # \\\"{fap_fname}\\\""
+    cmd_line = f'bndbuild --direct -- ayt --verbose --target CPC \\"{ym_fname}\\" -o \\"{ayt_fname}\\"'
 
     try:
         res = __crunch_or_compile_music__(ym_fname, ayt_fname, cmd_line)
@@ -235,10 +250,6 @@ def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str) -> dict:
         else:
             pass # printed an error message BUT generated the file ...
 
-    # fix missing -o --output
-    if os.path.exists(ayt_fname):
-        os.remove(ayt_fname)
-    os.rename(os.path.basename(ayt_fname), ayt_fname)
     res["data-size"] = os.path.getsize(ayt_fname)
     return res
 
@@ -297,18 +308,34 @@ def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
             res["play_time"] = int(time_parts)
     return res
 
+def rename_arkos_binary_for_fname_unicity(arkos_fname: str) -> str:
+    base, ext = os.path.splitext(arkos_fname)
+    return f"{base}_{ext[1:]}{ext}"
+
+def __compile_aks_with_tool__(at_fname: str, output_fname: str, tool_name: str) -> dict:
+    """
+    Generic Arkos Tracker compilation helper for SongToAkg/Aky/Akm.
+    
+    Args:
+        at_fname: Path to input AKS file
+        output_fname: Path to output file (akg/akys/akm)
+        tool_name: Tool name (Akg, Aky, or Akm)
+    """
+    tmp_fname = rename_arkos_binary_for_fname_unicity(output_fname)
+    cmd_line = f'bndbuild --direct -- SongTo{tool_name} -bin -adr 0x506 --exportPlayerConfig \\"{at_fname}\\" \\"{tmp_fname}\\" '
+    res = __crunch_or_compile_music__(at_fname, tmp_fname, cmd_line)
+    res["compressed_fname"] = output_fname
+    res["player_config"] = os.path.splitext(tmp_fname)[0] + "_playerconfig.asm"
+    if os.path.exists(output_fname):
+        os.remove(output_fname)
+    os.rename(tmp_fname, output_fname)
+    return res
 
 def compile_aks_with_akg(at_fname, akg_fname):
-    cmd_line = f'bndbuild --direct -- SongToAkg -bin -adr 0x506 \\"{at_fname}\\" \\"{akg_fname}\\" '
-    cmd_line = f'tools\\SongToAkg -bin -adr 0x506 "{at_fname}" "{akg_fname}" '
-    return __crunch_or_compile_music__(at_fname, akg_fname, cmd_line)
+    return __compile_aks_with_tool__(at_fname, akg_fname, "Akg")
 
-
-def compile_aks_with_aky(at_fname, aky_fname):
-    cmd_line = f'bndbuild --direct -- SongToAky -bin -adr 0x506 \\"{at_fname}\\" \\"{aky_fname}\\" '
-    return __crunch_or_compile_music__(at_fname, aky_fname, cmd_line)
-
+def compile_aks_with_akys(at_fname, akys_fname):
+    return __compile_aks_with_tool__(at_fname, akys_fname, "Aky")
 
 def compile_aks_with_akm(at_fname, akm_fname):
-    cmd_line = f'bndbuild --direct -- SongToAkm -bin -adr 0x506 \\"{at_fname}\\" \\"{akm_fname}\\" '
-    return __crunch_or_compile_music__(at_fname, akm_fname, cmd_line)
+    return __compile_aks_with_tool__(at_fname, akm_fname, "Akm")

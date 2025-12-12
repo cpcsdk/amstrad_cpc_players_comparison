@@ -16,12 +16,13 @@ import json
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 from itertools import combinations
 from joblib import delayed, Parallel
 from scipy.stats import wilcoxon
 from math import pi
-from matplotlib.patches import Ellipse
+from matplotlib.patches import Ellipse, Rectangle
 
 from datasets import *
 from players import *
@@ -92,7 +93,8 @@ class Benchmark:
             }
 
             # Compute format ordering once
-            preferred_order = [".chp", ".akm", ".akg", ".fap", ".aky", ".ayt"]
+            preferred_order = [".chp", ".akm", ".akg", ".fap", ".akys", ".ayt"]
+            preferred_order = [".chp", ".akg", ".fap", ".akys", ".ayt"]
             ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
             format_palette = sns.color_palette("tab10", n_colors=len(ordered_extensions))
             format_colors = dict(zip(ordered_extensions, format_palette))
@@ -293,6 +295,10 @@ class Benchmark:
 
         for fmt in ordered_extensions:
             format_data = df[df["format"] == fmt]
+            # Use square marker for stable players, circle for others
+            player_format = PlayerFormat.get_format(fmt)
+            marker = 's' if player_format.is_stable() else 'o'
+            
             ax.scatter(
                 format_data["prog_size"],
                 format_data["max_execution_time"],
@@ -300,7 +306,8 @@ class Benchmark:
                 s=100,
                 alpha=0.6,
                 zorder=2,
-                color=format_colors.get(fmt)
+                color=format_colors.get(fmt),
+                marker=marker
             )
 
         ax.set_xlabel("Program Size (bytes)")
@@ -315,6 +322,11 @@ class Benchmark:
         ax.axhline(y=3328, color='blue', linestyle=':', linewidth=1.5, alpha=0.6, label='1 halt')
         
         ax.legend()
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+        
+        # Format x-axis as hexadecimal
+        ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"0x{int(x):04X} ({int(x)})"))
 
         scatter_png = f"reports/scatter_prog_size_vs_exec_time_{self.name}.png"
         try:
@@ -348,18 +360,25 @@ class Benchmark:
         labels = []
         for _, row in player_df.iterrows():
             color = format_colors.get(row["format"], "C0")
-            sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=color, label=row["format"])
+            # Use square marker for stable players, circle for others
+            player_format = PlayerFormat.get_format(row["format"])
+            marker = 's' if player_format.is_stable() else 'o'
+            
+            sc = ax.scatter(row["prog_size"], row["max_execution_time"], s=200, alpha=0.7, color=color, marker=marker, label=row["format"])
             handles.append(sc)
             labels.append(row["format"])
 
-            ellipse = Ellipse(
+            width = 2 * row["std_prog_size"]
+            height = 2 * row["std_exec_time"]
+            patch = Ellipse(
                 (row["prog_size"], row["max_execution_time"]),
-                width=2*row["std_prog_size"],
-                height=2*row["std_exec_time"],
+                width=width,
+                height=height,
                 alpha=0.2,
                 color=color
             )
-            ax.add_patch(ellipse)
+
+            ax.add_patch(patch)
             ax.annotate(row["format"], (row["prog_size"], row["max_execution_time"]),
                         xytext=(5, 5), textcoords="offset points", fontsize=10)
 
@@ -372,12 +391,17 @@ class Benchmark:
         ax.set_title("Player Formats Comparison (Median Values ± 1 Std Dev)")
         ax.grid(True, alpha=0.3)
         ax.legend()
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+        
+        # Format x-axis as hexadecimal
+        ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"0x{int(x):04X} ({int(x)})"))
 
         scatter_median_png = f"reports/scatter_median_prog_size_vs_exec_time_{self.name}.png"
         try:
             fig.savefig(scatter_median_png, dpi=100, bbox_inches='tight')
             report.write(f"\n\n![Scatter Plot - Median Values]({os.path.basename(scatter_median_png)})\n")
-            report.write("\nNote: Ellipses show ±1 standard deviation around median values. The dashed line represents the Pareto front (non-dominated players).\n")
+            report.write("\nNote: Shaded regions show ±1 standard deviation (ellipse for circle markers, square for stable players). The dashed line represents the Pareto front (non-dominated players).\n")
         except Exception as e:
             logging.error(f"Failed to save {scatter_median_png}: {e}")
         plt.close(fig)
@@ -389,7 +413,7 @@ class ArkosTracker3Benchmark(Benchmark):
             PlayerFormat.FAP,
             PlayerFormat.AYT,
             PlayerFormat.AKG,
-            PlayerFormat.AKY,
+            PlayerFormat.AKYS,
             PlayerFormat.AKM,
         ]
         super().__init__("AT3", At3Dataset(), replay_formats)

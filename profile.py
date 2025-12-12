@@ -1,6 +1,7 @@
 from utils import *
 import os
 import pandas as pd
+import platform
 
 def profile(amsdos_fname, load_address):
     """
@@ -8,9 +9,15 @@ def profile(amsdos_fname, load_address):
     """
     assert os.path.exists(amsdos_fname), f"File {amsdos_fname} does not exist"
 
-    prof = os.path.join("tools", "Z80Profiler.exe")
     csv_fname = os.path.splitext(amsdos_fname)[0] + ".CSV"
-    cmd = f'{prof} "{amsdos_fname}" "{csv_fname}" -l {hex(load_address)}'
+    
+    # Apply Windows path escaping for subprocess (triple backslash)
+    if "Windows" in platform.system():
+        rep = r"\\\\"
+        amsdos_fname = amsdos_fname.replace("\\", rep)
+        csv_fname = csv_fname.replace("\\", rep)
+    
+    cmd = f'"bndbuild" --direct -- Z80Profiler -l {hex(load_address)} \\"{amsdos_fname}\\" \\"{csv_fname}\\"'
 
     execute_process(cmd)
 

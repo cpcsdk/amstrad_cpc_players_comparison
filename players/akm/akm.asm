@@ -1,6 +1,9 @@
 
     org 0x500
 
+
+	include PLAYER_CONFIG_FNAME
+
 		; START Specific code for the profiler ; should not county
 		jp profiler_init
 		jp profiler_run
