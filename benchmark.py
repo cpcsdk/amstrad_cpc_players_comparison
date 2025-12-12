@@ -93,8 +93,8 @@ class Benchmark:
             }
 
             # Compute format ordering once
-            preferred_order = [".chp", ".akm", ".akg", ".fap", ".akys", ".ayt"]
-            preferred_order = [".chp", ".akg", ".fap", ".akys", ".ayt"]
+            preferred_order = [".chp", ".akm", ".akg", ".fap", ".akys", ".akyu", ".ayt"]
+            preferred_order = [".chp", ".akg", ".fap", ".akys", ".akyu", ".ayt"]
             ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
             format_palette = sns.color_palette("tab10", n_colors=len(ordered_extensions))
             format_colors = dict(zip(ordered_extensions, format_palette))
@@ -414,6 +414,7 @@ class ArkosTracker3Benchmark(Benchmark):
             PlayerFormat.AYT,
             PlayerFormat.AKG,
             PlayerFormat.AKYS,
+            PlayerFormat.AKYU,
             PlayerFormat.AKM,
         ]
         super().__init__("AT3", At3Dataset(), replay_formats)

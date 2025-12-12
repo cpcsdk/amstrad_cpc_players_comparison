@@ -29,6 +29,7 @@ class PlayerFormat(enum.Enum):
     AKG = "akg"
     AKM = "akm"
     AKYS = "akys"
+    AKYU = "akyu"
     CHP = "chpdb"
 
     """
@@ -55,6 +56,7 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.CHP: chp_only,
             PlayerFormat.AKG: at_compatible,
             PlayerFormat.AKYS: at_compatible,
+            PlayerFormat.AKYU: at_compatible,
             PlayerFormat.AKM: at_compatible.union(chp_only),
         }[self]
 
@@ -85,7 +87,8 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.MINY: None,
             PlayerFormat.AYC: None,
             PlayerFormat.AKG: profiler_header + 12 + 8,   # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
-            PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total
+            PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
+            PlayerFormat.AKYU: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
             PlayerFormat.AKM: profiler_header + 9 + 9,    # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
             PlayerFormat.CHP: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
         }[self]
@@ -105,6 +108,7 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -
         PlayerFormat.AYC: crunch_ym_with_ayc,
         PlayerFormat.AKG: compile_aks_with_akg,
         PlayerFormat.AKYS: compile_aks_with_akys,
+        PlayerFormat.AKYU: compile_aks_with_akyu,
         PlayerFormat.AKM: compile_aks_with_akm,
         PlayerFormat.CHP: compile_chp,
     }[format](input_file, output_file)
@@ -117,6 +121,7 @@ def build_replay_program(data: dict, player: PlayerFormat) -> dict:
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
         PlayerFormat.AKG: (build_replay_program_for_akg, ["player_config"]),
         PlayerFormat.AKYS: (build_replay_program_for_akys, ["player_config"]),
+        PlayerFormat.AKYU: (build_replay_program_for_akyu, ["player_config"]),
         PlayerFormat.AKM: (build_replay_program_for_akm, ["player_config"]),
         PlayerFormat.CHP: (build_replay_program_for_chp, []),
     }[player]
@@ -145,6 +150,11 @@ def build_replay_program_for_akg(music_data_fname: str, player: PlayerFormat, pl
 def build_replay_program_for_akys(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
     z80 = "players/akys/akys.asm"
     return __build_replay_program__(music_data_fname,   "",z80, player, config=player_config)
+
+
+def build_replay_program_for_akyu(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
+    z80 = "players/akyu/akyu.asm"
+    return __build_replay_program__(music_data_fname, "", z80, player, config=player_config)
 
 
 def build_replay_program_for_akm(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
@@ -336,6 +346,9 @@ def compile_aks_with_akg(at_fname, akg_fname):
 
 def compile_aks_with_akys(at_fname, akys_fname):
     return __compile_aks_with_tool__(at_fname, akys_fname, "Aky")
+
+def compile_aks_with_akyu(at_fname, akyu_fname):
+    return __compile_aks_with_tool__(at_fname, akyu_fname, "Aky")
 
 def compile_aks_with_akm(at_fname, akm_fname):
     return __compile_aks_with_tool__(at_fname, akm_fname, "Akm")

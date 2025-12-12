@@ -98,6 +98,7 @@ class Dataset(ABC):
             "*.akg",
             "*.akm",
             "*.akys",
+            "*.akyu",
             "*.ayt",
             "*.BIN",
             "*.CHPB",
