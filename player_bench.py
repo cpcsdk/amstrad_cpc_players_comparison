@@ -29,6 +29,11 @@ if __name__ == "__main__":
         "--benchmark", "--bench", action="append", default=[], choices=["AT3", "CHP", "PACIDEMO"]
     )
     parser.add_argument("--clean", action="store_true")
+    parser.add_argument("--no-report", action="store_true", help="Skip report/plot generation and only produce JSON results")
+    parser.add_argument("--no-profile", action="store_true", help="Skip profiling step (Z80Profiler) during build")
+    parser.add_argument("--outdir", type=str, default=None, help="Output directory for reports and artifacts")
+    parser.add_argument("--jobs", type=int, default=-1, help="Number of parallel jobs for building (-1 = all cores)")
+    parser.add_argument("-v", "--verbose", action="count", default=0, help="Increase verbosity (use -v or -vv for more log output)")
 
 
     args = parser.parse_args()
@@ -44,6 +49,19 @@ if __name__ == "__main__":
         benchs.append(benchmark.PaCiDemoBenchmark())
 
     for bench in benchs:
+        # Apply runtime flags to the Benchmark instance
+        bench.no_report = bool(args.no_report)
+        bench.no_profile = bool(args.no_profile)
+        bench.jobs = int(args.jobs) if args.jobs is not None else -1
+        if args.outdir:
+            bench.outdir = args.outdir
+
+        # Adjust logging level based on verbosity
+        if args.verbose >= 1:
+            logging.getLogger().setLevel(logging.DEBUG)
+        else:
+            logging.getLogger().setLevel(logging.INFO)
+
         if args.clean:
             bench.clean()
         else:

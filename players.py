@@ -37,7 +37,9 @@ class PlayerFormat(enum.Enum):
     """
 
     def requires_one_of(self):
-        ym_only = {MusicFormat.YM6}
+        ym6_only = {MusicFormat.YM6}
+        ym3_only = {MusicFormat.YM3}
+        any_ym= {MusicFormat.YM3, MusicFormat.YM6}
         chp_only = {MusicFormat.CHP}
 
         at_compatible = {
@@ -49,10 +51,10 @@ class PlayerFormat(enum.Enum):
         }
 
         return {
-            PlayerFormat.FAP: ym_only,
-            PlayerFormat.AYT: ym_only,
-            PlayerFormat.MINY: ym_only,
-            PlayerFormat.AYC: ym_only,
+            PlayerFormat.FAP: ym6_only,
+            PlayerFormat.AYT: ym6_only,
+            PlayerFormat.MINY: ym3_only,
+            PlayerFormat.AYC: ym3_only,
             PlayerFormat.CHPB: chp_only,
             PlayerFormat.AKG: at_compatible,
             PlayerFormat.AKYS: at_compatible,
