@@ -203,7 +203,7 @@ class Benchmark:
                 # derive format from compressed filename extension (best-effort)
                 try:
                     raw_fmt = os.path.splitext(res.get("compressed_fname", ""))[1]
-                    raw_fmt = raw_fmt.replace("CHPZ80", "chp")
+                    raw_fmt = raw_fmt.replace("CHPZ80", "CHPB")
                 except Exception:
                     raw_fmt = ""
 
@@ -236,7 +236,8 @@ class Benchmark:
             })
 
             # remove AKM
-            df = df[ df["format"] != "AKM"]
+            if False:
+                df = df[ df["format"] != "AKM"]
 
             title = {
                 'prog_size': "Raw program size",
@@ -245,9 +246,10 @@ class Benchmark:
             }
 
             # Canonical ordering: prefer the order of players configured for this benchmark
-            preferred_order = ["CHP", "AKM", "AKG", "FAP", "AYT", "AKYS", "AKYU"]
+            preferred_order = ["CHPB", "AKM", "AKG", "FAP", "AYT", "AKYS", "AKYU"]
             # Keep only formats present in the dataframe (preserve player order)
             ordered_extensions = [c for c in preferred_order if c in df["format"].unique()]
+            print(ordered_extensions)
             format_palette = sns.color_palette("tab10", n_colors=max(1, len(ordered_extensions)))
             format_colors = dict(zip(ordered_extensions, format_palette))
 
@@ -339,6 +341,10 @@ class Benchmark:
         report.write("\n\n# Spider Charts by Player Format\n\n")
         metrics = [col for col in df.columns if col not in ["format", "sources"]]
         n_formats = len(ordered_extensions)
+        if n_formats == 0:
+            logging.info("No formats present for spider charts; skipping")
+            report.write("\nNo formats available for spider charts.\n")
+            return
         n_cols = min(3, n_formats)
         n_rows = (n_formats + n_cols - 1) // n_cols
 
@@ -532,14 +538,18 @@ class Benchmark:
 
     def _plot_boxplot(self, df: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, format_colors: dict = None, report=None) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
-        # Build palette mapping for ordered_extensions
-        palette = None
-        if format_colors is not None:
-            palette = {fmt: format_colors.get(fmt) for fmt in ordered_extensions}
+        # Build palette mapping for ordered_extensions using centralized helper
+        palette = self._palette_for_ordered(format_colors, ordered_extensions)
 
         # Use hue='format' with dodge=False to apply explicit palette without deprecation warning
-        sns.boxplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
-                    ax=ax, order=ordered_extensions, palette=palette)
+        try:
+            print(palette.keys())
+            sns.boxplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
+                        ax=ax, order=ordered_extensions, palette=palette)
+        except ValueError:
+            logging.warning("Boxplot palette mapping failed; retrying without explicit palette", df[x], palette.keys())
+            sns.boxplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
+                        ax=ax, order=ordered_extensions)
         # remove redundant legend created by hue
         lg = ax.get_legend()
         if lg:
@@ -556,16 +566,20 @@ class Benchmark:
 
     def _plot_swarmplot(self, df: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, format_colors: dict = None, report=None) -> None:
         fig, ax = plt.subplots(figsize=(10, 6))
-        # Build palette mapping for ordered_extensions
-        palette = None
-        if format_colors is not None:
-            palette = {fmt: format_colors.get(fmt) for fmt in ordered_extensions}
+        # Build palette mapping for ordered_extensions using centralized helper
+        palette = self._palette_for_ordered(format_colors, ordered_extensions)
 
         # Use violinplot to show distribution and avoid point-overlap issues
         # Use density_norm='width' (future-proof replacement for scale='width')
-        sns.violinplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
-                       ax=ax, order=ordered_extensions, cut=0, inner="quartile",
-                       density_norm='width', linewidth=0.6, palette=palette)
+        try:
+            sns.violinplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
+                           ax=ax, order=ordered_extensions, cut=0, inner="quartile",
+                           density_norm='width', linewidth=0.6, palette=palette)
+        except ValueError:
+            logging.warning("Violin plot palette mapping failed; retrying without explicit palette")
+            sns.violinplot(data=df, x="format", y=comparison_key, hue="format", dodge=False,
+                           ax=ax, order=ordered_extensions, cut=0, inner="quartile",
+                           density_norm='width', linewidth=0.6)
         # remove redundant legend created by hue
         lg = ax.get_legend()
         if lg:
@@ -600,6 +614,26 @@ class Benchmark:
 
         logging.info(f"Removed {removed} produced files for {self.name}")
 
+    def _palette_for_ordered(self, format_colors: dict, ordered_extensions: list):
+        """Return a palette mapping (format -> color) for the given ordered formats.
+
+        This centralizes palette construction so plotting helpers stay consistent.
+        If `format_colors` is None, returns None to let seaborn pick defaults.
+        """
+        if format_colors is None:
+            return None
+
+        # Ensure palette contains an entry for every requested format.
+        # If the provided `format_colors` lacks some keys, fall back to a
+        # generated categorical palette and prefer any explicit colors.
+        palette = {}
+        auto_palette = sns.color_palette("tab10", n_colors=max(1, len(ordered_extensions)))
+        for i, fmt in enumerate(ordered_extensions):
+            palette[fmt] = format_colors.get(fmt, auto_palette[i % len(auto_palette)])
+            if "CHPB" in palette:
+                palette["CHP"] = palette["CHPB"]
+        return palette
+
 
 class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):
@@ -616,7 +650,7 @@ class ArkosTracker3Benchmark(Benchmark):
 
 class ChpBenchmark(Benchmark):
     def __init__(self):
-        replay_formats = [PlayerFormat.CHP, PlayerFormat.AKM]
+        replay_formats = [PlayerFormat.CHPB, PlayerFormat.AKM]
         super().__init__("CHP", ChpDataset(), replay_formats)
 
 

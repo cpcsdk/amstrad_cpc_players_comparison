@@ -30,7 +30,7 @@ class PlayerFormat(enum.Enum):
     AKM = "akm"
     AKYS = "akys"
     AKYU = "akyu"
-    CHP = "chpdb"
+    CHPB = "chpb"
 
     """
     Returns the list of format that could produce it 
@@ -53,7 +53,7 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.AYT: ym_only,
             PlayerFormat.MINY: ym_only,
             PlayerFormat.AYC: ym_only,
-            PlayerFormat.CHP: chp_only,
+            PlayerFormat.CHPB: chp_only,
             PlayerFormat.AKG: at_compatible,
             PlayerFormat.AKYS: at_compatible,
             PlayerFormat.AKYU: at_compatible,
@@ -90,7 +90,7 @@ class PlayerFormat(enum.Enum):
             PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
             PlayerFormat.AKYU: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
             PlayerFormat.AKM: profiler_header + 9 + 9,    # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
-            PlayerFormat.CHP: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
+            PlayerFormat.CHPB: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
         }[self]
     
     def load_address(self):
@@ -110,7 +110,7 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -
         PlayerFormat.AKYS: compile_aks_with_akys,
         PlayerFormat.AKYU: compile_aks_with_akyu,
         PlayerFormat.AKM: compile_aks_with_akm,
-        PlayerFormat.CHP: compile_chp,
+        PlayerFormat.CHPB: compile_chp,
     }[format](input_file, output_file)
 
 
@@ -123,7 +123,7 @@ def build_replay_program(data: dict, player: PlayerFormat) -> dict:
         PlayerFormat.AKYS: (build_replay_program_for_akys, ["player_config"]),
         PlayerFormat.AKYU: (build_replay_program_for_akyu, ["player_config"]),
         PlayerFormat.AKM: (build_replay_program_for_akm, ["player_config"]),
-        PlayerFormat.CHP: (build_replay_program_for_chp, []),
+        PlayerFormat.CHPB: (build_replay_program_for_chp, []),
     }[player]
 
 
