@@ -17,15 +17,16 @@ import sys
 
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.INFO)
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.ERROR)
 
     parser = argparse.ArgumentParser(
         prog=sys.argv[0], description="Benchmark launcher for Amstrad CPC players"
     )
 
+    # accept both --benchmark and the shorter --bench for convenience/compatibility
     parser.add_argument(
-        "--benchmark", action="append", default=[], choices=["AT3", "CHP", "PACIDEMO"]
+        "--benchmark", "--bench", action="append", default=[], choices=["AT3", "CHP", "PACIDEMO"]
     )
     parser.add_argument("--clean", action="store_true")
 

@@ -147,8 +147,14 @@ def _plot_pareto_scatter(df: pd.DataFrame, music_path: str, save_plot: str | Non
     # Plot points
     for _, row in df.iterrows():
         color = format_colors[row["player"]]
-        # Use square marker for stable players, circle for others
-        player_format = PlayerFormat[row["player"].upper()]
+        # Resolve player format robustly: accept enum name or value
+        try:
+            player_format = PlayerFormat[row["player"].upper()]
+        except KeyError:
+            # fallback: lookup by value
+            player_format = next((pf for pf in PlayerFormat if pf.value.lower() == str(row["player"]).lower()), None)
+            if player_format is None:
+                raise KeyError(f"Unknown player format: {row['player']}")
         marker = 's' if player_format.is_stable() else 'o'
         ax.scatter(row["program_size"], row["nops_exec_max"], s=150, alpha=0.7, color=color, marker=marker, label=row["player"])
         ax.annotate(row["player"], (row["program_size"], row["nops_exec_max"]),

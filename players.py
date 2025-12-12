@@ -299,8 +299,48 @@ def compile_chp(chp_fname: str, _):
 
 
 def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
-    cmd_line = f'bndbuild --direct -- fap \\"{ym_fname}\\" \\"{fap_fname}\\"'
-    res = __crunch_or_compile_music__(ym_fname, fap_fname, cmd_line)
+    # Use a temporary safe filename to avoid bndbuild parsing issues with
+    # filenames that contain quotes or other special characters.
+    import tempfile
+    import shutil
+    import os
+
+    tmpdir = tempfile.mkdtemp(prefix="fap-")
+    try:
+        base_in = os.path.basename(ym_fname)
+        ext_in = os.path.splitext(base_in)[1]
+        safe_in = os.path.join(tmpdir, f"in{ext_in}")
+        safe_out = os.path.join(tmpdir, "out.fap")
+        shutil.copyfile(ym_fname, safe_in)
+
+        cmd = ["bndbuild", "--direct", "--", "fap", safe_in, safe_out]
+        res_proc = utils.execute_process(cmd)
+
+        # Copy produced file to requested target
+        shutil.copyfile(safe_out, fap_fname)
+
+        stdout = (res_proc.stdout or b"").decode("utf-8", errors="ignore")
+        stderr = (res_proc.stderr or b"").decode("utf-8", errors="ignore")
+
+        try:
+            s = os.path.getsize(fap_fname)
+        except OSError:
+            s = -1
+
+        res = {
+            "original_fname": ym_fname,
+            "compressed_fname": fap_fname,
+            "stdout": stdout,
+            "stderr": stderr,
+            "buffer_size": 0,
+            "data_size": s,
+            "play_time": -1,
+        }
+    finally:
+        try:
+            shutil.rmtree(tmpdir)
+        except Exception:
+            pass
     for line in res["stdout"].splitlines():
         DECRUNCH_BUFF_SIZE = "Decrunch buffer size"
         PLAY_TIME = "Play time"

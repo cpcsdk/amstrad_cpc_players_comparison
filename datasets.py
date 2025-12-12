@@ -80,14 +80,57 @@ def convert_music_file(input_file: str, output_file: str) -> None:
 
 
 def convert_at_to_ym6(input, output):
-    #  cmd = f"tools\\SongToYm.exe \\\"{input}\\\" \\\"{output}\\\""
-    cmd = f'bndbuild --direct -- SongToYm  \\"{input}\\" \\"{output}\\" '
-    execute_process(cmd)
+    # bndbuild may not handle filenames with quotes/apostrophes robustly.
+    # Workaround: copy input to a temporary safe filename, run the conversion
+    # there, then move the produced file to the requested output path.
+    import tempfile
+    import shutil
+    import uuid
+    import os
+
+    tmpdir = tempfile.mkdtemp(prefix="songtoym-")
+    try:
+        base_in = os.path.basename(input)
+        ext = os.path.splitext(base_in)[1]
+        safe_in = os.path.join(tmpdir, f"in{ext}")
+        safe_out = os.path.join(tmpdir, "out.ym")
+        shutil.copyfile(input, safe_in)
+
+        cmd = ["bndbuild", "--direct", "--", "SongToYm", safe_in, safe_out]
+        execute_process(cmd)
+
+        # move produced file to desired output
+        shutil.copyfile(safe_out, output)
+    finally:
+        try:
+            shutil.rmtree(tmpdir)
+        except Exception:
+            pass
 
 
 def convert_chp_to_ym3(input, output):
-    cmd = f'bndbuild --direct -- chipnsfx  \\"{input}\\" -y \\"{output}\\" '
-    execute_process(cmd)
+    # Same temporary-file workaround for CHP conversion to avoid quoting issues
+    import tempfile
+    import shutil
+    import os
+
+    tmpdir = tempfile.mkdtemp(prefix="chipnsfx-")
+    try:
+        base_in = os.path.basename(input)
+        ext = os.path.splitext(base_in)[1]
+        safe_in = os.path.join(tmpdir, f"in{ext}")
+        safe_out = os.path.join(tmpdir, "out.ym")
+        shutil.copyfile(input, safe_in)
+
+        cmd = ["bndbuild", "--direct", "--", "chipnsfx", safe_in, "-y", safe_out]
+        execute_process(cmd)
+
+        shutil.copyfile(safe_out, output)
+    finally:
+        try:
+            shutil.rmtree(tmpdir)
+        except Exception:
+            pass
 
 
 class Dataset(ABC):
@@ -97,6 +140,7 @@ class Dataset(ABC):
         self.clean_patterns = [
             "*.akg",
             "*.akm",
+            "*.aky", # kept to clean up old folders
             "*.akys",
             "*.akyu",
             "*.ayt",
@@ -198,3 +242,24 @@ class At3Dataset(Dataset):
             kind_path = os.path.join(self.root(), kind.value)
             for f in glob.glob(os.path.join(kind_path, "*.json")):
                 yield f
+
+
+class PaCiDemoDataset(Dataset):
+    def __init__(self):
+        super().__init__(os.path.join("datasets", "PaCiDemo"))
+
+    def __iter__(self):
+        # Walk the PaCiDemo folder and yield files whose extension matches
+        # known music formats (from MusicFormat enum).
+        valid_exts = {fmt.value.lower() for fmt in MusicFormat}
+        for root, _, files in os.walk(self.root()):
+            for fname in files:
+                ext = os.path.splitext(fname)[1][1:].lower()
+                if ext in valid_exts:
+                    yield os.path.join(root, fname)
+
+    def iter_json(self):
+        for root, _, files in os.walk(self.root()):
+            for fname in files:
+                if fname.lower().endswith('.json'):
+                    yield os.path.join(root, fname)

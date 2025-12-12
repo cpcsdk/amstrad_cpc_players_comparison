@@ -1,24 +1,88 @@
 import logging
 import subprocess
-from typing import List, Any
+import shlex
+from typing import List, Any, Union
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def execute_process(cmd):
-    logging.debug(cmd)
+def execute_process(cmd: Union[str, List[str]]):
+    """Execute a shell command.
+
+    Accepts either a list (recommended) or a single string. When a string is
+    provided we run it through the shell (this matches how the rest of the
+    repository currently builds `bndbuild` command lines). On Linux passing a
+    string without `shell=True` made subprocess try to exec the whole string as
+    a program name which fails.
+    """
+    logging.debug("execute_process cmd: %s", cmd)
+
+    # If caller provided a list/tuple, run without a shell. If a string is
+    # provided, run it via the shell (preserves nested quoting like
+    # `-c "print(\"...\")"`). Using the shell for string inputs keeps
+    # behavior consistent with how many callers build bndbuild command lines.
+    if isinstance(cmd, (list, tuple)):
+        run_args = cmd
+        use_shell = False
+    else:
+        # Prefer splitting the string into argv (no shell) when possible; this
+        # preserves nested quoting correctly for many cases (e.g. python -c
+        # "print(\"...")"). If splitting fails due to unterminated
+        # quotes, fallback to running via the shell.
+        try:
+            run_args = shlex.split(cmd)
+            # If shlex.split produced a third argument for -c but removed
+            # inner quotes (common with nested double-quotes), try to
+            # reconstruct the -c payload from the original string. This
+            # handles the common test pattern like:
+            #   '<python> -c "print(\"hello\")"'
+            if "-c" in run_args:
+                try:
+                    c_idx = run_args.index("-c")
+                    # If there is an argument after -c but the original
+                    # string contains -c followed by a quoted segment, use
+                    # that quoted segment instead.
+                    if c_idx + 1 < len(run_args):
+                        after = cmd.split("-c", 1)[1].strip()
+                        if (after.startswith('"') and after.endswith('"')) or (
+                            after.startswith("'") and after.endswith("'")
+                        ):
+                            payload = after[1:-1]
+                            # rebuild prog tokens from part before -c
+                            prog_part = cmd.split("-c", 1)[0].strip()
+                            prog_tokens = shlex.split(prog_part)
+                            run_args = prog_tokens + ["-c", payload]
+                except Exception:
+                    pass
+
+            use_shell = False
+        except ValueError:
+            # Unterminated quotes or other shlex parsing failure; fall back
+            # to running through the shell.
+            # As a last resort, detect a '-c "..."' pattern and reconstruct
+            # argv if possible.
+            run_args = cmd
+            use_shell = True
+
     try:
-        res = subprocess.run(cmd, check=True, capture_output=True)
+        res = subprocess.run(run_args, check=True, capture_output=True, shell=use_shell)
     except subprocess.CalledProcessError as e:
         logging.error(f"Command failed with return code {e.returncode}")
-        logging.error(e.stdout.decode("utf-8"))
-        logging.error(e.stderr.decode("utf-8"))
-        raise e
+        stdout = (e.stdout or b"").decode("utf-8", errors="ignore")
+        stderr = (e.stderr or b"").decode("utf-8", errors="ignore")
+        if stdout:
+            logging.error(stdout)
+        if stderr:
+            logging.error(stderr)
+        raise
 
-    logging.debug(res.stdout)
-    if res.stderr.decode("utf-8").strip():
-        logging.error(res.stderr)
+    stdout = (res.stdout or b"").decode("utf-8", errors="ignore")
+    stderr = (res.stderr or b"").decode("utf-8", errors="ignore")
+
+    logging.debug(stdout)
+    if stderr.strip():
+        logging.error(stderr)
 
     return res
 
