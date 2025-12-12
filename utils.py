@@ -6,6 +6,7 @@ import json
 import tempfile
 import shutil
 import os
+import platform
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -289,3 +290,20 @@ def safe_write_json(path: str, obj, indent: int | None = None) -> None:
         except Exception:
             pass
         logging.exception(f"Failed writing JSON to {path}")
+
+
+def build_bndbuild_tokens(*parts) -> list:
+    """Construct a `bndbuild` argv list from components and apply Windows escaping.
+
+    Usage: pass the command parts as separate args; returned value is a list
+    of strings safe to pass to `subprocess.run(..., shell=False)` via
+    `execute_process()`.
+
+    On Windows we apply conservative backslash escaping (replace '\\' with
+    '\\\\') to mimic previous escaping behavior used across the codebase.
+    """
+    tokens = [str(p) for p in parts]
+    if platform.system().startswith("Windows"):
+        rep = r"\\\\"
+        tokens = [t.replace("\\", rep) for t in tokens]
+    return tokens

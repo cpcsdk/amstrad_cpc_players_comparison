@@ -1,4 +1,5 @@
 from utils import *
+from utils import build_bndbuild_tokens
 import os
 import pandas as pd
 import platform
@@ -11,15 +12,19 @@ def profile(amsdos_fname, load_address):
 
     csv_fname = os.path.splitext(amsdos_fname)[0] + ".CSV"
     
-    # Apply Windows path escaping for subprocess (triple backslash)
-    if "Windows" in platform.system():
-        rep = r"\\\\"
-        amsdos_fname = amsdos_fname.replace("\\", rep)
-        csv_fname = csv_fname.replace("\\", rep)
-    
-    cmd = f'"bndbuild" --direct -- Z80Profiler -l {hex(load_address)} \\"{amsdos_fname}\\" \\"{csv_fname}\\"'
+    # Build argv tokens and let `execute_process` run them (no shell).
+    tokens = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        "Z80Profiler",
+        "-l",
+        hex(load_address),
+        amsdos_fname,
+        csv_fname,
+    )
 
-    execute_process(cmd)
+    execute_process(tokens)
 
     timings = pd.read_csv(
         csv_fname, 

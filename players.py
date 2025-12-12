@@ -15,7 +15,7 @@ import os
 import subprocess
 import logging
 import platform
-from utils import execute_process, safe_getsize, safe_bndbuild_conversion
+from utils import execute_process, safe_getsize, safe_bndbuild_conversion, build_bndbuild_tokens
 
 from datasets import MusicFormat
 import utils
@@ -221,8 +221,19 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
             program_size = max(0, program_size - overhead)
 
     zx0_fname = amsdos_fname + ".zx0"
-    cmd = f'bndbuild --direct -- compress --cruncher zx0 --input \\"{amsdos_fname}\\" --output \\"{zx0_fname}\\"'
-    execute_process(cmd)
+    tokens = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        "compress",
+        "--cruncher",
+        "zx0",
+        "--input",
+        amsdos_fname,
+        "--output",
+        zx0_fname,
+    )
+    execute_process(tokens)
     program_zx0_size = safe_getsize(zx0_fname) #no header to remove
     
     
@@ -248,15 +259,26 @@ def __crunch_or_compile_music__(src: str, tgt: str, cmd: str) -> dict:
 
 
 def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str) -> dict:
-    cmd_line = f'bndbuild --direct -- ayt --verbose --target CPC \\"{ym_fname}\\" -o \\"{ayt_fname}\\"'
+    tokens = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        "ayt",
+        "--verbose",
+        "--target",
+        "CPC",
+        ym_fname,
+        "-o",
+        ayt_fname,
+    )
 
     try:
-        res = __crunch_or_compile_music__(ym_fname, ayt_fname, cmd_line)
+        res = __crunch_or_compile_music__(ym_fname, ayt_fname, tokens)
     except Exception as e:
         if not os.path.exists(ayt_fname):
             raise e
         else:
-            pass # printed an error message BUT generated the file ...
+            pass  # printed an error message BUT generated the file ...
 
     res["data-size"] = safe_getsize(ayt_fname)
     return res
@@ -273,12 +295,27 @@ def crunch_ym_with_miny(ym_fname: str, miny_fname: str) -> dict:
 def compile_chp(chp_fname: str, _):
     assert ".CHP" in chp_fname
     chpz80_fname = chp_fname.replace(".CHP", ".CHPZ80")
-    cmd_line = f'bndbuild --direct -- chipnsfx \\"{chp_fname}\\" \\"{chpz80_fname}\\"'
-    res = utils.execute_process(cmd_line)
+    tokens1 = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        "chipnsfx",
+        chp_fname,
+        chpz80_fname,
+    )
+    res = execute_process(tokens1)
 
     chpb_fname = chp_fname.replace(".CHP", ".CHPB")
-    cmd_line = f'bndbuild --direct -- basm \\"{chpz80_fname}\\" -o \\"{chpb_fname}\\"'
-    res = utils.execute_process(cmd_line)
+    tokens2 = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        "basm",
+        chpz80_fname,
+        "-o",
+        chpb_fname,
+    )
+    res = execute_process(tokens2)
 
     s = safe_getsize(chpb_fname)
 
@@ -354,8 +391,19 @@ def __compile_aks_with_tool__(at_fname: str, output_fname: str, tool_name: str) 
         tool_name: Tool name (Akg, Aky, or Akm)
     """
     tmp_fname = rename_arkos_binary_for_fname_unicity(output_fname)
-    cmd_line = f'bndbuild --direct -- SongTo{tool_name} -bin -adr 0x506 --exportPlayerConfig \\"{at_fname}\\" \\"{tmp_fname}\\" '
-    res = __crunch_or_compile_music__(at_fname, tmp_fname, cmd_line)
+    tokens = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        f"SongTo{tool_name}",
+        "-bin",
+        "-adr",
+        "0x506",
+        "--exportPlayerConfig",
+        at_fname,
+        tmp_fname,
+    )
+    res = __crunch_or_compile_music__(at_fname, tmp_fname, tokens)
     res["compressed_fname"] = output_fname
     res["player_config"] = os.path.splitext(tmp_fname)[0] + "_playerconfig.asm"
     if os.path.exists(output_fname):
