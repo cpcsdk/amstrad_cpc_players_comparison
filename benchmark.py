@@ -27,7 +27,7 @@ import numpy as np
 from math import pi
 from matplotlib.ticker import FuncFormatter
 from matplotlib.patches import Ellipse
-from utils import compute_pareto_front, draw_pareto_front
+from utils import compute_pareto_front, draw_pareto_front, safe_read_json, safe_write_json, safe_rmtree
 import plots
 from itertools import combinations
 try:
@@ -92,16 +92,18 @@ class Benchmark:
 
                 # Prefer dataset-local JSON if present
                 if os.path.exists(json_target):
-                    try:
-                        return json.load(open(json_target))
-                    except Exception:
-                        logging.exception("Failed reading dataset JSON; will rebuild")
+                    res = safe_read_json(json_target)
+                    if res is not None:
+                        return res
+                    else:
+                        logging.info("Failed reading dataset JSON; will rebuild")
 
                 if os.path.exists(json_working):
-                    try:
-                        return json.load(open(json_working))
-                    except Exception:
-                        logging.exception("Failed reading working JSON; will rebuild")
+                    res = safe_read_json(json_working)
+                    if res is not None:
+                        return res
+                    else:
+                        logging.info("Failed reading working JSON; will rebuild")
 
                 # Convert, crunch, build, profile
                 convert_music_file(working_input, converted_working)
@@ -157,14 +159,10 @@ class Benchmark:
                     except Exception:
                         pass
 
-                    with open(json_target, "w") as fh:
-                        json.dump(result, fh)
+                    safe_write_json(json_target, result)
                     return result
                 finally:
-                    try:
-                        shutil.rmtree(tmpdir)
-                    except Exception:
-                        pass
+                    safe_rmtree(tmpdir)
             except Exception as e:
                 logging.exception(f"Unexpected error processing {original_input} for {out_player}")
                 return {
@@ -240,11 +238,9 @@ class Benchmark:
             init_time = []
 
             for f in self.iter_json():
-                try:
-                    with open(f) as json_file:
-                        res = json.load(json_file)
-                except Exception:
-                    logging.exception(f"Failed reading JSON {f}; skipping")
+                res = safe_read_json(f)
+                if res is None:
+                    # safe_read_json already logged the issue
                     continue
 
                 # Determine canonical format: prefer explicit `player_format` written

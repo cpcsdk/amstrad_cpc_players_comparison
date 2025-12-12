@@ -15,7 +15,7 @@ import os
 import subprocess
 import logging
 import platform
-from utils import execute_process
+from utils import execute_process, safe_getsize, safe_bndbuild_conversion
 
 from datasets import MusicFormat
 import utils
@@ -212,7 +212,7 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
     )
 
     execute_process(cmd)
-    program_size = os.path.getsize(amsdos_fname) #- 128 #header has to be removed
+    program_size = safe_getsize(amsdos_fname)
 
     # Subtract profiling overhead if player format provided
     if player is not None:
@@ -223,7 +223,7 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
     zx0_fname = amsdos_fname + ".zx0"
     cmd = f'bndbuild --direct -- compress --cruncher zx0 --input \\"{amsdos_fname}\\" --output \\"{zx0_fname}\\"'
     execute_process(cmd)
-    program_zx0_size = os.path.getsize(zx0_fname) #no header to remove
+    program_zx0_size = safe_getsize(zx0_fname) #no header to remove
     
     
     return {
@@ -235,11 +235,7 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
 
 def __crunch_or_compile_music__(src: str, tgt: str, cmd: str) -> dict:
     res = utils.execute_process(cmd)
-
-    try:
-        s = os.path.getsize(tgt)
-    except OSError:
-        s = -1
+    s = safe_getsize(tgt)
     return {
         "original_fname": src,
         "compressed_fname": tgt,
@@ -262,7 +258,7 @@ def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str) -> dict:
         else:
             pass # printed an error message BUT generated the file ...
 
-    res["data-size"] = os.path.getsize(ayt_fname)
+    res["data-size"] = safe_getsize(ayt_fname)
     return res
 
 
@@ -284,10 +280,7 @@ def compile_chp(chp_fname: str, _):
     cmd_line = f'bndbuild --direct -- basm \\"{chpz80_fname}\\" -o \\"{chpb_fname}\\"'
     res = utils.execute_process(cmd_line)
 
-    try:
-        s = os.path.getsize(chpb_fname)
-    except OSError:
-        s = -1
+    s = safe_getsize(chpb_fname)
 
     return {
         "original_fname": chp_fname,
@@ -301,48 +294,29 @@ def compile_chp(chp_fname: str, _):
 
 
 def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
-    # Use a temporary safe filename to avoid bndbuild parsing issues with
-    # filenames that contain quotes or other special characters.
-    import tempfile
-    import shutil
-    import os
-
-    tmpdir = tempfile.mkdtemp(prefix="fap-")
+    cmd = ["bndbuild", "--direct", "--", "fap", "{in_path}", "{out_path}"]
     try:
-        base_in = os.path.basename(ym_fname)
-        ext_in = os.path.splitext(base_in)[1]
-        safe_in = os.path.join(tmpdir, f"in{ext_in}")
-        safe_out = os.path.join(tmpdir, "out.fap")
-        shutil.copyfile(ym_fname, safe_in)
+        res_proc, stdout, stderr = safe_bndbuild_conversion(ym_fname, fap_fname, cmd, tmp_prefix="fap-")
+    except Exception as e:
+        if not os.path.exists(fap_fname):
+            raise e
+        else:
+            # file exists despite error; proceed with what we have
+            stdout = ""
+            stderr = ""
 
-        cmd = ["bndbuild", "--direct", "--", "fap", safe_in, safe_out]
-        res_proc = utils.execute_process(cmd)
+    s = safe_getsize(fap_fname)
 
-        # Copy produced file to requested target
-        shutil.copyfile(safe_out, fap_fname)
+    res = {
+        "original_fname": ym_fname,
+        "compressed_fname": fap_fname,
+        "stdout": stdout,
+        "stderr": stderr,
+        "buffer_size": 0,
+        "data_size": s,
+        "play_time": -1,
+    }
 
-        stdout = (res_proc.stdout or b"").decode("utf-8", errors="ignore")
-        stderr = (res_proc.stderr or b"").decode("utf-8", errors="ignore")
-
-        try:
-            s = os.path.getsize(fap_fname)
-        except OSError:
-            s = -1
-
-        res = {
-            "original_fname": ym_fname,
-            "compressed_fname": fap_fname,
-            "stdout": stdout,
-            "stderr": stderr,
-            "buffer_size": 0,
-            "data_size": s,
-            "play_time": -1,
-        }
-    finally:
-        try:
-            shutil.rmtree(tmpdir)
-        except Exception:
-            pass
     for line in res["stdout"].splitlines():
         DECRUNCH_BUFF_SIZE = "Decrunch buffer size"
         PLAY_TIME = "Play time"
@@ -351,13 +325,19 @@ def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
             parts = line.split(":")[1]
             parts = parts.split("(")[0]
             parts = parts.strip()
-            res["buffer_size"] = int(parts)
+            try:
+                res["buffer_size"] = int(parts)
+            except Exception:
+                pass
 
         elif PLAY_TIME in line:
             time_parts = line.split(":")[1]
             time_parts = time_parts.split("N")[0]
             time_parts = time_parts.strip()
-            res["play_time"] = int(time_parts)
+            try:
+                res["play_time"] = int(time_parts)
+            except Exception:
+                pass
     return res
 
 def rename_arkos_binary_for_fname_unicity(arkos_fname: str) -> str:

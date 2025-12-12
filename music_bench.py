@@ -131,8 +131,9 @@ def main() -> None:
         _plot_pareto_scatter(df, music_path, args.save_plot)
 
     if args.out_json:
-        with open(args.out_json, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2)
+        # Use safe write helper to avoid partial files
+        from utils import safe_write_json
+        safe_write_json(args.out_json, results, indent=2)
         logging.info(f"Saved results to {args.out_json}")
 
 

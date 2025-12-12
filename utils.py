@@ -2,6 +2,10 @@ import logging
 import subprocess
 import shlex
 from typing import List, Any, Union
+import json
+import tempfile
+import shutil
+import os
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -184,3 +188,104 @@ def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
         ax.axvline(x=0x8000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
         ax.axvline(x=0xC000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
         ax.axhline(y=3328, color='blue', linestyle=':', linewidth=1.5, alpha=0.6, label='1 halt')
+
+
+def safe_getsize(path: str, fallback: int = -1) -> int:
+    """Return `os.path.getsize(path)` or `fallback` on error.
+
+    Many callers in the repo expect -1 on failure; centralize that behavior here.
+    """
+    try:
+        return os.path.getsize(path)
+    except Exception:
+        return fallback
+
+
+def safe_read_json(path: str) -> dict | None:
+    """Read JSON and return its object or None on error (logs exception).
+
+    This centralizes defensive JSON loading used in `benchmark.py` and other places.
+    """
+    try:
+        with open(path, 'r') as fh:
+            return json.load(fh)
+    except Exception:
+        logging.exception(f"Failed reading JSON {path}")
+        return None
+
+
+def safe_bndbuild_conversion(input_path: str, output_path: str, cmd_template, tmp_prefix: str = "tmp-"):
+    """Run a `bndbuild`-style conversion using a temporary safe filename.
+
+    Parameters:
+    - input_path: original input file
+    - output_path: final target path to produce
+    - cmd_template: either a list of argv tokens or a string command. Use
+      placeholders `{in_path}` and `{out_path}` in tokens/strings to indicate
+      where the temporary paths should be substituted.
+    - tmp_prefix: prefix for the temporary directory
+
+    Returns:
+      (res, stdout, stderr) where `res` is the CompletedProcess returned by
+      `execute_process` (or whatever the underlying runner returns). stdout and
+      stderr are decoded strings for convenience.
+    """
+    tmpdir = tempfile.mkdtemp(prefix=tmp_prefix)
+    try:
+        base_in = os.path.basename(input_path)
+        ext = os.path.splitext(base_in)[1]
+        safe_in = os.path.join(tmpdir, f"in{ext}")
+        # Use the same extension as the requested output for the temporary output
+        out_ext = os.path.splitext(output_path)[1]
+        safe_out = os.path.join(tmpdir, f"out{out_ext}")
+        shutil.copyfile(input_path, safe_in)
+
+        # Format the command template
+        if isinstance(cmd_template, (list, tuple)):
+            cmd = [str(t).replace("{in_path}", safe_in).replace("{out_path}", safe_out) for t in cmd_template]
+        else:
+            cmd = str(cmd_template).replace("{in_path}", safe_in).replace("{out_path}", safe_out)
+
+        res = execute_process(cmd)
+
+        # Copy produced file back to requested output
+        if os.path.exists(safe_out):
+            shutil.copyfile(safe_out, output_path)
+
+        stdout = (getattr(res, 'stdout', b"") or b"").decode("utf-8", errors="ignore")
+        stderr = (getattr(res, 'stderr', b"") or b"").decode("utf-8", errors="ignore")
+        return res, stdout, stderr
+    finally:
+        safe_rmtree(tmpdir)
+
+
+def safe_rmtree(path: str) -> None:
+    """Remove a directory tree, ignoring errors and logging failures.
+
+    Use this helper to centralize try/except semantics around `shutil.rmtree`.
+    """
+    try:
+        shutil.rmtree(path)
+    except Exception:
+        logging.exception(f"Failed removing tree {path}")
+
+
+def safe_write_json(path: str, obj, indent: int | None = None) -> None:
+    """Write JSON atomically to `path`.
+
+    Uses a temporary file in the same directory then `os.replace` to avoid
+    leaving partial files on interruption.
+    """
+    d = os.path.dirname(path) or "."
+    os.makedirs(d, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix="tmpjson-", dir=d)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(obj, fh, indent=indent)
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.remove(tmp)
+        except Exception:
+            pass
+        logging.exception(f"Failed writing JSON to {path}")

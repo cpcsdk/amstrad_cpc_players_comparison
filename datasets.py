@@ -17,7 +17,7 @@ import subprocess
 import logging
 import glob
 from abc import ABC, abstractmethod
-from utils import execute_process
+from utils import execute_process, safe_bndbuild_conversion
 
 
 class MusicFormat(enum.Enum):
@@ -80,57 +80,14 @@ def convert_music_file(input_file: str, output_file: str) -> None:
 
 
 def convert_at_to_ym6(input, output):
-    # bndbuild may not handle filenames with quotes/apostrophes robustly.
-    # Workaround: copy input to a temporary safe filename, run the conversion
-    # there, then move the produced file to the requested output path.
-    import tempfile
-    import shutil
-    import uuid
-    import os
-
-    tmpdir = tempfile.mkdtemp(prefix="songtoym-")
-    try:
-        base_in = os.path.basename(input)
-        ext = os.path.splitext(base_in)[1]
-        safe_in = os.path.join(tmpdir, f"in{ext}")
-        safe_out = os.path.join(tmpdir, "out.ym")
-        shutil.copyfile(input, safe_in)
-
-        cmd = ["bndbuild", "--direct", "--", "SongToYm", safe_in, safe_out]
-        execute_process(cmd)
-
-        # move produced file to desired output
-        shutil.copyfile(safe_out, output)
-    finally:
-        try:
-            shutil.rmtree(tmpdir)
-        except Exception:
-            pass
+    # Use helper to avoid duplicating temporary-file pattern across modules.
+    cmd = ["bndbuild", "--direct", "--", "SongToYm", "{in_path}", "{out_path}"]
+    safe_bndbuild_conversion(input, output, cmd, tmp_prefix="songtoym-")
 
 
 def convert_chp_to_ym3(input, output):
-    # Same temporary-file workaround for CHP conversion to avoid quoting issues
-    import tempfile
-    import shutil
-    import os
-
-    tmpdir = tempfile.mkdtemp(prefix="chipnsfx-")
-    try:
-        base_in = os.path.basename(input)
-        ext = os.path.splitext(base_in)[1]
-        safe_in = os.path.join(tmpdir, f"in{ext}")
-        safe_out = os.path.join(tmpdir, "out.ym")
-        shutil.copyfile(input, safe_in)
-
-        cmd = ["bndbuild", "--direct", "--", "chipnsfx", safe_in, "-y", safe_out]
-        execute_process(cmd)
-
-        shutil.copyfile(safe_out, output)
-    finally:
-        try:
-            shutil.rmtree(tmpdir)
-        except Exception:
-            pass
+    cmd = ["bndbuild", "--direct", "--", "chipnsfx", "{in_path}", "-y", "{out_path}"]
+    safe_bndbuild_conversion(input, output, cmd, tmp_prefix="chipnsfx-")
 
 
 class Dataset(ABC):
