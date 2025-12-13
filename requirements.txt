@@ -1,0 +1,12 @@
+
+# Project dependencies for player_benchmark
+# Adjust versions if your environment requires different releases
+pandas>=1.5
+numpy>=1.24
+matplotlib>=3.6
+seaborn>=0.12
+joblib>=1.2
+scipy>=1.10  # optional (used for statistical tests if available)
+pytest>=7.2  # for running tests
+
+# Optional/utility
