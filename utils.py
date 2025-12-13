@@ -7,6 +7,9 @@ import tempfile
 import shutil
 import os
 import platform
+import stat
+import urllib.request
+from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -303,7 +306,68 @@ def build_bndbuild_tokens(*parts) -> list:
     '\\\\') to mimic previous escaping behavior used across the codebase.
     """
     tokens = [str(p) for p in parts]
+
+    # If caller used the generic 'bndbuild' token, try to locate a local
+    # bundled binary (env `BNDBUILD_PATH` or `./tools/bndbuild`) and prefer
+    # it. This allows CI or reproducible runs to use a downloaded copy.
+    if tokens and tokens[0] == "bndbuild":
+        bnd_path = locate_or_download_bndbuild()
+        if bnd_path:
+            tokens[0] = str(bnd_path)
+            logging.info("Using bndbuild at %s", bnd_path)
+
     if platform.system().startswith("Windows"):
-        rep = r"\\\\"
+        rep = r"\\"
         tokens = [t.replace("\\", rep) for t in tokens]
     return tokens
+
+
+def locate_or_download_bndbuild(tools_dir: str = "tools") -> str | None:
+    """Return a path to a bndbuild executable to use, preferring (in order):
+    - env var `BNDBUILD_PATH`
+    - `./tools/bndbuild` (or `.exe` on Windows)
+    - system `bndbuild` in PATH (returns the string 'bndbuild')
+    - if env `BNDBUILD_DOWNLOAD_URL` is set, download it into `./tools` and
+      make it executable, then return that path.
+
+    Returns `None` if none found and no download attempted.
+    """
+    env_path = os.environ.get("BNDBUILD_PATH")
+    if env_path:
+        if os.path.exists(env_path):
+            return env_path
+
+    tools = Path(tools_dir)
+    tools.mkdir(parents=True, exist_ok=True)
+
+    # platform-specific candidate name
+    exe_name = "bndbuild.exe" if platform.system().startswith("Windows") else "bndbuild"
+    candidate = tools / exe_name
+    if candidate.exists():
+        return str(candidate)
+
+    # If system has bndbuild available in PATH, just rely on it
+    which = shutil.which("bndbuild")
+    if which:
+        return "bndbuild"
+
+    # Optionally download from URL if provided via env var, otherwise
+    # use repository provided default release assets depending on platform.
+    dl_url = os.environ.get("BNDBUILD_DOWNLOAD_URL")
+    if not dl_url:
+        if platform.system().startswith("Windows"):
+            dl_url = "https://github.com/cpcsdk/rust.cpclib/releases/download/latest/bndbuild.exe"
+        else:
+            dl_url = "https://github.com/cpcsdk/rust.cpclib/releases/download/latest/bndbuild"
+
+    try:
+        target = str(candidate)
+        logging.info("Downloading bndbuild from %s to %s", dl_url, target)
+        urllib.request.urlretrieve(dl_url, target)
+        # Make executable
+        st = os.stat(target)
+        os.chmod(target, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        return target
+    except Exception:
+        logging.exception("Failed to download bndbuild from %s", dl_url)
+        return None
