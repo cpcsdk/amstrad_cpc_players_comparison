@@ -55,7 +55,7 @@ def _compatible_players(music_path: str, players: List[PlayerFormat] | None) -> 
     candidates: Iterable[PlayerFormat] = players if players is not None else list(PlayerFormat)
     compatible: List[PlayerFormat] = []
     for pf in candidates:
-        if pf in (PlayerFormat.MINY, PlayerFormat.AYC):
+        if pf in (PlayerFormat.MINYQ, PlayerFormat.AYC):
             continue  # not yet supported
         expected = pf.requires_one_of()
         if convertible.intersection(expected):

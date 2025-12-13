@@ -24,7 +24,7 @@ import utils
 class PlayerFormat(enum.Enum):
     FAP = "fap"
     AYT = "ayt"
-    MINY = "miny"
+    MINYQ = "minyq"
     AYC = "ayc"
     AKG = "akg"
     AKM = "akm"
@@ -53,7 +53,7 @@ class PlayerFormat(enum.Enum):
         return {
             PlayerFormat.FAP: ym6_only,
             PlayerFormat.AYT: ym6_only,
-            PlayerFormat.MINY: ym3_only,
+            PlayerFormat.MINYQ: ym3_only,
             PlayerFormat.AYC: ym3_only,
             PlayerFormat.CHPB: chp_only,
             PlayerFormat.AKG: at_compatible,
@@ -86,7 +86,7 @@ class PlayerFormat(enum.Enum):
         return {
             PlayerFormat.FAP: profiler_header + 19 + 15,  # 40 bytes total
             PlayerFormat.AYT: profiler_header + 22 + 9,   # 37 bytes (JP method)
-            PlayerFormat.MINY: None,
+            PlayerFormat.MINYQ: None,
             PlayerFormat.AYC: None,
             PlayerFormat.AKG: profiler_header + 12 + 8,   # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
             PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
@@ -106,7 +106,7 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -
     return {
         PlayerFormat.FAP: crunch_ym_with_fap,
         PlayerFormat.AYT: crunch_ym_with_ayt,
-        PlayerFormat.MINY: crunch_ym_with_miny,
+        PlayerFormat.MINYQ: crunch_ym_with_miny,
         PlayerFormat.AYC: crunch_ym_with_ayc,
         PlayerFormat.AKG: compile_aks_with_akg,
         PlayerFormat.AKYS: compile_aks_with_akys,

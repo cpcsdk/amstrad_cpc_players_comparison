@@ -40,7 +40,7 @@ class MusicFormat(enum.Enum):
 
     def convertible_to(self) -> set:
         if self == MusicFormat.CHP:
-            return {self, MusicFormat.YM3}
+            return {self, MusicFormat.YM3, MusicFormat.YM6}
         else:
             return {self, MusicFormat.YM6}
 
@@ -68,11 +68,10 @@ def convert_music_file(input_file: str, output_file: str) -> None:
         and output_format == MusicFormat.YM6
     ):
         convert_at_to_ym6(input_file, output_file)
-    elif input_format == MusicFormat.CHP and output_format in [
-        MusicFormat.YM3,
-        MusicFormat.YM6,
-    ]:
+    elif input_format == MusicFormat.CHP and output_format == MusicFormat.YM3:
         convert_chp_to_ym3(input_file, output_file)
+    elif input_format == MusicFormat.CHP and output_format == MusicFormat.YM6:
+        convert_chp_to_ym6(input_file, output_file)
     else:
         raise NotImplementedError(
             f"Conversion between different {input_format} and {output_format} is not implemented yet."
@@ -89,6 +88,22 @@ def convert_chp_to_ym3(input, output):
     cmd = ["bndbuild", "--direct", "--", "chipnsfx", "{in_path}", "-y", "{out_path}"]
     safe_bndbuild_conversion(input, output, cmd, tmp_prefix="chipnsfx-")
 
+def convert_chp_to_ym6(input, output):
+    output_ym3 = output.replace(".ym", ".ym3")
+    convert_chp_to_ym3(input, output_ym3)
+    convert_ym3_to_ym6(output_ym3, output)
+
+
+def convert_ym3_to_ym6(input, output):
+    cmd = ["bndbuild", "--direct", "--", "SongToYm", "{in_path}", "{out_path}"]
+    safe_bndbuild_conversion(input, output, cmd, tmp_prefix="ym3toym6-")
+
+def convert_ym6_to_ym3(input, output):
+    cmd = ["bndbuild", "--direct", "--", "SongToYm", "--ym3", "{in_path}", "{out_path}"]
+    safe_bndbuild_conversion(input, output, cmd, tmp_prefix="ym6toym3-")
+
+
+    
 
 class Dataset(ABC):
     def __init__(self, path):
