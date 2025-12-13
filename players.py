@@ -11,6 +11,7 @@
 
 
 import enum
+import re
 import os
 import subprocess
 import logging
@@ -86,7 +87,7 @@ class PlayerFormat(enum.Enum):
         return {
             PlayerFormat.FAP: profiler_header + 19 + 15,  # 40 bytes total
             PlayerFormat.AYT: profiler_header + 22 + 9,   # 37 bytes (JP method)
-            PlayerFormat.MINYQ: None,
+            PlayerFormat.MINYQ: profiler_header + 12 + 6,  # 24 bytes total (miniq profiler: ld hl,de,call + call)
             PlayerFormat.AYC: None,
             PlayerFormat.AKG: profiler_header + 12 + 8,   # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
             PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
@@ -106,7 +107,7 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -
     return {
         PlayerFormat.FAP: crunch_ym_with_fap,
         PlayerFormat.AYT: crunch_ym_with_ayt,
-        PlayerFormat.MINYQ: crunch_ym_with_miny,
+        PlayerFormat.MINYQ: crunch_ym_with_minyq,
         PlayerFormat.AYC: crunch_ym_with_ayc,
         PlayerFormat.AKG: compile_aks_with_akg,
         PlayerFormat.AKYS: compile_aks_with_akys,
@@ -121,6 +122,7 @@ def build_replay_program(data: dict, player: PlayerFormat) -> dict:
     (function, params) = {
         PlayerFormat.FAP: (build_replay_program_for_fap, ["buffer_size"]),
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
+        PlayerFormat.MINYQ: (build_replay_program_for_minyq, ["buffer_size"]),
         PlayerFormat.AKG: (build_replay_program_for_akg, ["player_config"]),
         PlayerFormat.AKYS: (build_replay_program_for_akys, ["player_config"]),
         PlayerFormat.AKYU: (build_replay_program_for_akyu, ["player_config"]),
@@ -172,6 +174,19 @@ def build_replay_program_for_fap(music_data_fname: str, player: PlayerFormat, bu
         + f'\\"-DFAP_PLAY_PATH=\\\\\\"{{{{FAP_PLAY_PATH|basm_escape_path}}}}\\\\\\"\\" '
         + f'\\"-DMUSIC_BUFF_SIZE={buffer_size}\\" '
     )
+
+    return __build_replay_program__(music_data_fname, extra_cmd, z80, player)
+
+
+def build_replay_program_for_minyq(music_data_fname: str, player: PlayerFormat, buffer_size: int) -> dict:
+    """Build replay program for MinIQ/minyq players.
+
+    Passes a `-DMUSIC_BUFF_SIZE` define to the assembler so the wrapper
+    can reserve an appropriate cache/buffer size.
+    """
+    z80 = "players/miniq/miniq.asm"
+
+    extra_cmd = f'\\"-DMUSIC_BUFF_SIZE={buffer_size}\\" '
 
     return __build_replay_program__(music_data_fname, extra_cmd, z80, player)
 
@@ -288,8 +303,47 @@ def crunch_ym_with_ayc(ym_fname: str, ayc_fname: str) -> dict:
     raise NotImplementedError("A pc cruncher is required")
 
 
-def crunch_ym_with_miny(ym_fname: str, miny_fname: str) -> dict:
-    raise NotImplementedError("Waiting the newest version compatible with YM6")
+def crunch_ym_with_minyq(ym_fname: str, miny_fname: str) -> dict:
+    tokens = build_bndbuild_tokens(
+        "bndbuild",
+        "--direct",
+        "--",
+        "miny",
+        "quick",
+        ym_fname,
+        miny_fname,
+    )
+
+    try:
+        res = __crunch_or_compile_music__(ym_fname, miny_fname, tokens)
+    except Exception as e:
+        if not os.path.exists(miny_fname):
+            raise e
+        else:
+            # file exists despite error; attempt to continue
+            res = {
+                "original_fname": ym_fname,
+                "compressed_fname": miny_fname,
+                "stdout": "",
+                "stderr": str(e),
+                "buffer_size": -1,
+                "data_size": safe_getsize(miny_fname),
+                "play_time": -1,
+            }
+
+    # Ensure stdout is present
+    stdout_text = res.get("stdout", "")
+    # Look for lines like: "Total cache size:   1248"
+    for line in stdout_text.splitlines():
+        if "Total cache size" in line:
+            m = re.search(r"(\d+)", line)
+            if m:
+                try:
+                    res["buffer_size"] = int(m.group(1))
+                except Exception:
+                    res["buffer_size"] = -1
+
+    return res
 
 
 def compile_chp(chp_fname: str, _):

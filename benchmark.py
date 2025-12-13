@@ -431,7 +431,7 @@ class ArkosTracker3Benchmark(Benchmark):
 
 class ChpBenchmark(Benchmark):
     def __init__(self):
-        replay_formats = [PlayerFormat.CHPB, PlayerFormat.AKM, PlayerFormat.AYT, PlayerFormat.FAP]
+        replay_formats = [PlayerFormat.CHPB, PlayerFormat.AKM, PlayerFormat.AYT, PlayerFormat.FAP, PlayerFormat.MINYQ]
         super().__init__("CHP", ChpDataset(), replay_formats)
 
 

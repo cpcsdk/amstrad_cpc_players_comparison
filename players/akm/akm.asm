@@ -15,9 +15,8 @@ AKM_File
 		assert $ == 0x506
 		incbin MUSIC_DATA_FNAME
 
-		run $
-        BREAPOINT
 StartExample
+		run $
 		ld sp,0x500
 		ld hl,#c9fb		; Cpc interrupt reduced to ei/ret
 		ld (#38),hl		;
