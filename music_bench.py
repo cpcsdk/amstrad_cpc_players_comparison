@@ -49,10 +49,14 @@ def _parse_players(raw: str | None) -> List[PlayerFormat] | None:
     return result
 
 
-def _compatible_players(music_path: str, players: List[PlayerFormat] | None) -> List[PlayerFormat]:
+def _compatible_players(
+    music_path: str, players: List[PlayerFormat] | None
+) -> List[PlayerFormat]:
     input_fmt = MusicFormat.get_format(music_path)
     convertible = input_fmt.convertible_to()
-    candidates: Iterable[PlayerFormat] = players if players is not None else list(PlayerFormat)
+    candidates: Iterable[PlayerFormat] = (
+        players if players is not None else list(PlayerFormat)
+    )
     compatible: List[PlayerFormat] = []
     for pf in candidates:
         if pf in [PlayerFormat.AYC]:
@@ -73,7 +77,9 @@ def _run_for_player(music_path: str, player: PlayerFormat) -> dict:
         raise ValueError(f"Music {music_path} not compatible with {player.name}")
     convert_to = targets[0]
 
-    converted_fname = music_path.replace(os.path.splitext(music_path)[1], f".{convert_to.value}")
+    converted_fname = music_path.replace(
+        os.path.splitext(music_path)[1], f".{convert_to.value}"
+    )
     produced_fname = player.set_extension(converted_fname)
 
     convert_music_file(music_path, converted_fname)
@@ -81,15 +87,28 @@ def _run_for_player(music_path: str, player: PlayerFormat) -> dict:
     res_play = build_replay_program(res_conv, player)
     res_prof = profile(res_play["program_name"], player.load_address())
 
-    return res_conv | res_play | res_prof | {"player": player.value, "source": music_path}
+    return (
+        res_conv | res_play | res_prof | {"player": player.value, "source": music_path}
+    )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Benchmark a single music file across compatible players.")
-    parser.add_argument("--music", required=True, help="Path to the music file (AKS/CHP/YM/etc.)")
-    parser.add_argument("--players", help="Comma-separated player formats to force (e.g., AKM,AKG,FAP). If omitted, all compatible players are used.")
-    parser.add_argument("--out-json", help="Optional path to save aggregated results as JSON")
-    parser.add_argument("--save-plot", help="Optional path to save the Pareto front scatter plot (PNG)")
+    parser = argparse.ArgumentParser(
+        description="Benchmark a single music file across compatible players."
+    )
+    parser.add_argument(
+        "--music", required=True, help="Path to the music file (AKS/CHP/YM/etc.)"
+    )
+    parser.add_argument(
+        "--players",
+        help="Comma-separated player formats to force (e.g., AKM,AKG,FAP). If omitted, all compatible players are used.",
+    )
+    parser.add_argument(
+        "--out-json", help="Optional path to save aggregated results as JSON"
+    )
+    parser.add_argument(
+        "--save-plot", help="Optional path to save the Pareto front scatter plot (PNG)"
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
@@ -100,7 +119,9 @@ def main() -> None:
     requested_players = _parse_players(args.players)
     players = _compatible_players(music_path, requested_players)
     if not players:
-        raise SystemExit("No compatible players found for this music file and selection.")
+        raise SystemExit(
+            "No compatible players found for this music file and selection."
+        )
 
     results = []
     for pf in players:
@@ -133,11 +154,14 @@ def main() -> None:
     if args.out_json:
         # Use safe write helper to avoid partial files
         from utils import safe_write_json
+
         safe_write_json(args.out_json, results, indent=2)
         logging.info(f"Saved results to {args.out_json}")
 
 
-def _plot_pareto_scatter(df: pd.DataFrame, music_path: str, save_plot: str | None = None) -> None:
+def _plot_pareto_scatter(
+    df: pd.DataFrame, music_path: str, save_plot: str | None = None
+) -> None:
     """Generate scatter plot of program size vs execution time with Pareto front."""
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -153,17 +177,45 @@ def _plot_pareto_scatter(df: pd.DataFrame, music_path: str, save_plot: str | Non
             player_format = PlayerFormat[row["player"].upper()]
         except KeyError:
             # fallback: lookup by value
-            player_format = next((pf for pf in PlayerFormat if pf.value.lower() == str(row["player"]).lower()), None)
+            player_format = next(
+                (
+                    pf
+                    for pf in PlayerFormat
+                    if pf.value.lower() == str(row["player"]).lower()
+                ),
+                None,
+            )
             if player_format is None:
                 raise KeyError(f"Unknown player format: {row['player']}")
-        marker = 's' if player_format.is_stable() else 'o'
-        ax.scatter(row["program_size"], row["nops_exec_max"], s=150, alpha=0.7, color=color, marker=marker, label=row["player"])
-        ax.annotate(row["player"], (row["program_size"], row["nops_exec_max"]),
-                   xytext=(5, 5), textcoords="offset points", fontsize=9)
+        marker = "s" if player_format.is_stable() else "o"
+        ax.scatter(
+            row["program_size"],
+            row["nops_exec_max"],
+            s=150,
+            alpha=0.7,
+            color=color,
+            marker=marker,
+            label=row["player"],
+        )
+        ax.annotate(
+            row["player"],
+            (row["program_size"], row["nops_exec_max"]),
+            xytext=(5, 5),
+            textcoords="offset points",
+            fontsize=9,
+        )
 
     # Compute Pareto front
     pareto_indices = compute_pareto_front(df, "program_size", "nops_exec_max")
-    draw_pareto_front(ax, df, pareto_indices, "program_size", "nops_exec_max", scatter_size=180, include_label=True)
+    draw_pareto_front(
+        ax,
+        df,
+        pareto_indices,
+        "program_size",
+        "nops_exec_max",
+        scatter_size=180,
+        include_label=True,
+    )
 
     ax.set_xlabel("Program Size (bytes)")
     ax.set_ylabel("Maximum Execution Time (nops)")
@@ -173,14 +225,16 @@ def _plot_pareto_scatter(df: pd.DataFrame, music_path: str, save_plot: str | Non
     ax.grid(True, alpha=0.3)
     ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
-    
+
     # Format x-axis as hexadecimal with decimal in parentheses
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"0x{int(x):04X} ({int(x)})"))
+    ax.xaxis.set_major_formatter(
+        FuncFormatter(lambda x, pos: f"0x{int(x):04X} ({int(x)})")
+    )
 
     if save_plot:
         try:
             os.makedirs(os.path.dirname(save_plot) or ".", exist_ok=True)
-            fig.savefig(save_plot, dpi=100, bbox_inches='tight')
+            fig.savefig(save_plot, dpi=100, bbox_inches="tight")
             logging.info(f"Saved plot to {save_plot}")
         except Exception as e:
             logging.error(f"Failed to save plot: {e}")

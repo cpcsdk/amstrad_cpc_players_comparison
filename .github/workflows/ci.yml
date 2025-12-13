@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.11]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Create and activate venv, install deps
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download or resolve bndbuild
+        env:
+          BNDBUILD_DOWNLOAD_URL: https://github.com/cpcsdk/rust.cpclib/releases/download/latest/bndbuild
+        run: |
+          . .venv/bin/activate
+          python - <<'PY'
+          from utils import locate_or_download_bndbuild
+          print('bndbuild resolved to', locate_or_download_bndbuild())
+          PY
+
+      - name: Run tests
+        run: |
+          . .venv/bin/activate
+          pytest -q

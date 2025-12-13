@@ -1,0 +1,61 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+coverage.xml
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tools / binary downloads
+tools/bndbuild
+tools/bndbuild.exe
+
+# Build artifacts and outputs
+*.sna
+*.BIN
+*.zx0
+
+# Temporary files
+tmp*
+*.tmp
+*.akm
+*.BIN
+*.akys
+*.akyu
+*.ayt
+*.sna
+*.json
+*.ym
+*.fap
+*.sna

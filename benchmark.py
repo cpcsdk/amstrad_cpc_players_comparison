@@ -27,18 +27,32 @@ import numpy as np
 from math import pi
 from matplotlib.ticker import FuncFormatter
 from matplotlib.patches import Ellipse
-from utils import compute_pareto_front, draw_pareto_front, safe_read_json, safe_write_json, safe_rmtree
+from utils import (
+    compute_pareto_front,
+    draw_pareto_front,
+    safe_read_json,
+    safe_write_json,
+    safe_rmtree,
+)
 import plots
 from itertools import combinations
+
 try:
     from scipy.stats import wilcoxon
+
     _have_wilcoxon = True
 except Exception:
     _have_wilcoxon = False
 
 from joblib import Parallel, delayed
 
-from datasets import MusicFormat, convert_music_file, At3Dataset, ChpDataset, PaCiDemoDataset
+from datasets import (
+    MusicFormat,
+    convert_music_file,
+    At3Dataset,
+    ChpDataset,
+    PaCiDemoDataset,
+)
 from players import crunch_music_file, build_replay_program, PlayerFormat
 from profile import profile
 
@@ -57,7 +71,6 @@ class Benchmark:
 
     def iter_json(self) -> list:
         return self.dataset.iter_json()
-
 
     def build_files(self):
         def handle_input_with_player(original_input: str, out_player: PlayerFormat):
@@ -82,11 +95,15 @@ class Benchmark:
                 convertible = input_fmt.convertible_to()
                 convert_to = set(expected).intersection(convertible).pop()
 
-                converted_working = working_input.rsplit('.', 1)[0] + f".{convert_to.value}"
+                converted_working = (
+                    working_input.rsplit(".", 1)[0] + f".{convert_to.value}"
+                )
                 produced_working = out_player.set_extension(converted_working)
                 json_working = produced_working + ".json"
 
-                converted_target = original_input.rsplit('.', 1)[0] + f".{convert_to.value}"
+                converted_target = (
+                    original_input.rsplit(".", 1)[0] + f".{convert_to.value}"
+                )
                 produced_target = out_player.set_extension(converted_target)
                 json_target = produced_target + ".json"
 
@@ -107,7 +124,9 @@ class Benchmark:
 
                 # Convert, crunch, build, profile
                 convert_music_file(working_input, converted_working)
-                res_conv = crunch_music_file(converted_working, produced_working, out_player)
+                res_conv = crunch_music_file(
+                    converted_working, produced_working, out_player
+                )
 
                 try:
                     res_play = build_replay_program(res_conv, out_player)
@@ -118,7 +137,7 @@ class Benchmark:
                 res_prof = {}
                 try:
                     program_name = res_play.get("program_name")
-                    if program_name and not getattr(self, 'no_profile', False):
+                    if program_name and not getattr(self, "no_profile", False):
                         res_prof = profile(program_name, out_player.load_address())
                 except Exception:
                     logging.exception("profile failed")
@@ -127,17 +146,20 @@ class Benchmark:
 
                 # Copy back produced artifacts and write dataset-local JSON
                 try:
-                    if converted_working != converted_target and os.path.exists(converted_working):
+                    if converted_working != converted_target and os.path.exists(
+                        converted_working
+                    ):
                         shutil.copyfile(converted_working, converted_target)
 
                     import glob
-                    tmp_base = converted_working.rsplit('.', 1)[0]
-                    target_base = converted_target.rsplit('.', 1)[0]
+
+                    tmp_base = converted_working.rsplit(".", 1)[0]
+                    target_base = converted_target.rsplit(".", 1)[0]
                     for f in glob.glob(tmp_base + "*"):
                         if f == converted_working:
                             continue
                         try:
-                            suffix = f[len(tmp_base):]
+                            suffix = f[len(tmp_base) :]
                             shutil.copyfile(f, target_base + suffix)
                         except Exception:
                             logging.exception(f"Failed copying produced file {f}")
@@ -152,7 +174,9 @@ class Benchmark:
                         comp = result.get("compressed_fname", "")
                         if comp:
                             try:
-                                result["player_format"] = PlayerFormat.get_format(comp).name
+                                result["player_format"] = PlayerFormat.get_format(
+                                    comp
+                                ).name
                             except Exception:
                                 # keep original if we cannot canonicalize
                                 result["player_format"] = None
@@ -164,7 +188,9 @@ class Benchmark:
                 finally:
                     safe_rmtree(tmpdir)
             except Exception as e:
-                logging.exception(f"Unexpected error processing {original_input} for {out_player}")
+                logging.exception(
+                    f"Unexpected error processing {original_input} for {out_player}"
+                )
                 return {
                     "original_input": original_input,
                     "player": str(out_player),
@@ -181,7 +207,7 @@ class Benchmark:
             return handle_input_with_player(inp, p)
 
         # Allow caller to tune job count via `self.jobs` (default -1 = all cores)
-        n_jobs = getattr(self, 'jobs', -1)
+        n_jobs = getattr(self, "jobs", -1)
         return Parallel(n_jobs=n_jobs)(delayed(_run)(t) for t in tasks)
 
     def execute(self):
@@ -191,8 +217,10 @@ class Benchmark:
         logging.info(f"Finished benchmark {self.name}: processed {len(results)} tasks")
         # If caller requested to skip plot generation, avoid running the
         # heavier `analyse_files()` pipeline which produces plots and images.
-        if getattr(self, 'no_report', False):
-            logging.info("no_report: skipping rich analysis; returning JSON-only results")
+        if getattr(self, "no_report", False):
+            logging.info(
+                "no_report: skipping rich analysis; returning JSON-only results"
+            )
             # JSONs are produced by `build_files()`; when `no_report` is set we
             # intentionally avoid generating any reports or plots. Return the
             # collected results so callers can inspect or persist them.
@@ -202,7 +230,9 @@ class Benchmark:
             # Prefer the richer analysis/report pipeline from the working backup
             self.analyse_files()
         except Exception:
-            logging.exception("Failed to generate rich report; falling back to simple generate_report")
+            logging.exception(
+                "Failed to generate rich report; falling back to simple generate_report"
+            )
             try:
                 self.generate_report(results)
             except Exception:
@@ -223,8 +253,10 @@ class Benchmark:
         # If requested to skip reports, bail out early to avoid creating figures
         # and consuming plotting resources. The caller (execute) should
         # generate a minimal report instead.
-        if getattr(self, 'no_report', False):
-            logging.info("no_report is True; analyse_files() will skip report generation")
+        if getattr(self, "no_report", False):
+            logging.info(
+                "no_report is True; analyse_files() will skip report generation"
+            )
             return
 
         with open(fname, "w") as report:
@@ -256,38 +288,44 @@ class Benchmark:
                             pf = PlayerFormat.get_format(raw_fmt)
                             fmt = pf.name
                         except Exception:
-                            fmt = str(raw_fmt).upper().lstrip('.')
+                            fmt = str(raw_fmt).upper().lstrip(".")
                 except Exception:
                     fmt = ""
 
                 formats.append(fmt)
                 sizes.append(res.get("program_size", 0))
                 zx0sizes.append(res.get("program_zx0_size", 0))
-                sources.append(os.path.splitext(os.path.basename(res.get("compressed_fname", "")))[0])
+                sources.append(
+                    os.path.splitext(os.path.basename(res.get("compressed_fname", "")))[
+                        0
+                    ]
+                )
                 max_execution_time.append(res.get("nops_exec_max", 0))
                 min_execution_time.append(res.get("nops_exec_min", 0))
                 mean_execution_time.append(res.get("nops_exec_mean", 0))
                 init_time.append(res.get("nops_init", 0))
 
-            df = pd.DataFrame.from_dict({
-                "format": formats,
-                "prog_size": sizes,
-                "zx0_prog_size": zx0sizes,
-                "max_execution_time": max_execution_time,
-                "min_execution_time": min_execution_time,
-                "mean_execution_time": mean_execution_time,
-                "init_time": init_time,
-                "sources": sources,
-            })
+            df = pd.DataFrame.from_dict(
+                {
+                    "format": formats,
+                    "prog_size": sizes,
+                    "zx0_prog_size": zx0sizes,
+                    "max_execution_time": max_execution_time,
+                    "min_execution_time": min_execution_time,
+                    "mean_execution_time": mean_execution_time,
+                    "init_time": init_time,
+                    "sources": sources,
+                }
+            )
 
             # remove AKM
             if False:
-                df = df[ df["format"] != "AKM"]
+                df = df[df["format"] != "AKM"]
 
             title = {
-                'prog_size': "Raw program size",
-                'zx0_prog_size': "Crunch (zx0) program size (without decrunch routine and data reloction)",
-                'max_execution_time': "Maximum execution time (in nops)"
+                "prog_size": "Raw program size",
+                "zx0_prog_size": "Crunch (zx0) program size (without decrunch routine and data reloction)",
+                "max_execution_time": "Maximum execution time (in nops)",
             }
 
             # Prepare canonical ordering and color mapping for plots
@@ -300,10 +338,17 @@ class Benchmark:
 
                 # pivot per-source x format
                 try:
-                    summary: pd.DataFrame = df.pivot(index="sources", columns=["format"])[comparison_key]
+                    summary: pd.DataFrame = df.pivot(
+                        index="sources", columns=["format"]
+                    )[comparison_key]
                 except Exception:
                     # fallback: try pivot_table with median
-                    summary = df.pivot_table(index="sources", columns=["format"], values=comparison_key, aggfunc='median')
+                    summary = df.pivot_table(
+                        index="sources",
+                        columns=["format"],
+                        values=comparison_key,
+                        aggfunc="median",
+                    )
 
                 summary = summary.reset_index()
                 summary.to_markdown(report)
@@ -322,7 +367,11 @@ class Benchmark:
                         try:
                             res = wilcoxon(summary[col1], summary[col2])
                             if res.pvalue < 0.05:
-                                best = col1 if summary[col1].mean() < summary[col2].mean() else col2
+                                best = (
+                                    col1
+                                    if summary[col1].mean() < summary[col2].mean()
+                                    else col2
+                                )
                                 code = f"dissimilar (best={best})"
                             else:
                                 code = "similar"
@@ -336,23 +385,50 @@ class Benchmark:
                     for ext in ordered_extensions:
                         if ext not in summary.columns:
                             summary[ext] = 0
-                    plots.plot_parallel_coordinates(self, summary, ordered_extensions, comparison_key, title[comparison_key], report)
+                    plots.plot_parallel_coordinates(
+                        self,
+                        summary,
+                        ordered_extensions,
+                        comparison_key,
+                        title[comparison_key],
+                        report,
+                    )
                 except Exception:
                     logging.exception("_plot_parallel_coordinates failed")
 
                 try:
-                    present_formats = [f for f in ordered_extensions if f in df['format'].unique()]
+                    present_formats = [
+                        f for f in ordered_extensions if f in df["format"].unique()
+                    ]
                     if present_formats:
-                        plots.plot_boxplot(self, df, present_formats, comparison_key, title[comparison_key], format_colors, report)
+                        plots.plot_boxplot(
+                            self,
+                            df,
+                            present_formats,
+                            comparison_key,
+                            title[comparison_key],
+                            format_colors,
+                            report,
+                        )
                     else:
                         logging.info("No formats present for boxplot; skipping")
                 except Exception:
                     logging.exception("_plot_boxplot failed")
 
                 try:
-                    present_formats = [f for f in ordered_extensions if f in df['format'].unique()]
+                    present_formats = [
+                        f for f in ordered_extensions if f in df["format"].unique()
+                    ]
                     if present_formats:
-                        plots.plot_violin(self, df, present_formats, comparison_key, title[comparison_key], format_colors, report)
+                        plots.plot_violin(
+                            self,
+                            df,
+                            present_formats,
+                            comparison_key,
+                            title[comparison_key],
+                            format_colors,
+                            report,
+                        )
                     else:
                         logging.info("No formats present for swarmplot; skipping")
                 except Exception:
@@ -365,36 +441,76 @@ class Benchmark:
                 logging.exception("plot_spider failed")
 
             try:
-                plots.plot_scatter_tracks(self, df, ordered_extensions, format_colors, report)
+                plots.plot_scatter_tracks(
+                    self, df, ordered_extensions, format_colors, report
+                )
             except Exception:
                 logging.exception("plot_scatter_tracks failed")
 
             try:
-                plots.plot_scatter_median(self, df, ordered_extensions, format_colors, report)
+                plots.plot_scatter_median(
+                    self, df, ordered_extensions, format_colors, report
+                )
             except Exception:
                 logging.exception("plot_scatter_median failed")
 
             logging.info(f"Wrote report to {fname}")
 
-
-    def _plot_spider(self, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report) -> None:
+    def _plot_spider(
+        self, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report
+    ) -> None:
         # removed: use plots.plot_spider(...) directly from `analyse_files()`
         raise RuntimeError("_plot_spider is removed; call plots.plot_spider directly")
 
-    def _plot_scatter_tracks(self, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report) -> None:
-        raise RuntimeError("_plot_scatter_tracks is removed; call plots.plot_scatter_tracks directly")
+    def _plot_scatter_tracks(
+        self, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report
+    ) -> None:
+        raise RuntimeError(
+            "_plot_scatter_tracks is removed; call plots.plot_scatter_tracks directly"
+        )
 
-    def _plot_scatter_median(self, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report) -> None:
-        raise RuntimeError("_plot_scatter_median is removed; call plots.plot_scatter_median directly")
+    def _plot_scatter_median(
+        self, df: pd.DataFrame, ordered_extensions: list, format_colors: dict, report
+    ) -> None:
+        raise RuntimeError(
+            "_plot_scatter_median is removed; call plots.plot_scatter_median directly"
+        )
 
-    def _plot_parallel_coordinates(self, summary: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, report) -> None:
-        raise RuntimeError("_plot_parallel_coordinates is removed; call plots.plot_parallel_coordinates directly")
+    def _plot_parallel_coordinates(
+        self,
+        summary: pd.DataFrame,
+        ordered_extensions: list,
+        comparison_key: str,
+        title: str,
+        report,
+    ) -> None:
+        raise RuntimeError(
+            "_plot_parallel_coordinates is removed; call plots.plot_parallel_coordinates directly"
+        )
 
-    def _plot_boxplot(self, df: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, format_colors: dict = None, report=None) -> None:
+    def _plot_boxplot(
+        self,
+        df: pd.DataFrame,
+        ordered_extensions: list,
+        comparison_key: str,
+        title: str,
+        format_colors: dict = None,
+        report=None,
+    ) -> None:
         raise RuntimeError("_plot_boxplot is removed; call plots.plot_boxplot directly")
 
-    def _plot_swarmplot(self, df: pd.DataFrame, ordered_extensions: list, comparison_key: str, title: str, format_colors: dict = None, report=None) -> None:
-        raise RuntimeError("_plot_swarmplot is removed; call plots.plot_violin directly")
+    def _plot_swarmplot(
+        self,
+        df: pd.DataFrame,
+        ordered_extensions: list,
+        comparison_key: str,
+        title: str,
+        format_colors: dict = None,
+        report=None,
+    ) -> None:
+        raise RuntimeError(
+            "_plot_swarmplot is removed; call plots.plot_violin directly"
+        )
 
     def clean(self):
         """Remove produced artifacts (but keep original input files)."""
@@ -403,7 +519,7 @@ class Benchmark:
 
         removed = 0
         for inp in self.dataset:
-            base = inp.rsplit('.', 1)[0]
+            base = inp.rsplit(".", 1)[0]
             for f in glob.glob(base + "*"):
                 # never delete the original input file
                 if f == inp:
@@ -415,6 +531,7 @@ class Benchmark:
                     logging.exception(f"Failed to remove {f}")
 
         logging.info(f"Removed {removed} produced files for {self.name}")
+
 
 class ArkosTracker3Benchmark(Benchmark):
     def __init__(self):
@@ -431,7 +548,13 @@ class ArkosTracker3Benchmark(Benchmark):
 
 class ChpBenchmark(Benchmark):
     def __init__(self):
-        replay_formats = [PlayerFormat.CHPB, PlayerFormat.AKM, PlayerFormat.AYT, PlayerFormat.FAP, PlayerFormat.MINYQ]
+        replay_formats = [
+            PlayerFormat.CHPB,
+            PlayerFormat.AKM,
+            PlayerFormat.AYT,
+            PlayerFormat.FAP,
+            PlayerFormat.MINYQ,
+        ]
         super().__init__("CHP", ChpDataset(), replay_formats)
 
 

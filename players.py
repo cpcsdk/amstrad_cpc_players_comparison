@@ -16,7 +16,12 @@ import os
 import subprocess
 import logging
 import platform
-from utils import execute_process, safe_getsize, safe_bndbuild_conversion, build_bndbuild_tokens
+from utils import (
+    execute_process,
+    safe_getsize,
+    safe_bndbuild_conversion,
+    build_bndbuild_tokens,
+)
 
 from datasets import MusicFormat
 import utils
@@ -40,7 +45,7 @@ class PlayerFormat(enum.Enum):
     def requires_one_of(self):
         ym6_only = {MusicFormat.YM6}
         ym3_only = {MusicFormat.YM3}
-        any_ym= {MusicFormat.YM3, MusicFormat.YM6}
+        any_ym = {MusicFormat.YM3, MusicFormat.YM6}
         chp_only = {MusicFormat.CHP}
 
         at_compatible = {
@@ -73,11 +78,10 @@ class PlayerFormat(enum.Enum):
 
     def set_extension(self, source: str) -> str:
         return os.path.splitext(source)[0] + "." + self.value
-    
 
     def profiler_extra_size(self):
         """Return the number of bytes consumed by the extra profiling code
-        
+
         Profiling code consists of:
         - 2 jp instructions at start (6 bytes)
         - profiler_init routine
@@ -86,22 +90,35 @@ class PlayerFormat(enum.Enum):
         profiler_header = 6  # 2 jp instructions (jp profiler_init, jp profiler_run)
         return {
             PlayerFormat.FAP: profiler_header + 19 + 15,  # 40 bytes total
-            PlayerFormat.AYT: profiler_header + 22 + 9,   # 37 bytes (JP method)
-            PlayerFormat.MINYQ: profiler_header + 12 + 6,  # 24 bytes total (miniq profiler: ld hl,de,call + call)
+            PlayerFormat.AYT: profiler_header + 22 + 9,  # 37 bytes (JP method)
+            PlayerFormat.MINYQ: profiler_header
+            + 12
+            + 6,  # 24 bytes total (miniq profiler: ld hl,de,call + call)
             PlayerFormat.AYC: None,
-            PlayerFormat.AKG: profiler_header + 12 + 8,   # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
-            PlayerFormat.AKYS: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
-            PlayerFormat.AKYU: profiler_header + 11 + 8,   # 25 bytes total (jp 0xffff stubs)
-            PlayerFormat.AKM: profiler_header + 9 + 9,    # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
-            PlayerFormat.CHPB: profiler_header + 3 + 8,    # 17 bytes total (jp 0xffff + di+call+ei+jp)
+            PlayerFormat.AKG: profiler_header
+            + 12
+            + 8,  # 26 bytes total (di+ld+xor+call+ei+jp + di+call+ei+jp)
+            PlayerFormat.AKYS: profiler_header
+            + 11
+            + 8,  # 25 bytes total (jp 0xffff stubs)
+            PlayerFormat.AKYU: profiler_header
+            + 11
+            + 8,  # 25 bytes total (jp 0xffff stubs)
+            PlayerFormat.AKM: profiler_header
+            + 9
+            + 9,  # 24 bytes total (di+3 ld+call+ei+jp + di+call+ei+jp)
+            PlayerFormat.CHPB: profiler_header
+            + 3
+            + 8,  # 17 bytes total (jp 0xffff + di+call+ei+jp)
         }[self]
-    
+
     def load_address(self):
         return 0x500
-    
+
     def is_stable(self) -> bool:
         """Return True if the player format has stable/constant CPU consumption."""
         return self in (PlayerFormat.AKYS, PlayerFormat.AYC, PlayerFormat.FAP)
+
 
 def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -> dict:
     return {
@@ -118,7 +135,6 @@ def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -
 
 
 def build_replay_program(data: dict, player: PlayerFormat) -> dict:
-
     (function, params) = {
         PlayerFormat.FAP: (build_replay_program_for_fap, ["buffer_size"]),
         PlayerFormat.AYT: (build_replay_program_for_ayt, []),
@@ -129,7 +145,6 @@ def build_replay_program(data: dict, player: PlayerFormat) -> dict:
         PlayerFormat.AKM: (build_replay_program_for_akm, ["player_config"]),
         PlayerFormat.CHPB: (build_replay_program_for_chp, []),
     }[player]
-
 
     return function(data["compressed_fname"], player, **{k: data[k] for k in params})
 
@@ -146,27 +161,43 @@ def build_replay_program_for_ayt(music_data_fname: str, player: PlayerFormat) ->
     return __build_replay_program__(music_data_fname, "-i ", z80, player)
 
 
-def build_replay_program_for_akg(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
+def build_replay_program_for_akg(
+    music_data_fname: str, player: PlayerFormat, player_config: str
+) -> dict:
     z80 = "players/akg/akg.asm"
-    return __build_replay_program__(music_data_fname, "", z80, player, config=player_config)
+    return __build_replay_program__(
+        music_data_fname, "", z80, player, config=player_config
+    )
 
 
-def build_replay_program_for_akys(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
+def build_replay_program_for_akys(
+    music_data_fname: str, player: PlayerFormat, player_config: str
+) -> dict:
     z80 = "players/akys/akys.asm"
-    return __build_replay_program__(music_data_fname,   "",z80, player, config=player_config)
+    return __build_replay_program__(
+        music_data_fname, "", z80, player, config=player_config
+    )
 
 
-def build_replay_program_for_akyu(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
+def build_replay_program_for_akyu(
+    music_data_fname: str, player: PlayerFormat, player_config: str
+) -> dict:
     z80 = "players/akyu/akyu.asm"
-    return __build_replay_program__(music_data_fname, "", z80, player, config=player_config)
+    return __build_replay_program__(
+        music_data_fname, "", z80, player, config=player_config
+    )
 
 
-def build_replay_program_for_akm(music_data_fname: str, player: PlayerFormat, player_config: str) -> dict:
+def build_replay_program_for_akm(
+    music_data_fname: str, player: PlayerFormat, player_config: str
+) -> dict:
     z80 = "players/akm/akm.asm"
     return __build_replay_program__(music_data_fname, "", z80, player, player_config)
 
 
-def build_replay_program_for_fap(music_data_fname: str, player: PlayerFormat, buffer_size: int) -> dict:
+def build_replay_program_for_fap(
+    music_data_fname: str, player: PlayerFormat, buffer_size: int
+) -> dict:
     z80 = "players/fap/fap.asm"
 
     extra_cmd = (
@@ -178,7 +209,9 @@ def build_replay_program_for_fap(music_data_fname: str, player: PlayerFormat, bu
     return __build_replay_program__(music_data_fname, extra_cmd, z80, player)
 
 
-def build_replay_program_for_minyq(music_data_fname: str, player: PlayerFormat, buffer_size: int) -> dict:
+def build_replay_program_for_minyq(
+    music_data_fname: str, player: PlayerFormat, buffer_size: int
+) -> dict:
     """Build replay program for MinIQ/minyq players.
 
     Passes a `-DMUSIC_BUFF_SIZE` define to the assembler so the wrapper
@@ -191,9 +224,13 @@ def build_replay_program_for_minyq(music_data_fname: str, player: PlayerFormat, 
     return __build_replay_program__(music_data_fname, extra_cmd, z80, player)
 
 
-
-
-def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, player: PlayerFormat | None = None, config: str | None = None) -> dict:
+def __build_replay_program__(
+    music_data_fname: str,
+    extra_cmd: str,
+    z80: str,
+    player: PlayerFormat | None = None,
+    config: str | None = None,
+) -> dict:
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
     clean_amsdos_fname = base + ".BIN"
@@ -215,16 +252,12 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
         + " "
         + f'\\"-DMUSIC_DATA_FNAME=\\\\\\"{music_data_fname}\\\\\\"\\"  '
         + f'\\"-DMUSIC_EXEC_FNAME=\\\\\\"{amsdos_fname}\\\\\\"\\" '
-
     )
 
     if config is not None:
         cmd += f'\\"-DPLAYER_CONFIG_FNAME=\\\\\\"{config}\\\\\\"\\" '
 
-    cmd += (
-        f"--snapshot "
-        + f'-o \\"{sna_fname}\\" \\"{z80}\\" '
-    )
+    cmd += f"--snapshot " + f'-o \\"{sna_fname}\\" \\"{z80}\\" '
 
     execute_process(cmd)
     program_size = safe_getsize(amsdos_fname)
@@ -249,13 +282,12 @@ def __build_replay_program__(music_data_fname: str, extra_cmd: str, z80: str, pl
         zx0_fname,
     )
     execute_process(tokens)
-    program_zx0_size = safe_getsize(zx0_fname) #no header to remove
-    
-    
+    program_zx0_size = safe_getsize(zx0_fname)  # no header to remove
+
     return {
         "program_name": clean_amsdos_fname,
-        "program_size": program_size, 
-        "program_zx0_size": program_zx0_size
+        "program_size": program_size,
+        "program_zx0_size": program_zx0_size,
     }
 
 
@@ -387,7 +419,9 @@ def compile_chp(chp_fname: str, _):
 def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
     cmd = ["bndbuild", "--direct", "--", "fap", "{in_path}", "{out_path}"]
     try:
-        res_proc, stdout, stderr = safe_bndbuild_conversion(ym_fname, fap_fname, cmd, tmp_prefix="fap-")
+        res_proc, stdout, stderr = safe_bndbuild_conversion(
+            ym_fname, fap_fname, cmd, tmp_prefix="fap-"
+        )
     except Exception as e:
         if not os.path.exists(fap_fname):
             raise e
@@ -431,14 +465,16 @@ def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
                 pass
     return res
 
+
 def rename_arkos_binary_for_fname_unicity(arkos_fname: str) -> str:
     base, ext = os.path.splitext(arkos_fname)
     return f"{base}_{ext[1:]}{ext}"
 
+
 def __compile_aks_with_tool__(at_fname: str, output_fname: str, tool_name: str) -> dict:
     """
     Generic Arkos Tracker compilation helper for SongToAkg/Aky/Akm.
-    
+
     Args:
         at_fname: Path to input AKS file
         output_fname: Path to output file (akg/akys/akm)
@@ -465,14 +501,18 @@ def __compile_aks_with_tool__(at_fname: str, output_fname: str, tool_name: str) 
     os.rename(tmp_fname, output_fname)
     return res
 
+
 def compile_aks_with_akg(at_fname, akg_fname):
     return __compile_aks_with_tool__(at_fname, akg_fname, "Akg")
+
 
 def compile_aks_with_akys(at_fname, akys_fname):
     return __compile_aks_with_tool__(at_fname, akys_fname, "Aky")
 
+
 def compile_aks_with_akyu(at_fname, akyu_fname):
     return __compile_aks_with_tool__(at_fname, akyu_fname, "Aky")
+
 
 def compile_aks_with_akm(at_fname, akm_fname):
     return __compile_aks_with_tool__(at_fname, akm_fname, "Akm")

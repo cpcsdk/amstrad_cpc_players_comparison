@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import platform
 
+
 def profile(amsdos_fname, load_address):
     """
     Profile a replay routine by executing it 10000 times
@@ -11,7 +12,7 @@ def profile(amsdos_fname, load_address):
     assert os.path.exists(amsdos_fname), f"File {amsdos_fname} does not exist"
 
     csv_fname = os.path.splitext(amsdos_fname)[0] + ".CSV"
-    
+
     # Build argv tokens and let `execute_process` run them (no shell).
     tokens = build_bndbuild_tokens(
         "bndbuild",
@@ -27,15 +28,9 @@ def profile(amsdos_fname, load_address):
     execute_process(tokens)
 
     timings = pd.read_csv(
-        csv_fname, 
-        sep=",", 
-        header=0,
-        dtype={
-            "nop count": int,
-            "Execution index":  int
-       }
+        csv_fname, sep=",", header=0, dtype={"nop count": int, "Execution index": int}
     )
-    nops = timings["nop count"][timings["Execution index"]>0]
+    nops = timings["nop count"][timings["Execution index"] > 0]
     res = {
         "nops_init": int(timings["nop count"].values[0]),
         "nops_exec_min": int(nops.min()),
@@ -51,11 +46,13 @@ def profile(amsdos_fname, load_address):
 # python .\profile.py .\datasets\chipnsfx\ABADIA1_CHPZ80.BIN 0x500
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <amsdos_file> <load_address>")
         sys.exit(1)
 
     import logging
+
     logging.basicConfig(level=logging.DEBUG)
 
     amsdos_file = sys.argv[1]

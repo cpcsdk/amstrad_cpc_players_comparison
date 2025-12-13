@@ -99,12 +99,12 @@ def compute_pareto_front(df: pd.DataFrame, x_col: str, y_col: str) -> List[int]:
     """
     Compute Pareto front indices (non-dominated points).
     Lower values are better for both dimensions.
-    
+
     Args:
         df: DataFrame with the data
         x_col: Column name for X axis (e.g., "program_size")
         y_col: Column name for Y axis (e.g., "nops_exec_max")
-    
+
     Returns:
         List of indices that form the Pareto front
     """
@@ -113,10 +113,14 @@ def compute_pareto_front(df: pd.DataFrame, x_col: str, y_col: str) -> List[int]:
         is_dominated = False
         for j in range(len(df)):
             if i != j:
-                if (df.iloc[j][x_col] <= df.iloc[i][x_col] and
-                    df.iloc[j][y_col] <= df.iloc[i][y_col]):
-                    if (df.iloc[j][x_col] < df.iloc[i][x_col] or
-                        df.iloc[j][y_col] < df.iloc[i][y_col]):
+                if (
+                    df.iloc[j][x_col] <= df.iloc[i][x_col]
+                    and df.iloc[j][y_col] <= df.iloc[i][y_col]
+                ):
+                    if (
+                        df.iloc[j][x_col] < df.iloc[i][x_col]
+                        or df.iloc[j][y_col] < df.iloc[i][y_col]
+                    ):
                         is_dominated = True
                         break
         if not is_dominated:
@@ -124,13 +128,20 @@ def compute_pareto_front(df: pd.DataFrame, x_col: str, y_col: str) -> List[int]:
     return pareto_indices
 
 
-def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
-                      x_col: str, y_col: str, scatter_size: int = 180,
-                      line_style: str = 'k--', include_label: bool = True,
-                      add_bank_marker: bool = True) -> None:
+def draw_pareto_front(
+    ax: Any,
+    df: pd.DataFrame,
+    pareto_indices: List[int],
+    x_col: str,
+    y_col: str,
+    scatter_size: int = 180,
+    line_style: str = "k--",
+    include_label: bool = True,
+    add_bank_marker: bool = True,
+) -> None:
     """
     Draw the Pareto front on a matplotlib axis.
-    
+
     Args:
         ax: Matplotlib axis to draw on
         df: DataFrame containing the data
@@ -166,32 +177,52 @@ def draw_pareto_front(ax: Any, df: pd.DataFrame, pareto_indices: List[int],
 
         # Draw the line connecting Pareto points
         line_label = "Pareto Front" if include_label else None
-        ax.plot(pareto_df[x_col], pareto_df[y_col],
-                line_style, linewidth=2, alpha=0.5, label=line_label)
+        ax.plot(
+            pareto_df[x_col],
+            pareto_df[y_col],
+            line_style,
+            linewidth=2,
+            alpha=0.5,
+            label=line_label,
+        )
 
         # Draw the points with marker based on stability
         point_label = "Pareto Points" if include_label else None
         for _, row in pareto_df.iterrows():
-            marker = 's' if _is_stable(row) else 'o'
+            marker = "s" if _is_stable(row) else "o"
             ax.scatter(
                 row[x_col],
                 row[y_col],
                 s=scatter_size,
-                facecolors='none',
-                edgecolors='black',
+                facecolors="none",
+                edgecolors="black",
                 linewidths=2,
                 zorder=3,
                 marker=marker,
                 label=point_label,
             )
             point_label = None
-    
+
     # Add bank marker lines
     if add_bank_marker:
-        ax.axvline(x=16384, color='red', linestyle=':', linewidth=1.5, alpha=0.6, label='bank limitation')
-        ax.axvline(x=0x8000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
-        ax.axvline(x=0xC000, color='red', linestyle=':', linewidth=1.5, alpha=0.6)
-        ax.axhline(y=3328, color='blue', linestyle=':', linewidth=1.5, alpha=0.6, label='1 halt')
+        ax.axvline(
+            x=16384,
+            color="red",
+            linestyle=":",
+            linewidth=1.5,
+            alpha=0.6,
+            label="bank limitation",
+        )
+        ax.axvline(x=0x8000, color="red", linestyle=":", linewidth=1.5, alpha=0.6)
+        ax.axvline(x=0xC000, color="red", linestyle=":", linewidth=1.5, alpha=0.6)
+        ax.axhline(
+            y=3328,
+            color="blue",
+            linestyle=":",
+            linewidth=1.5,
+            alpha=0.6,
+            label="1 halt",
+        )
 
 
 def safe_getsize(path: str, fallback: int = -1) -> int:
@@ -211,14 +242,16 @@ def safe_read_json(path: str) -> dict | None:
     This centralizes defensive JSON loading used in `benchmark.py` and other places.
     """
     try:
-        with open(path, 'r') as fh:
+        with open(path, "r") as fh:
             return json.load(fh)
     except Exception:
         logging.exception(f"Failed reading JSON {path}")
         return None
 
 
-def safe_bndbuild_conversion(input_path: str, output_path: str, cmd_template, tmp_prefix: str = "tmp-"):
+def safe_bndbuild_conversion(
+    input_path: str, output_path: str, cmd_template, tmp_prefix: str = "tmp-"
+):
     """Run a `bndbuild`-style conversion using a temporary safe filename.
 
     Parameters:
@@ -246,9 +279,16 @@ def safe_bndbuild_conversion(input_path: str, output_path: str, cmd_template, tm
 
         # Format the command template
         if isinstance(cmd_template, (list, tuple)):
-            cmd = [str(t).replace("{in_path}", safe_in).replace("{out_path}", safe_out) for t in cmd_template]
+            cmd = [
+                str(t).replace("{in_path}", safe_in).replace("{out_path}", safe_out)
+                for t in cmd_template
+            ]
         else:
-            cmd = str(cmd_template).replace("{in_path}", safe_in).replace("{out_path}", safe_out)
+            cmd = (
+                str(cmd_template)
+                .replace("{in_path}", safe_in)
+                .replace("{out_path}", safe_out)
+            )
 
         res = execute_process(cmd)
 
@@ -256,8 +296,8 @@ def safe_bndbuild_conversion(input_path: str, output_path: str, cmd_template, tm
         if os.path.exists(safe_out):
             shutil.copyfile(safe_out, output_path)
 
-        stdout = (getattr(res, 'stdout', b"") or b"").decode("utf-8", errors="ignore")
-        stderr = (getattr(res, 'stderr', b"") or b"").decode("utf-8", errors="ignore")
+        stdout = (getattr(res, "stdout", b"") or b"").decode("utf-8", errors="ignore")
+        stderr = (getattr(res, "stderr", b"") or b"").decode("utf-8", errors="ignore")
         return res, stdout, stderr
     finally:
         safe_rmtree(tmpdir)

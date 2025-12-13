@@ -88,6 +88,7 @@ def convert_chp_to_ym3(input, output):
     cmd = ["bndbuild", "--direct", "--", "chipnsfx", "{in_path}", "-y", "{out_path}"]
     safe_bndbuild_conversion(input, output, cmd, tmp_prefix="chipnsfx-")
 
+
 def convert_chp_to_ym6(input, output):
     output_ym3 = output.replace(".ym", ".ym3")
     convert_chp_to_ym3(input, output_ym3)
@@ -98,12 +99,11 @@ def convert_ym3_to_ym6(input, output):
     cmd = ["bndbuild", "--direct", "--", "SongToYm", "{in_path}", "{out_path}"]
     safe_bndbuild_conversion(input, output, cmd, tmp_prefix="ym3toym6-")
 
+
 def convert_ym6_to_ym3(input, output):
     cmd = ["bndbuild", "--direct", "--", "SongToYm", "--ym3", "{in_path}", "{out_path}"]
     safe_bndbuild_conversion(input, output, cmd, tmp_prefix="ym6toym3-")
 
-
-    
 
 class Dataset(ABC):
     def __init__(self, path):
@@ -112,7 +112,7 @@ class Dataset(ABC):
         self.clean_patterns = [
             "*.akg",
             "*.akm",
-            "*.aky", # kept to clean up old folders
+            "*.aky",  # kept to clean up old folders
             "*.akys",
             "*.akyu",
             "*.ayt",
@@ -125,7 +125,7 @@ class Dataset(ABC):
             "*.sna",
             "*.ym",  # XXX this ine can be dangerous for new datasets
             "*.zx0",
-            "*_playerconfig.asm"
+            "*_playerconfig.asm",
         ]
         self.clean_pattern_folder_part = None
         self.path = path
@@ -144,7 +144,9 @@ class Dataset(ABC):
     def clean(self):
         for pat in self.clean_patterns:
             print(pat, self.root())
-            for f in glob.glob(os.path.join("**",pat), root_dir=self.root(), recursive=True):
+            for f in glob.glob(
+                os.path.join("**", pat), root_dir=self.root(), recursive=True
+            ):
                 f = os.path.join(self.root(), f)
                 logging.info(f"Delete {f}")
                 os.remove(f)
@@ -203,7 +205,12 @@ class At3Dataset(Dataset):
         kind_path = os.path.join(self.root(), kind.value)
         for fname in os.listdir(kind_path):
             ext = os.path.splitext(fname)[1][1:].upper()
-            if any([ext == available_kind.extension() for available_kind in self.file_kinds]):
+            if any(
+                [
+                    ext == available_kind.extension()
+                    for available_kind in self.file_kinds
+                ]
+            ):
                 logging.info(f"{fname} will be handled thanks to type {ext}")
                 yield os.path.join(kind_path, fname)
             else:
@@ -233,5 +240,5 @@ class PaCiDemoDataset(Dataset):
     def iter_json(self):
         for root, _, files in os.walk(self.root()):
             for fname in files:
-                if fname.lower().endswith('.json'):
+                if fname.lower().endswith(".json"):
                     yield os.path.join(root, fname)
