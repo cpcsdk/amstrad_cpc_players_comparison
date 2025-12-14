@@ -12,8 +12,13 @@ import argparse
 import json
 import logging
 import os
+import re
+import shutil
+import tempfile
 from typing import Iterable, List
 
+import matplotlib
+matplotlib.use("Agg")  # Use headless backend to avoid GUI display issues
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
@@ -116,6 +121,32 @@ def main() -> None:
     music_path = args.music
     assert os.path.exists(music_path), f"Music file not found: {music_path}"
 
+    # If the filename contains problematic characters (&, etc.), create a sanitized
+    # symlink/copy in the same directory to work around external tool limitations
+    original_path = music_path
+    needs_cleanup = False
+    if "&" in os.path.basename(music_path) or " " in os.path.basename(music_path):
+        # Create a sanitized filename in the same directory
+        base_dir = os.path.dirname(music_path) or "."
+        base_name = os.path.basename(music_path)
+        name, ext = os.path.splitext(base_name)
+        # Replace problematic characters
+        safe_name = re.sub(r'[&\s]+', '_', name)
+        safe_path = os.path.join(base_dir, safe_name + ext)
+        
+        # If safe path doesn't exist or is different from a previous run, create it
+        if not os.path.exists(safe_path) or not os.path.samefile(music_path, safe_path):
+            try:
+                os.symlink(os.path.abspath(music_path), safe_path)
+                logging.info(f"Created symlink: {safe_path} -> {music_path}")
+            except (OSError, NotImplementedError):
+                # Symlinks might not be supported; fall back to copy
+                shutil.copy2(music_path, safe_path)
+                logging.info(f"Created copy: {safe_path}")
+            needs_cleanup = True
+        
+        music_path = safe_path
+
     requested_players = _parse_players(args.players)
     players = _compatible_players(music_path, requested_players)
     if not players:
@@ -125,8 +156,10 @@ def main() -> None:
 
     results = []
     for pf in players:
-        logging.info(f"Benchmarking {music_path} with player {pf.name}")
+        logging.info(f"Benchmarking {original_path} with player {pf.name}")
         res = _run_for_player(music_path, pf)
+        # Update source to reflect original path
+        res["source"] = original_path
         results.append(res)
 
     # Pretty print results via pandas
@@ -149,7 +182,7 @@ def main() -> None:
 
     # Generate scatter plot with Pareto front
     if len(df) > 1 and "program_size" in df.columns and "nops_exec_max" in df.columns:
-        _plot_pareto_scatter(df, music_path, args.save_plot)
+        _plot_pareto_scatter(df, original_path, args.save_plot)
 
     if args.out_json:
         # Use safe write helper to avoid partial files
@@ -157,6 +190,14 @@ def main() -> None:
 
         safe_write_json(args.out_json, results, indent=2)
         logging.info(f"Saved results to {args.out_json}")
+
+    # Cleanup: remove sanitized symlink/copy if we created it
+    if needs_cleanup and os.path.exists(music_path) and music_path != original_path:
+        try:
+            os.remove(music_path)
+            logging.debug(f"Cleaned up temporary file: {music_path}")
+        except Exception:
+            pass
 
 
 def _plot_pareto_scatter(
@@ -238,8 +279,17 @@ def _plot_pareto_scatter(
             logging.info(f"Saved plot to {save_plot}")
         except Exception as e:
             logging.error(f"Failed to save plot: {e}")
+    else:
+        # When save_plot is not specified, save to a default location
+        # to avoid hanging on plt.show() with headless backend
+        default_plot_path = "music_bench_plot.png"
+        try:
+            fig.savefig(default_plot_path, dpi=100, bbox_inches="tight")
+            logging.info(f"Saved plot to {default_plot_path}")
+        except Exception as e:
+            logging.error(f"Failed to save plot: {e}")
 
-    plt.show()
+    plt.close(fig)  # Close figure to free memory
 
 
 if __name__ == "__main__":
