@@ -114,7 +114,9 @@ def main() -> None:
         "--save-plot", help="Optional path to save the Pareto front scatter plot (PNG)"
     )
     parser.add_argument(
-        "--show", action="store_true", help="Display the plot interactively (requires GUI)"
+        "--show",
+        action="store_true",
+        help="Display the plot interactively (requires GUI)",
     )
     args = parser.parse_args()
 
@@ -137,9 +139,9 @@ def main() -> None:
         base_name = os.path.basename(music_path)
         name, ext = os.path.splitext(base_name)
         # Replace problematic characters
-        safe_name = re.sub(r'[&\s]+', '_', name)
+        safe_name = re.sub(r"[&\s]+", "_", name)
         safe_path = os.path.join(base_dir, safe_name + ext)
-        
+
         # If safe path doesn't exist or is different from a previous run, create it
         if not os.path.exists(safe_path) or not os.path.samefile(music_path, safe_path):
             try:
@@ -150,7 +152,7 @@ def main() -> None:
                 shutil.copy2(music_path, safe_path)
                 logging.info(f"Created copy: {safe_path}")
             needs_cleanup = True
-        
+
         music_path = safe_path
 
     requested_players = _parse_players(args.players)
@@ -207,7 +209,10 @@ def main() -> None:
 
 
 def _plot_pareto_scatter(
-    df: pd.DataFrame, music_path: str, save_plot: str | None = None, show_plot: bool = False
+    df: pd.DataFrame,
+    music_path: str,
+    save_plot: str | None = None,
+    show_plot: bool = False,
 ) -> None:
     """Generate scatter plot of program size vs execution time with Pareto front."""
     fig, ax = plt.subplots(figsize=(10, 6))
