@@ -231,35 +231,46 @@ def __build_replay_program__(
     player: PlayerFormat | None = None,
     config: str | None = None,
 ) -> dict:
-    from player_utils import escape_windows_path
-    
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
     clean_amsdos_fname = base + ".BIN"
     sna_fname = base + ".sna"
 
-    # Escape paths for Windows bndbuild compatibility
-    amsdos_fname = escape_windows_path(clean_amsdos_fname)
-    music_data_fname = escape_windows_path(music_data_fname)
-    sna_fname = escape_windows_path(sna_fname)
-    if config:
-        config = escape_windows_path(config)
-
-    cmd = (
-        f"bndbuild --direct --with_expansion -- basm "
-        + extra_cmd
-        + " "
-        + f'\\"-DMUSIC_DATA_FNAME=\\\\\\"{music_data_fname}\\\\\\"\\"  '
-        + f'\\"-DMUSIC_EXEC_FNAME=\\\\\\"{amsdos_fname}\\\\\\"\\" '
-    )
-
+    # Build basm command arguments
+    basm_args = [
+        "bndbuild",
+        "--direct",
+        "--with_expansion",
+        "--",
+        "basm",
+    ]
+    
+    # Add extra_cmd tokens if provided (typically additional -D defines)
+    if extra_cmd:
+        # Split extra_cmd on spaces while preserving quoted strings
+        import shlex
+        basm_args.extend(shlex.split(extra_cmd))
+    
+    # Add standard defines
+    basm_args.extend([
+        f'-DMUSIC_DATA_FNAME=\\"{music_data_fname}\\"',
+        f'-DMUSIC_EXEC_FNAME=\\"{clean_amsdos_fname}\\"',
+    ])
+    
     if config is not None:
-        cmd += f'\\"-DPLAYER_CONFIG_FNAME=\\\\\\"{config}\\\\\\"\\" '
-
-    cmd += f"--snapshot " + f'-o \\"{sna_fname}\\" \\"{z80}\\" '
-
-    execute_process(cmd)
-    program_size = safe_getsize(amsdos_fname)
+        basm_args.append(f'-DPLAYER_CONFIG_FNAME=\\"{config}\\"')
+    
+    # Add snapshot output and source file
+    basm_args.extend([
+        "--snapshot",
+        "-o",
+        sna_fname,
+        z80,
+    ])
+    
+    tokens = build_bndbuild_tokens(*basm_args)
+    execute_process(tokens)
+    program_size = safe_getsize(clean_amsdos_fname)
 
     # Subtract profiling overhead if player format provided
     if player is not None:
@@ -267,7 +278,7 @@ def __build_replay_program__(
         if overhead is not None:
             program_size = max(0, program_size - overhead)
 
-    zx0_fname = amsdos_fname + ".zx0"
+    zx0_fname = clean_amsdos_fname + ".zx0"
     tokens = build_bndbuild_tokens(
         "bndbuild",
         "--direct",
@@ -276,7 +287,7 @@ def __build_replay_program__(
         "--cruncher",
         "zx0",
         "--input",
-        amsdos_fname,
+        clean_amsdos_fname,
         "--output",
         zx0_fname,
     )
