@@ -231,20 +231,19 @@ def __build_replay_program__(
     player: PlayerFormat | None = None,
     config: str | None = None,
 ) -> dict:
+    from player_utils import escape_windows_path
+    
     splits = os.path.splitext(music_data_fname)
     base = splits[0] + "_" + splits[1][1:]
     clean_amsdos_fname = base + ".BIN"
     sna_fname = base + ".sna"
 
-    if "Windows" in platform.system():
-        rep = r"\\\\"
-        amsdos_fname = clean_amsdos_fname.replace("\\", rep)
-        music_data_fname = music_data_fname.replace("\\", rep)
-        sna_fname = sna_fname.replace("\\", rep)
-        if config:
-            config = config.replace("\\", rep)
-    else:
-        amsdos_fname = clean_amsdos_fname
+    # Escape paths for Windows bndbuild compatibility
+    amsdos_fname = escape_windows_path(clean_amsdos_fname)
+    music_data_fname = escape_windows_path(music_data_fname)
+    sna_fname = escape_windows_path(sna_fname)
+    if config:
+        config = escape_windows_path(config)
 
     cmd = (
         f"bndbuild --direct --with_expansion -- basm "

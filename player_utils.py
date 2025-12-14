@@ -6,12 +6,37 @@ Shared utilities for player and music format operations.
 
 import logging
 import os
+import platform
 import re
 import shutil
 from typing import List
 
 from datasets import MusicFormat
 from players import PlayerFormat
+
+
+def escape_windows_path(path: str) -> str:
+    """
+    Escape file path for Windows bndbuild commands.
+    
+    On Windows, bndbuild requires backslashes to be escaped with double backslashes
+    (\\\\) for proper path handling in shell commands.
+    
+    Args:
+        path: File path to escape
+        
+    Returns:
+        Escaped path on Windows, original path on other platforms
+        
+    Example:
+        >>> escape_windows_path("C:\\Users\\file.bin")  # On Windows
+        'C:\\\\\\\\Users\\\\\\\\file.bin'
+        >>> escape_windows_path("/home/user/file.bin")  # On Linux
+        '/home/user/file.bin'
+    """
+    if "Windows" in platform.system():
+        return path.replace("\\", r"\\\\")
+    return path
 
 
 def parse_player(raw: str) -> PlayerFormat:
