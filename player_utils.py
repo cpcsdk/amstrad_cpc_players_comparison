@@ -160,3 +160,26 @@ def find_conversion_target(music_path: str, player: PlayerFormat) -> MusicFormat
         )
 
     return targets[0]
+
+
+def generate_conversion_paths(
+    music_path: str, convert_to: MusicFormat, player: PlayerFormat
+) -> tuple[str, str]:
+    """
+    Generate file paths for the conversion pipeline.
+    
+    Args:
+        music_path: Original music file path
+        convert_to: Target music format to convert to
+        player: Target player format
+        
+    Returns:
+        Tuple of (converted_path, produced_path)
+        - converted_path: Path for the converted music file
+        - produced_path: Path for the player-specific output file
+    """
+    converted_fname = music_path.replace(
+        os.path.splitext(music_path)[1], f".{convert_to.value}"
+    )
+    produced_fname = player.set_extension(converted_fname)
+    return converted_fname, produced_fname

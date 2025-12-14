@@ -23,18 +23,22 @@ import seaborn as sns
 
 from datasets import MusicFormat, convert_music_file
 from players import PlayerFormat, crunch_music_file, build_replay_program
-from player_utils import parse_players, sanitize_filename, find_compatible_players, find_conversion_target
+from player_utils import (
+    parse_players,
+    sanitize_filename,
+    find_compatible_players,
+    find_conversion_target,
+    generate_conversion_paths,
+)
 from profile import profile
 from utils import compute_pareto_front, draw_pareto_front
 
 
 def _run_for_player(music_path: str, player: PlayerFormat) -> dict:
     convert_to = find_conversion_target(music_path, player)
-
-    converted_fname = music_path.replace(
-        os.path.splitext(music_path)[1], f".{convert_to.value}"
+    converted_fname, produced_fname = generate_conversion_paths(
+        music_path, convert_to, player
     )
-    produced_fname = player.set_extension(converted_fname)
 
     convert_music_file(music_path, converted_fname)
     res_conv = crunch_music_file(converted_fname, produced_fname, player)

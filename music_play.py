@@ -15,7 +15,12 @@ import os
 
 from datasets import MusicFormat, convert_music_file
 from players import PlayerFormat, crunch_music_file, build_replay_program
-from player_utils import parse_player, sanitize_filename, find_conversion_target
+from player_utils import (
+    parse_player,
+    sanitize_filename,
+    find_conversion_target,
+    generate_conversion_paths,
+)
 from utils import execute_process, build_bndbuild_tokens
 
 
@@ -32,10 +37,11 @@ def _convert_and_build(music_path: str, player: PlayerFormat) -> dict:
         logging.info(
             f"Music file is already in {convert_to.value} format, no conversion needed"
         )
+        produced_fname = player.set_extension(converted_fname)
     else:
         # Generate output filenames
-        converted_fname = music_path.replace(
-            os.path.splitext(music_path)[1], f".{convert_to.value}"
+        converted_fname, produced_fname = generate_conversion_paths(
+            music_path, convert_to, player
         )
 
         # Clean up any existing output files to ensure fresh conversion
@@ -50,8 +56,9 @@ def _convert_and_build(music_path: str, player: PlayerFormat) -> dict:
         if not os.path.exists(converted_fname):
             raise RuntimeError(f"Conversion failed: {converted_fname} was not created")
 
-    # Generate the player-specific output filename
-    produced_fname = player.set_extension(converted_fname)
+    # If we didn't generate produced_fname in the else block, generate it now
+    if "produced_fname" not in locals():
+        produced_fname = player.set_extension(converted_fname)
 
     # Clean up existing player file
     if os.path.exists(produced_fname):
