@@ -18,7 +18,6 @@ import tempfile
 from typing import Iterable, List
 
 import matplotlib
-matplotlib.use("Agg")  # Use headless backend to avoid GUI display issues
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
@@ -114,7 +113,14 @@ def main() -> None:
     parser.add_argument(
         "--save-plot", help="Optional path to save the Pareto front scatter plot (PNG)"
     )
+    parser.add_argument(
+        "--show", action="store_true", help="Display the plot interactively (requires GUI)"
+    )
     args = parser.parse_args()
+
+    # Set matplotlib backend based on --show flag
+    if not args.show:
+        matplotlib.use("Agg")  # Headless backend when not showing interactively
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -182,7 +188,7 @@ def main() -> None:
 
     # Generate scatter plot with Pareto front
     if len(df) > 1 and "program_size" in df.columns and "nops_exec_max" in df.columns:
-        _plot_pareto_scatter(df, original_path, args.save_plot)
+        _plot_pareto_scatter(df, original_path, args.save_plot, args.show)
 
     if args.out_json:
         # Use safe write helper to avoid partial files
@@ -201,7 +207,7 @@ def main() -> None:
 
 
 def _plot_pareto_scatter(
-    df: pd.DataFrame, music_path: str, save_plot: str | None = None
+    df: pd.DataFrame, music_path: str, save_plot: str | None = None, show_plot: bool = False
 ) -> None:
     """Generate scatter plot of program size vs execution time with Pareto front."""
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -279,9 +285,8 @@ def _plot_pareto_scatter(
             logging.info(f"Saved plot to {save_plot}")
         except Exception as e:
             logging.error(f"Failed to save plot: {e}")
-    else:
-        # When save_plot is not specified, save to a default location
-        # to avoid hanging on plt.show() with headless backend
+    elif not show_plot:
+        # When save_plot is not specified and not showing, save to a default location
         default_plot_path = "music_bench_plot.png"
         try:
             fig.savefig(default_plot_path, dpi=100, bbox_inches="tight")
@@ -289,7 +294,10 @@ def _plot_pareto_scatter(
         except Exception as e:
             logging.error(f"Failed to save plot: {e}")
 
-    plt.close(fig)  # Close figure to free memory
+    if show_plot:
+        plt.show()  # Display plot interactively
+    else:
+        plt.close(fig)  # Close figure to free memory
 
 
 if __name__ == "__main__":
