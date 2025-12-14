@@ -418,17 +418,9 @@ def compile_chp(chp_fname: str, _):
 
 def crunch_ym_with_fap(ym_fname: str, fap_fname: str) -> dict:
     cmd = ["bndbuild", "--direct", "--", "fap", "{in_path}", "{out_path}"]
-    try:
-        res_proc, stdout, stderr = safe_bndbuild_conversion(
-            ym_fname, fap_fname, cmd, tmp_prefix="fap-"
-        )
-    except Exception as e:
-        if not os.path.exists(fap_fname):
-            raise e
-        else:
-            # file exists despite error; proceed with what we have
-            stdout = ""
-            stderr = ""
+    res_proc, stdout, stderr = safe_bndbuild_conversion(
+        ym_fname, fap_fname, cmd, tmp_prefix="fap-"
+    )
 
     s = safe_getsize(fap_fname)
 

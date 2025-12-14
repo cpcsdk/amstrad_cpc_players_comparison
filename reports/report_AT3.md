@@ -39,7 +39,7 @@ title: AT3
 | 30 | Targhan - DemoIzArt - End Part             | 11545 |  9705 |  29564 |  28971 | 49989 | 26172 |
 | 31 | Targhan - DemoIzArt - Twist Part           |  8100 |  7046 |  17473 |  16903 | 27563 | 16700 |
 | 32 | Targhan - Hocus Pocus                      |  7532 |  6043 |  16566 |  16133 | 26277 | 15682 |
-| 33 | Targhan - Midline Process - Carpet         |  9510 |  8274 |  18110 |  17559 | 39463 | 20796 |
+| 33 | Targhan - Midline Process - Carpet         |  9510 |   nan |  18110 |  17559 | 39463 | 20796 |
 | 34 | Targhan - Midline Process - Molusk         |  9752 |  8468 |  24108 |  23557 | 47550 | 30524 |
 | 35 | Targhan - Ooops                            |  2478 |  1657 |   2627 |   2071 |  4668 |  5436 |
 | 36 | Targhan - Orion Prime - Danger Ahead       |  2086 |  1438 |   2404 |   1740 |  2781 |  4668 |
@@ -87,7 +87,7 @@ Mean
 | format   |        0 |
 |:---------|---------:|
 | AKG      |  5016.73 |
-| AKM      |  3955.24 |
+| AKM      |  3896.88 |
 | AKYS     |  9072.12 |
 | AKYU     |  8454.01 |
 | AYT      | 16820.1  |
@@ -97,17 +97,17 @@ Mean
  - FAP vs AKG: dissimilar (best=AKG)
  - FAP vs AKYS: dissimilar (best=AKYS)
  - FAP vs AKYU: dissimilar (best=AKYU)
- - FAP vs AKM: dissimilar (best=AKM)
+ - FAP vs AKM: similar
  - AYT vs AKG: dissimilar (best=AKG)
  - AYT vs AKYS: dissimilar (best=AKYS)
  - AYT vs AKYU: dissimilar (best=AKYU)
- - AYT vs AKM: dissimilar (best=AKM)
+ - AYT vs AKM: similar
  - AKG vs AKYS: dissimilar (best=AKG)
  - AKG vs AKYU: dissimilar (best=AKG)
- - AKG vs AKM: dissimilar (best=AKM)
+ - AKG vs AKM: similar
  - AKYS vs AKYU: dissimilar (best=AKYU)
- - AKYS vs AKM: dissimilar (best=AKM)
- - AKYU vs AKM: dissimilar (best=AKM)
+ - AKYS vs AKM: similar
+ - AKYU vs AKM: similar
 
 
 ![Parallel coordinates](prog_size_parallel_coordinates_AT3.png)
@@ -154,7 +154,7 @@ Mean
 | 30 | Targhan - DemoIzArt - End Part             |  5702 |  5337 |  15982 |  15732 | 13836 | 12804 |
 | 31 | Targhan - DemoIzArt - Twist Part           |  3941 |  3848 |   8047 |   7812 |  8770 |  8955 |
 | 32 | Targhan - Hocus Pocus                      |  4271 |  3779 |   9222 |   9034 |  9910 |  9395 |
-| 33 | Targhan - Midline Process - Carpet         |  4627 |  4435 |   9325 |   9099 | 11571 | 10888 |
+| 33 | Targhan - Midline Process - Carpet         |  4627 |   nan |   9325 |   9099 | 11571 | 10888 |
 | 34 | Targhan - Midline Process - Molusk         |  5338 |  5341 |  13170 |  12943 | 15112 | 16109 |
 | 35 | Targhan - Ooops                            |  1567 |  1303 |   1387 |   1159 |  1407 |  1792 |
 | 36 | Targhan - Orion Prime - Danger Ahead       |  1274 |  1091 |   1093 |    814 |   917 |  1089 |
@@ -202,7 +202,7 @@ Mean
 | format   |       0 |
 |:---------|--------:|
 | AKG      | 2575.24 |
-| AKM      | 2291.88 |
+| AKM      | 2262.92 |
 | AKYS     | 4369.65 |
 | AKYU     | 4116.87 |
 | AYT      | 4688.48 |
@@ -212,17 +212,17 @@ Mean
  - FAP vs AKG: dissimilar (best=AKG)
  - FAP vs AKYS: dissimilar (best=AKYS)
  - FAP vs AKYU: dissimilar (best=AKYU)
- - FAP vs AKM: dissimilar (best=AKM)
+ - FAP vs AKM: similar
  - AYT vs AKG: dissimilar (best=AKG)
  - AYT vs AKYS: dissimilar (best=AKYS)
  - AYT vs AKYU: dissimilar (best=AKYU)
- - AYT vs AKM: dissimilar (best=AKM)
+ - AYT vs AKM: similar
  - AKG vs AKYS: dissimilar (best=AKG)
  - AKG vs AKYU: dissimilar (best=AKG)
- - AKG vs AKM: dissimilar (best=AKM)
+ - AKG vs AKM: similar
  - AKYS vs AKYU: dissimilar (best=AKYU)
- - AKYS vs AKM: dissimilar (best=AKM)
- - AKYU vs AKM: dissimilar (best=AKM)
+ - AKYS vs AKM: similar
+ - AKYU vs AKM: similar
 
 
 ![Parallel coordinates](zx0_prog_size_parallel_coordinates_AT3.png)
@@ -234,90 +234,90 @@ Mean
 ![Violin Plot](zx0_prog_size_violin_AT3.png)
 # Maximum execution time (in nops)
 
-|    | sources                                    |   AKG |     AKM |   AKYS |   AKYU |   AYT |   FAP |
-|---:|:-------------------------------------------|------:|--------:|-------:|-------:|------:|------:|
-|  0 | 2018_EA_demosong                           |  2026 |    2795 |   1181 |    693 |   392 |   631 |
-|  1 | 2018_nq_skrju_demosong                     |  1833 |    2536 |   1181 |    704 |   392 |   631 |
-|  2 | Andy Severn - Lop Ears                     |  2278 | 2500026 |   1181 |    677 |   422 |   607 |
-|  3 | Doclands - Buzz-o-Meter (YM)               |  1822 |    2482 |   1181 |    805 |   453 |   631 |
-|  4 | Doclands - GinFizz                         |  1979 | 2500053 |   1181 |    693 |   422 |   631 |
-|  5 | Doclands - Pong Cracktro (YM)              |  1814 | 2500035 |   1181 |    772 |   423 |   655 |
-|  6 | Doclands - Slowly But (YM)                 |  1731 |    2374 |   1181 |    668 |   392 |   607 |
-|  7 | Doclands - The Rivals (YM)                 |  1884 |    2443 |   1181 |    766 |   453 |   655 |
-|  8 | Doclands - The Saga (YM)                   |  1759 | 2500030 |   1181 |    756 |   453 |   607 |
-|  9 | Doclands - Tiny Things (YM)                |  1835 | 2500049 |   1181 |    810 |   423 |   655 |
-| 10 | Doclands - Truly Yours (YM)                |  1830 |    2424 |   1181 |    805 |   453 |   655 |
-| 11 | Doclands - Your Credits (YM)               |  1580 |    2149 |   1181 |    802 |   453 |   655 |
-| 12 | Excellence in Art 2018 - Just add cream    |  2083 | 2500064 |   1181 |    779 |   453 |   655 |
-| 13 | FenyxKell - BD10n'nOeuf                    |  1470 |    2098 |   1181 |    686 |   422 |   607 |
-| 14 | FenyxKell - Bobline                        |  1555 |    2192 |   1181 |    737 |   423 |   655 |
-| 15 | FenyxKell - KellyOn                        |  1650 |    2253 |   1181 |    772 |   453 |   655 |
-| 16 | FenyxKell - Smoke                          |  1517 |    2163 |   1181 |    668 |   362 |   607 |
-| 17 | FenyxKell - Solarium                       |  1498 |    2174 |   1181 |    763 |   453 |   655 |
-| 18 | FenyxKell - Spectrum Castle                |  1618 |    2342 |   1181 |    781 |   453 |   655 |
-| 19 | Giherem - Bancaloide                       |  1389 |    1969 |   1181 |    801 |   453 |   655 |
-| 20 | Ok3anos - Cpc Dream                        |  1425 |    1964 |   1181 |    793 |   453 |   607 |
-| 21 | Playing with effects                       |  1468 |    2041 |   1181 |    640 |   331 |   607 |
-| 22 | PulkoMandy - Renegade Remix                |  1508 |    2050 |   1181 |    747 |   453 |   655 |
-| 23 | SoundEffects                               |  1040 |    1620 |   1181 |    633 |   269 |   607 |
-| 24 | Targhan - A Harmless Grenade               |  2034 | 2500056 |   1181 |    802 |   453 |   655 |
-| 25 | Targhan - Aganamemnon (soft drums version) |  2286 | 2500042 |   1181 |    756 |   453 |   655 |
-| 26 | Targhan - Crtc                             |  2130 |    2795 |   1181 |    756 |   453 |   655 |
-| 27 | Targhan - Dead On Time - Ingame            |  1341 |    1933 |   1181 |    584 |   301 |   607 |
-| 28 | Targhan - Dead On Time - Main Menu         |  1796 |    2584 |   1181 |    686 |   422 |   631 |
-| 29 | Targhan - Dead On Time - Sound Effects     |  1192 |    1729 |   1181 |    663 |   269 |   607 |
-| 30 | Targhan - DemoIzArt - End Part             |  1731 |    2288 |   1181 |    767 |   423 |   631 |
-| 31 | Targhan - DemoIzArt - Twist Part           |  1583 |    2305 |   1181 |    802 |   453 |   655 |
-| 32 | Targhan - Hocus Pocus                      |  2130 | 2500048 |   1181 |    805 |   453 |   723 |
-| 33 | Targhan - Midline Process - Carpet         |  1671 |    2334 |   1181 |    802 |   453 |   655 |
-| 34 | Targhan - Midline Process - Molusk         |  1700 |    2370 |   1181 |    772 |   453 |   631 |
-| 35 | Targhan - Ooops                            |  1462 |    2150 |   1181 |    805 |   453 |   655 |
-| 36 | Targhan - Orion Prime - Danger Ahead       |  1456 |    2131 |   1181 |    736 |   392 |   607 |
-| 37 | Targhan - Orion Prime - Fight              |  1965 |    2716 |   1181 |    809 |   453 |   655 |
-| 38 | Targhan - Orion Prime - Introduction       |  1652 |    2331 |   1181 |    802 |   453 |   655 |
-| 39 | Targhan - Orion Prime - Level 1            |  1573 |    2081 |   1181 |    759 |   423 |   723 |
-| 40 | Targhan - Orion Prime - Level 4 - Theme 1  |  1545 |    2122 |   1181 |    772 |   453 |   655 |
-| 41 | Targhan - Orion Prime - Level 4 - Theme 2  |  1635 |    2202 |   1181 |    801 |   423 |   607 |
-| 42 | Targhan - Star Sabre - Boss Theme          |  1919 |    2518 |   1181 |    763 |   453 |   655 |
-| 43 | Targhan - Star Sabre - Ingame              |  1547 |    2199 |   1181 |    753 |   453 |  3679 |
-| 44 | Targhan - Star Sabre - Intermission        |  1557 |    2333 |   1181 |    796 |   453 |   655 |
-| 45 | Targhan - Star Sabre - Main Menu           |  1486 |    2162 |   1181 |    818 |   453 |   655 |
-| 46 | Targhan - Wunderbar                        |  1554 |    2218 |   1181 |    756 |   453 |   655 |
-| 47 | Tom&Jerry - Boules Et Bits (Extended)      |  1662 |    2313 |   1181 |    810 |   453 |   655 |
-| 48 | Tom&Jerry - From Scratch - Part 1          |  1637 |    2266 |   1181 |    786 |   453 |   607 |
-| 49 | Tom&Jerry - From Scratch - Part 2          |  1437 |    2129 |   1181 |    779 |   423 |   655 |
-| 50 | Tom&Jerry - From Scratch - Part 3          |  1342 |    2018 |   1181 |    754 |   453 |   655 |
-| 51 | Tom&Jerry - From Scratch - Part 4          |  1390 |    2062 |   1181 |    756 |   453 |   655 |
-| 52 | Tom&Jerry - Le Crime Du Parking - End Game |  1309 |    1913 |   1181 |    640 |   331 |   607 |
-| 53 | Tom&Jerry - Le Crime Du Parking - Intro    |  1531 |    2221 |   1181 |    793 |   453 |   655 |
-| 54 | Tom&Jerry - Sudoku - Menu                  |  1223 |    1895 |   1181 |    640 |   332 |   607 |
-| 55 | Tom&Jerry - Sudoku - Notice                |  1303 |    1889 |   1181 |    640 |   361 |   607 |
-| 56 | Tom&Jerry - Sudoku - Sundat                |  1218 |    1838 |   1181 |    640 |   332 |   607 |
-| 57 | Tom&Jerry - Sudoku - Theme 1               |  1464 |    2072 |   1181 |    804 |   453 |   655 |
-| 58 | Tom&Jerry - Sudoku - Theme 2               |  1476 |    2104 |   1181 |    754 |   453 |   675 |
-| 59 | Tom&Jerry - Sudoku - Victory               |  1207 |    1888 |   1181 |    640 |   332 |   607 |
-| 60 | Totta - BaraBadaBastu                      |  1795 |    2335 |   1181 |    766 |   423 |   723 |
-| 61 | Totta - Crawlers                           |  1788 |    2327 |   1181 |    766 |   453 |   723 |
-| 62 | Totta - Hardy                              |  1940 |    2666 |   1181 |    822 |   453 |   699 |
-| 63 | Totta - Mellow                             |  1357 |    1959 |   1181 |    640 |   392 |   607 |
-| 64 | Totta - Rezzy                              |  1822 |    2539 |   1181 |    810 |   453 |   655 |
-| 65 | Totta - Room5                              |  1581 |    2190 |   1181 |    627 |   299 |   607 |
-| 66 | UltraSyd - Dead Floppy                     |  1302 |    1886 |   1181 |    716 |   453 |   655 |
-| 67 | UltraSyd - Fractal                         |  1534 |    2110 |   1181 |    749 |   453 |   631 |
-| 68 | UltraSyd - Fuck It                         |  1496 |    2048 |   1181 |    707 |   453 |   723 |
-| 69 | UltraSyd - Robot                           |  1587 |    2222 |   1181 |    772 |   453 |   655 |
-| 70 | UltraSyd - The End                         |  1563 |    2194 |   1181 |    801 |   453 |   655 |
-| 71 | UltraSyd - YM Type                         |  1492 |    2067 |   1181 |    762 |   453 |   723 |
-| 72 | Ultrasyd - Morons                          |  1442 |    1878 |   1181 |    725 |   453 |   655 |
-| 73 | jinj_med                                   |  1071 |    1706 |   1181 |    640 |   361 |   607 |
-| 74 | maryjane2                                  |  1156 |    1798 |   1181 |    684 |   392 |   607 |
+|    | sources                                    |   AKG |            AKM |   AKYS |   AKYU |   AYT |   FAP |
+|---:|:-------------------------------------------|------:|---------------:|-------:|-------:|------:|------:|
+|  0 | 2018_EA_demosong                           |  2026 | 2795           |   1181 |    693 |   392 |   631 |
+|  1 | 2018_nq_skrju_demosong                     |  1833 | 2536           |   1181 |    704 |   392 |   631 |
+|  2 | Andy Severn - Lop Ears                     |  2278 |    2.50003e+06 |   1181 |    677 |   422 |   607 |
+|  3 | Doclands - Buzz-o-Meter (YM)               |  1822 | 2482           |   1181 |    805 |   453 |   631 |
+|  4 | Doclands - GinFizz                         |  1979 |    2.50005e+06 |   1181 |    693 |   422 |   631 |
+|  5 | Doclands - Pong Cracktro (YM)              |  1814 |    2.50004e+06 |   1181 |    772 |   423 |   655 |
+|  6 | Doclands - Slowly But (YM)                 |  1731 | 2374           |   1181 |    668 |   392 |   607 |
+|  7 | Doclands - The Rivals (YM)                 |  1884 | 2443           |   1181 |    766 |   453 |   655 |
+|  8 | Doclands - The Saga (YM)                   |  1759 |    2.50003e+06 |   1181 |    756 |   453 |   607 |
+|  9 | Doclands - Tiny Things (YM)                |  1835 |    2.50005e+06 |   1181 |    810 |   423 |   655 |
+| 10 | Doclands - Truly Yours (YM)                |  1830 | 2424           |   1181 |    805 |   453 |   655 |
+| 11 | Doclands - Your Credits (YM)               |  1580 | 2149           |   1181 |    802 |   453 |   655 |
+| 12 | Excellence in Art 2018 - Just add cream    |  2083 |    2.50006e+06 |   1181 |    779 |   453 |   655 |
+| 13 | FenyxKell - BD10n'nOeuf                    |  1470 | 2098           |   1181 |    686 |   422 |   607 |
+| 14 | FenyxKell - Bobline                        |  1555 | 2192           |   1181 |    737 |   423 |   655 |
+| 15 | FenyxKell - KellyOn                        |  1650 | 2253           |   1181 |    772 |   453 |   655 |
+| 16 | FenyxKell - Smoke                          |  1517 | 2163           |   1181 |    668 |   362 |   607 |
+| 17 | FenyxKell - Solarium                       |  1498 | 2174           |   1181 |    763 |   453 |   655 |
+| 18 | FenyxKell - Spectrum Castle                |  1618 | 2342           |   1181 |    781 |   453 |   655 |
+| 19 | Giherem - Bancaloide                       |  1389 | 1969           |   1181 |    801 |   453 |   655 |
+| 20 | Ok3anos - Cpc Dream                        |  1425 | 1964           |   1181 |    793 |   453 |   607 |
+| 21 | Playing with effects                       |  1468 | 2041           |   1181 |    640 |   331 |   607 |
+| 22 | PulkoMandy - Renegade Remix                |  1508 | 2050           |   1181 |    747 |   453 |   655 |
+| 23 | SoundEffects                               |  1040 | 1620           |   1181 |    633 |   269 |   607 |
+| 24 | Targhan - A Harmless Grenade               |  2034 |    2.50006e+06 |   1181 |    802 |   453 |   655 |
+| 25 | Targhan - Aganamemnon (soft drums version) |  2286 |    2.50004e+06 |   1181 |    756 |   453 |   655 |
+| 26 | Targhan - Crtc                             |  2130 | 2795           |   1181 |    756 |   453 |   655 |
+| 27 | Targhan - Dead On Time - Ingame            |  1341 | 1933           |   1181 |    584 |   301 |   607 |
+| 28 | Targhan - Dead On Time - Main Menu         |  1796 | 2584           |   1181 |    686 |   422 |   631 |
+| 29 | Targhan - Dead On Time - Sound Effects     |  1192 | 1729           |   1181 |    663 |   269 |   607 |
+| 30 | Targhan - DemoIzArt - End Part             |  1731 | 2288           |   1181 |    767 |   423 |   631 |
+| 31 | Targhan - DemoIzArt - Twist Part           |  1583 | 2305           |   1181 |    802 |   453 |   655 |
+| 32 | Targhan - Hocus Pocus                      |  2130 |    2.50005e+06 |   1181 |    805 |   453 |   723 |
+| 33 | Targhan - Midline Process - Carpet         |  1671 |  nan           |   1181 |    802 |   453 |   655 |
+| 34 | Targhan - Midline Process - Molusk         |  1700 | 2370           |   1181 |    772 |   453 |   631 |
+| 35 | Targhan - Ooops                            |  1462 | 2150           |   1181 |    805 |   453 |   655 |
+| 36 | Targhan - Orion Prime - Danger Ahead       |  1456 | 2131           |   1181 |    736 |   392 |   607 |
+| 37 | Targhan - Orion Prime - Fight              |  1965 | 2716           |   1181 |    809 |   453 |   655 |
+| 38 | Targhan - Orion Prime - Introduction       |  1652 | 2331           |   1181 |    802 |   453 |   655 |
+| 39 | Targhan - Orion Prime - Level 1            |  1573 | 2081           |   1181 |    759 |   423 |   723 |
+| 40 | Targhan - Orion Prime - Level 4 - Theme 1  |  1545 | 2122           |   1181 |    772 |   453 |   655 |
+| 41 | Targhan - Orion Prime - Level 4 - Theme 2  |  1635 | 2202           |   1181 |    801 |   423 |   607 |
+| 42 | Targhan - Star Sabre - Boss Theme          |  1919 | 2518           |   1181 |    763 |   453 |   655 |
+| 43 | Targhan - Star Sabre - Ingame              |  1547 | 2199           |   1181 |    753 |   453 |  3679 |
+| 44 | Targhan - Star Sabre - Intermission        |  1557 | 2333           |   1181 |    796 |   453 |   655 |
+| 45 | Targhan - Star Sabre - Main Menu           |  1486 | 2162           |   1181 |    818 |   453 |   655 |
+| 46 | Targhan - Wunderbar                        |  1554 | 2218           |   1181 |    756 |   453 |   655 |
+| 47 | Tom&Jerry - Boules Et Bits (Extended)      |  1662 | 2313           |   1181 |    810 |   453 |   655 |
+| 48 | Tom&Jerry - From Scratch - Part 1          |  1637 | 2266           |   1181 |    786 |   453 |   607 |
+| 49 | Tom&Jerry - From Scratch - Part 2          |  1437 | 2129           |   1181 |    779 |   423 |   655 |
+| 50 | Tom&Jerry - From Scratch - Part 3          |  1342 | 2018           |   1181 |    754 |   453 |   655 |
+| 51 | Tom&Jerry - From Scratch - Part 4          |  1390 | 2062           |   1181 |    756 |   453 |   655 |
+| 52 | Tom&Jerry - Le Crime Du Parking - End Game |  1309 | 1913           |   1181 |    640 |   331 |   607 |
+| 53 | Tom&Jerry - Le Crime Du Parking - Intro    |  1531 | 2221           |   1181 |    793 |   453 |   655 |
+| 54 | Tom&Jerry - Sudoku - Menu                  |  1223 | 1895           |   1181 |    640 |   332 |   607 |
+| 55 | Tom&Jerry - Sudoku - Notice                |  1303 | 1889           |   1181 |    640 |   361 |   607 |
+| 56 | Tom&Jerry - Sudoku - Sundat                |  1218 | 1838           |   1181 |    640 |   332 |   607 |
+| 57 | Tom&Jerry - Sudoku - Theme 1               |  1464 | 2072           |   1181 |    804 |   453 |   655 |
+| 58 | Tom&Jerry - Sudoku - Theme 2               |  1476 | 2104           |   1181 |    754 |   453 |   675 |
+| 59 | Tom&Jerry - Sudoku - Victory               |  1207 | 1888           |   1181 |    640 |   332 |   607 |
+| 60 | Totta - BaraBadaBastu                      |  1795 | 2335           |   1181 |    766 |   423 |   723 |
+| 61 | Totta - Crawlers                           |  1788 | 2327           |   1181 |    766 |   453 |   723 |
+| 62 | Totta - Hardy                              |  1940 | 2666           |   1181 |    822 |   453 |   699 |
+| 63 | Totta - Mellow                             |  1357 | 1959           |   1181 |    640 |   392 |   607 |
+| 64 | Totta - Rezzy                              |  1822 | 2539           |   1181 |    810 |   453 |   655 |
+| 65 | Totta - Room5                              |  1581 | 2190           |   1181 |    627 |   299 |   607 |
+| 66 | UltraSyd - Dead Floppy                     |  1302 | 1886           |   1181 |    716 |   453 |   655 |
+| 67 | UltraSyd - Fractal                         |  1534 | 2110           |   1181 |    749 |   453 |   631 |
+| 68 | UltraSyd - Fuck It                         |  1496 | 2048           |   1181 |    707 |   453 |   723 |
+| 69 | UltraSyd - Robot                           |  1587 | 2222           |   1181 |    772 |   453 |   655 |
+| 70 | UltraSyd - The End                         |  1563 | 2194           |   1181 |    801 |   453 |   655 |
+| 71 | UltraSyd - YM Type                         |  1492 | 2067           |   1181 |    762 |   453 |   723 |
+| 72 | Ultrasyd - Morons                          |  1442 | 1878           |   1181 |    725 |   453 |   655 |
+| 73 | jinj_med                                   |  1071 | 1706           |   1181 |    640 |   361 |   607 |
+| 74 | maryjane2                                  |  1156 | 1798           |   1181 |    684 |   392 |   607 |
 
 Mean
 
 | format   |          0 |
 |:---------|-----------:|
 | AKG      |   1608.83  |
-| AKM      | 301927     |
+| AKM      | 305975     |
 | AKYS     |   1181     |
 | AKYU     |    743.187 |
 | AYT      |    422.52  |
@@ -327,17 +327,17 @@ Mean
  - FAP vs AKG: dissimilar (best=FAP)
  - FAP vs AKYS: dissimilar (best=FAP)
  - FAP vs AKYU: dissimilar (best=FAP)
- - FAP vs AKM: dissimilar (best=FAP)
+ - FAP vs AKM: similar
  - AYT vs AKG: dissimilar (best=AYT)
  - AYT vs AKYS: dissimilar (best=AYT)
  - AYT vs AKYU: dissimilar (best=AYT)
- - AYT vs AKM: dissimilar (best=AYT)
+ - AYT vs AKM: similar
  - AKG vs AKYS: dissimilar (best=AKYS)
  - AKG vs AKYU: dissimilar (best=AKYU)
- - AKG vs AKM: dissimilar (best=AKG)
+ - AKG vs AKM: similar
  - AKYS vs AKYU: dissimilar (best=AKYU)
- - AKYS vs AKM: dissimilar (best=AKYS)
- - AKYU vs AKM: dissimilar (best=AKYU)
+ - AKYS vs AKM: similar
+ - AKYU vs AKM: similar
 
 
 ![Parallel coordinates](max_execution_time_parallel_coordinates_AT3.png)
