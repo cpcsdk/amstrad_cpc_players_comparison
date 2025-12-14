@@ -12,9 +12,6 @@ import argparse
 import json
 import logging
 import os
-import re
-import shutil
-import tempfile
 from typing import Iterable, List
 
 import matplotlib
@@ -26,60 +23,13 @@ import seaborn as sns
 
 from datasets import MusicFormat, convert_music_file
 from players import PlayerFormat, crunch_music_file, build_replay_program
+from player_utils import parse_players, sanitize_filename, find_compatible_players, find_conversion_target
 from profile import profile
 from utils import compute_pareto_front, draw_pareto_front
 
 
-def _parse_players(raw: str | None) -> List[PlayerFormat] | None:
-    if raw is None:
-        return None
-    result: List[PlayerFormat] = []
-    for token in raw.split(","):
-        t = token.strip()
-        if not t:
-            continue
-        # Accept enum name (AKM) or value (akm)
-        try:
-            result.append(PlayerFormat[t.upper()])
-            continue
-        except KeyError:
-            pass
-        for pf in PlayerFormat:
-            if pf.value.lower() == t.lower():
-                result.append(pf)
-                break
-        else:
-            raise ValueError(f"Unknown player format: {t}")
-    return result
-
-
-def _compatible_players(
-    music_path: str, players: List[PlayerFormat] | None
-) -> List[PlayerFormat]:
-    input_fmt = MusicFormat.get_format(music_path)
-    convertible = input_fmt.convertible_to()
-    candidates: Iterable[PlayerFormat] = (
-        players if players is not None else list(PlayerFormat)
-    )
-    compatible: List[PlayerFormat] = []
-    for pf in candidates:
-        if pf in [PlayerFormat.AYC]:
-            continue  # not yet supported
-        expected = pf.requires_one_of()
-        if convertible.intersection(expected):
-            compatible.append(pf)
-    return compatible
-
-
 def _run_for_player(music_path: str, player: PlayerFormat) -> dict:
-    input_fmt = MusicFormat.get_format(music_path)
-    convertible = input_fmt.convertible_to()
-    expected = player.requires_one_of()
-
-    targets = sorted(convertible.intersection(expected), key=lambda f: f.value)
-    if not targets:
-        raise ValueError(f"Music {music_path} not compatible with {player.name}")
-    convert_to = targets[0]
+    convert_to = find_conversion_target(music_path, player)
 
     converted_fname = music_path.replace(
         os.path.splitext(music_path)[1], f".{convert_to.value}"
@@ -129,34 +79,12 @@ def main() -> None:
     music_path = args.music
     assert os.path.exists(music_path), f"Music file not found: {music_path}"
 
-    # If the filename contains problematic characters (&, etc.), create a sanitized
-    # symlink/copy in the same directory to work around external tool limitations
+    # Handle filenames with special characters
     original_path = music_path
-    needs_cleanup = False
-    if "&" in os.path.basename(music_path) or " " in os.path.basename(music_path):
-        # Create a sanitized filename in the same directory
-        base_dir = os.path.dirname(music_path) or "."
-        base_name = os.path.basename(music_path)
-        name, ext = os.path.splitext(base_name)
-        # Replace problematic characters
-        safe_name = re.sub(r"[&\s]+", "_", name)
-        safe_path = os.path.join(base_dir, safe_name + ext)
+    music_path, needs_cleanup = sanitize_filename(music_path)
 
-        # If safe path doesn't exist or is different from a previous run, create it
-        if not os.path.exists(safe_path) or not os.path.samefile(music_path, safe_path):
-            try:
-                os.symlink(os.path.abspath(music_path), safe_path)
-                logging.info(f"Created symlink: {safe_path} -> {music_path}")
-            except (OSError, NotImplementedError):
-                # Symlinks might not be supported; fall back to copy
-                shutil.copy2(music_path, safe_path)
-                logging.info(f"Created copy: {safe_path}")
-            needs_cleanup = True
-
-        music_path = safe_path
-
-    requested_players = _parse_players(args.players)
-    players = _compatible_players(music_path, requested_players)
+    requested_players = parse_players(args.players)
+    players = find_compatible_players(music_path, requested_players)
     if not players:
         raise SystemExit(
             "No compatible players found for this music file and selection."
