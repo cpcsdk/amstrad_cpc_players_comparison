@@ -319,14 +319,7 @@ def crunch_ym_with_ayt(ym_fname: str, ayt_fname: str) -> dict:
         ayt_fname,
     )
 
-    try:
-        res = __crunch_or_compile_music__(ym_fname, ayt_fname, tokens)
-    except Exception as e:
-        if not os.path.exists(ayt_fname):
-            raise e
-        else:
-            pass  # printed an error message BUT generated the file ...
-
+    res = __crunch_or_compile_music__(ym_fname, ayt_fname, tokens)
     res["data-size"] = safe_getsize(ayt_fname)
     return res
 
@@ -346,22 +339,7 @@ def crunch_ym_with_minyq(ym_fname: str, miny_fname: str) -> dict:
         miny_fname,
     )
 
-    try:
-        res = __crunch_or_compile_music__(ym_fname, miny_fname, tokens)
-    except Exception as e:
-        if not os.path.exists(miny_fname):
-            raise e
-        else:
-            # file exists despite error; attempt to continue
-            res = {
-                "original_fname": ym_fname,
-                "compressed_fname": miny_fname,
-                "stdout": "",
-                "stderr": str(e),
-                "buffer_size": -1,
-                "data_size": safe_getsize(miny_fname),
-                "play_time": -1,
-            }
+    res = __crunch_or_compile_music__(ym_fname, miny_fname, tokens)
 
     # Ensure stdout is present
     stdout_text = res.get("stdout", "")
