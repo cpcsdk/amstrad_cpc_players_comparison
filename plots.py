@@ -143,11 +143,9 @@ def plot_scatter_tracks(
     for fmt in ordered_extensions:
         format_data = df[df["format"] == fmt]
         # Use square marker for stable players, circle for others
-        try:
-            player_format = PlayerFormat.get_format(fmt)
-            marker = "s" if player_format.is_stable() else "o"
-        except Exception:
-            marker = "o"
+
+        player_format = PlayerFormat.get_format(fmt)
+        marker = player_format.get_plot_marker()
 
         # Scatter for this format (always run regardless of PlayerFormat lookup)
         ax.scatter(
@@ -228,11 +226,9 @@ def plot_scatter_median(
     for _, row in player_df.iterrows():
         color = format_colors.get(row["format"]) if format_colors else "C0"
         # Use square marker for stable players, circle for others
-        try:
-            player_format = PlayerFormat.get_format(row["format"])
-            marker = "s" if player_format.is_stable() else "o"
-        except Exception:
-            marker = "o"
+        player_format = PlayerFormat.get_format(row["format"])
+        marker = player_format.get_plot_marker()
+
         # Always create the scatter point and record its handle
         sc = ax.scatter(
             row["prog_size"],

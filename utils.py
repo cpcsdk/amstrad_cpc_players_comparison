@@ -162,18 +162,14 @@ def draw_pareto_front(
         except Exception:
             PlayerFormat = None  # fallback if import fails
 
-        def _is_stable(row) -> bool:
-            if PlayerFormat is None:
-                return False
-            try:
-                if "player" in row:
-                    return PlayerFormat[row["player"].upper()].is_stable()
-                if "format" in row:
-                    fmt_val = row["format"]
-                    return PlayerFormat.get_format(fmt_val).is_stable()
-            except Exception:
-                return False
-            return False
+        def player_marker(row) -> str:
+            if "player" in row:
+                player_format = PlayerFormat[row["player"].upper()].is_music_stable()
+            if "format" in row:
+                fmt_val = row["format"]
+                player_format = PlayerFormat.get_format(fmt_val).is_music_stable()
+            return player_format
+
 
         # Draw the line connecting Pareto points
         line_label = "Pareto Front" if include_label else None
@@ -189,7 +185,7 @@ def draw_pareto_front(
         # Draw the points with marker based on stability
         point_label = "Pareto Points" if include_label else None
         for _, row in pareto_df.iterrows():
-            marker = "s" if _is_stable(row) else "o"
+            marker = player_marker(row)
             ax.scatter(
                 row[x_col],
                 row[y_col],

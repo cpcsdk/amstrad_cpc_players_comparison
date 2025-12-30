@@ -115,9 +115,28 @@ class PlayerFormat(enum.Enum):
     def load_address(self):
         return 0x500
 
-    def is_stable(self) -> bool:
-        """Return True if the player format has stable/constant CPU consumption."""
-        return self in (PlayerFormat.AKYS, PlayerFormat.AYC, PlayerFormat.FAP)
+    def is_music_stable(self) -> bool:
+        """Return True if the player format has stable/constant CPU consumption.
+        The duration is music dependent.
+        """
+        return self in (PlayerFormat.AYC, PlayerFormat.FAP, PlayerFormat.AYT)
+    
+    def is_player_stable(self) -> bool:
+        """Return True if the player format has stable/constant CPU consumption.
+        The duration is the same whatever is the music.
+        """
+        return self in (PlayerFormat.AKYS, )
+    
+    def get_plot_marker(self) -> str:
+        if self.is_player_stable():
+            marker = "s"
+        elif self.is_music_stable():
+            marker = "^"
+        else:
+            marker = "o"
+
+        print(self, marker)
+        return marker
 
 
 def crunch_music_file(input_file: str, output_file: str, format: PlayerFormat) -> dict:

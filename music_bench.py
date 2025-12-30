@@ -171,7 +171,7 @@ def _plot_pareto_scatter(
             )
             if player_format is None:
                 raise KeyError(f"Unknown player format: {row['player']}")
-        marker = "s" if player_format.is_stable() else "o"
+        marker = player_format.get_marker_style()
         ax.scatter(
             row["program_size"],
             row["nops_exec_max"],
