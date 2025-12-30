@@ -1642,7 +1642,19 @@ PLY_AKG_Channel{channelNumber}_SetInstrumentStep:
 
         ;Saves the software period and volume for the PSG to send later.
         ld a,e
-        ld (PLY_AKG_PSGReg{{channelNumber} + 7}),a          ;Reaches register/label 8/9/10.
+        // TODO properly handle this code in basm
+ ;       ld (PLY_AKG_PSGReg{{channelNumber} + 7}),a          ;Reaches register/label 8/9/10.
+        switch {channelNumber}
+            case 1:
+                ld (PLY_AKG_PSGReg8),a
+                break
+            case 2:
+                ld (PLY_AKG_PSGReg9),a
+                break
+            case 3:
+                ld (PLY_AKG_PSGReg10),a
+                break
+       endswitch
 
         if {channelNumber} != 3
                 IFDEF PLY_AKG_HARDWARE_CPC_STANDARD

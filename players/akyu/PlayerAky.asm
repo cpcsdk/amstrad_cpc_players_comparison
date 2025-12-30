@@ -279,7 +279,7 @@ PLY_AKY_Init_SkipHeaderEnd:
         ld (PLY_AKY_PtLinker + PLY_AKY_Offset1b),hl        ;HL now points on the Linker.
 
         ld a,PLY_AKY_OPCODE_OR_A
-        REPEAT PLY_AKY_ChannelCount, ChannelNumber, 1
+        REPEAT PLY_AKY_ChannelCount, ChannelNumber
                 ld (PLY_AKY_Channel{{ChannelNumber}}_RegisterBlockLineState_Opcode),a
         REND
 dknr3 (void):  ld hl,1
@@ -352,7 +352,7 @@ PLY_AKY_Play:
 ;Linker.
 ;----------------------------------------
         IFNDEF PLY_AKY_ROM
-        dknr3()
+dknr3 (void):
 PLY_AKY_PatternFrameCounter: ld hl,1                ;How many frames left before reading the next Pattern.
         ELSE
         ld hl,(PLY_AKY_PatternFrameCounter)
@@ -373,7 +373,7 @@ PLY_AKY_PatternFrameCounter_Over:
 
 ;The pattern is over. Reads the next one.
         IFNDEF PLY_AKY_ROM
-        dknr3()
+dknr3 (void):
 PLY_AKY_PtLinker: ld sp,0                                   ;Points on the Pattern of the linker.
         ELSE
         ld sp,(PLY_AKY_PtLinker)                            ;Points on the Pattern of the linker.
@@ -392,7 +392,7 @@ PLY_AKY_PtLinker: ld sp,0                                   ;Points on the Patte
 PLY_AKY_LinkerNotEndSong:
         ld (PLY_AKY_PatternFrameCounter + PLY_AKY_Offset1b),hl
 
-        REPEAT PLY_AKY_ChannelCount, ChannelNumber, 1
+        REPEAT PLY_AKY_ChannelCount, ChannelNumber
                 pop hl
                 ld (PLY_AKY_Channel{{ChannelNumber}}_PtTrack + PLY_AKY_Offset1b),hl
         REND
@@ -400,7 +400,7 @@ PLY_AKY_LinkerNotEndSong:
 
         ;Resets the RegisterBlocks of the channel >1. The first one is skipped so there is no need to do so.
         ld a,1
-        REPEAT PLY_AKY_ChannelCount - 1, ChannelNumber, 2
+        REPEAT PLY_AKY_ChannelCount - 1, ChannelNumber,2
                 ld (PLY_AKY_Channel{{ChannelNumber}}_WaitBeforeNextRegisterBlock + PLY_AKY_Offset1b),a
         REND
         jr PLY_AKY_Channel1_WaitBeforeNextRegisterBlock_Over
@@ -408,13 +408,13 @@ PLY_AKY_LinkerNotEndSong:
 ;Reading the Tracks.
 ;----------------------------------------
 
-        REPEAT PLY_AKY_ChannelCount, ChannelNumber, 1                        ; ------------------------------------ REPEAT
+        REPEAT PLY_AKY_ChannelCount, ChannelNumber                        ; ------------------------------------ REPEAT
 
         IFNDEF PLY_AKY_ROM
 PLY_AKY_Channel{{ChannelNumber}}_WaitBeforeNextRegisterBlock: ld a,1        ;Frames to wait before reading the next RegisterBlock. 0 = finished.
         ELSE
-PLY_AKY_Channel{{ChannelNumber}}_WaitBeforeNextRegisterBlock_Start:
-        ld a,(PLY_AKY_Channel{{ChannelNumber}}_WaitBeforeNextRegisterBlock)
+PLY_AKY_Channel{ChannelNumber}_WaitBeforeNextRegisterBlock_Start:
+        ld a,(PLY_AKY_Channel{ChannelNumber}_WaitBeforeNextRegisterBlock)
         ENDIF
         dec a
         jr nz,PLY_AKY_Channel{{ChannelNumber}}_RegisterBlock_Process
@@ -427,7 +427,7 @@ PLY_AKY_Channel{{ChannelNumber}}_WaitBeforeNextRegisterBlock_Over:
 dknr3 (void):
 PLY_AKY_Channel{{ChannelNumber}}_PtTrack: ld sp,0                   ;Points on the Track.
         ELSE
-        ld sp,(PLY_AKY_Channel{{ChannelNumber}}_PtTrack)
+        ld sp,(PLY_AKY_Channel{ChannelNumber}_PtTrack)
         ENDIF
         dec sp                                  ;Only one byte is read. Compensate.
         pop af                                  ;Gets the duration.
@@ -488,22 +488,22 @@ dknr3 (void):  ld bc,%11100000 * 256 + 255                     ;C is 255 to prev
 
         IFNDEF PLY_AKY_ROM
 dknr3 (void):
-PLY_AKY_Channel{{ChannelNumber}}_PtRegisterBlock: ld hl,0                   ;Points on the data of the RegisterBlock to read.
+PLY_AKY_Channel{ChannelNumber}_PtRegisterBlock: ld hl,0                   ;Points on the data of the RegisterBlock to read.
         ELSE
-        ld hl,(PLY_AKY_Channel{{ChannelNumber}}_PtRegisterBlock)
+        ld hl,(PLY_AKY_Channel{ChannelNumber}_PtRegisterBlock)
         ENDIF
 
         IFNDEF PLY_AKY_ROM
-PLY_AKY_Channel{{ChannelNumber}}_RegisterBlockLineState_Opcode: or a        ;"or a" if initial state, "scf" (#37) if non-initial state.
+PLY_AKY_Channel{ChannelNumber}_RegisterBlockLineState_Opcode: or a        ;"or a" if initial state, "scf" (#37) if non-initial state.
         ELSE
-        ld a,(PLY_AKY_Channel{{ChannelNumber}}_RegisterBlockLineState_Opcode)
+        ld a,(PLY_AKY_Channel{ChannelNumber}_RegisterBlockLineState_Opcode)
         add a,a                                             ;Carry is set according to the opcode.
         ENDIF
         jp PLY_AKY_ReadRegisterBlock
-PLY_AKY_Channel{{ChannelNumber}}_RegisterBlock_Return:
+PLY_AKY_Channel{ChannelNumber}_RegisterBlock_Return:
         ld a,PLY_AKY_OPCODE_SCF
-        ld (PLY_AKY_Channel{{ChannelNumber}}_RegisterBlockLineState_Opcode),a
-        ld (PLY_AKY_Channel{{ChannelNumber}}_PtRegisterBlock + PLY_AKY_Offset1b),hl        ;This is new pointer on the RegisterBlock.
+        ld (PLY_AKY_Channel{ChannelNumber}_RegisterBlockLineState_Opcode),a
+        ld (PLY_AKY_Channel{ChannelNumber}_PtRegisterBlock + PLY_AKY_Offset1b),hl        ;This is new pointer on the RegisterBlock.
         
         ENDM                                                    ;--------------------------------------------------
 
@@ -1703,7 +1703,7 @@ dkbe (void):
 ;RET table for the Read RegisterBlock code to know where to return.
 PLY_AKY_RetTable_ReadRegisterBlock:
 dkps (void):
-        REPEAT PLY_AKY_ChannelCount, ChannelNumber, 1
+        REPEAT PLY_AKY_ChannelCount, ChannelNumber
                 dw PLY_AKY_Channel{{ChannelNumber}}_RegisterBlock_Return
         REND
 dkpe (void):
@@ -1714,11 +1714,11 @@ dkpe (void):
 dkbs (void):
         ;Bytes first.
 PLY_AKY_ROM_BufferSize = 0
-                REPEAT PLY_AKY_ChannelCount, ChannelNumber, 1
-PLY_AKY_Channel{{ChannelNumber}}_WaitBeforeNextRegisterBlock      equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 1
+                REPEAT PLY_AKY_ChannelCount, ChannelNumber
+PLY_AKY_Channel{ChannelNumber}_WaitBeforeNextRegisterBlock      equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 1
                 REND
-                REPEAT PLY_AKY_ChannelCount, ChannelNumber, 1
-PLY_AKY_Channel{{ChannelNumber}}_RegisterBlockLineState_Opcode    equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 1
+                REPEAT PLY_AKY_ChannelCount, ChannelNumber
+PLY_AKY_Channel{ChannelNumber}_RegisterBlockLineState_Opcode    equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 1
                 REND
 ;Some stored PSG registers. They MUST be consecutive (assertion don't work in this case...).
 PLY_AKY_PsgRegister6                                            equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 1
@@ -1740,7 +1740,7 @@ PLY_AKY_Channel3_PtTrack                                        equ PLY_AKY_ROM_
 PLY_AKY_Channel1_PtRegisterBlock                                equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 2
 PLY_AKY_Channel2_PtRegisterBlock                                equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 2
 PLY_AKY_Channel3_PtRegisterBlock                                equ PLY_AKY_ROM_Buffer + PLY_AKY_ROM_BufferSize : PLY_AKY_ROM_BufferSize = PLY_AKY_ROM_BufferSize + 2
-        dkwe()
+dkwe (void):
                         IFDEF PLY_CFG_UseHardwareSounds
         assert PLY_AKY_ROM_BufferSize == 29
                         ELSE
